@@ -4,6 +4,9 @@ import './App.css';
 // Components
 import Header from './components/Header';
 
+// Contexts
+import { NotificationProvider } from './contexts/NotificationProvider';
+
 // Pages  
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -31,25 +34,27 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Header />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<LoginPage />} />
-          <Route path="/create-post" element={<CreatePostPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/my-posts" element={<MyPostsPage />} />
-          <Route path="/post/:id" element={<PostDetailPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/api-test" element={<ApiTestPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </Router>
+    <NotificationProvider>
+      <Router>
+        <div className="App">
+          <Header />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<LoginPage />} />
+            <Route path="/create-post" element={<CreatePostPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/my-posts" element={<MyPostsPage />} />
+            <Route path="/post/:id" element={<PostDetailPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/api-test" element={<ApiTestPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </NotificationProvider>
   );
 }
 

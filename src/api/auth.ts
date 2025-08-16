@@ -28,6 +28,8 @@ export const authUtils = {
   saveAuth: (token: string, user: User): void => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    // 触发自定义事件，通知其他组件登录状态已改变
+    window.dispatchEvent(new CustomEvent('authStateChanged'));
   },
 
   // 获取当前用户
@@ -56,5 +58,7 @@ export const authUtils = {
   logout: (): void => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // 触发自定义事件，通知其他组件登录状态已改变
+    window.dispatchEvent(new CustomEvent('authStateChanged'));
   }
 }; 

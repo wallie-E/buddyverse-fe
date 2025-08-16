@@ -136,6 +136,7 @@ export interface Notification {
   type: 'comment' | 'reply' | 'system';
   title: string;
   content: string;
+  post_id: number;
   related_id: number;
   related_type: string;
   is_read: boolean;
