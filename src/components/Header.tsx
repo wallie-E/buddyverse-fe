@@ -1,11 +1,12 @@
 import { BellIcon, UserIcon, Cog6ToothIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-import { getUnreadNotificationCount, getCurrentUser } from '../data/mockData';
+import { getCurrentUser } from '../data/mockData';
 import { redirectToLoginIfNeeded } from '../utils/auth';
+import { useNotification } from '../hooks/useNotification';
 
 export default function Header() {
   const navigate = useNavigate();
-  const unreadCount = getUnreadNotificationCount();
+  const { unreadCount } = useNotification();
   const currentUser = getCurrentUser();
 
   // 检查是否是管理员

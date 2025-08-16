@@ -101,12 +101,6 @@ export default function MyPostsPage() {
               <h1 className="text-2xl font-bold text-gray-900">我的帖子</h1>
               <p className="text-gray-600 mt-1">管理你发布的所有帖子</p>
             </div>
-            <button
-              onClick={() => navigate('/create-post')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              发布新帖子
-            </button>
           </div>
         </div>
 

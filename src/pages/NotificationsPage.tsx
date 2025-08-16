@@ -7,17 +7,18 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import { API, authUtils } from '../api';
+import { useNotification } from '../hooks/useNotification';
 import type { Notification } from '../api/types';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { unreadCount, decrementUnreadCount, clearUnreadCount } = useNotification();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'all' | 'comment' | 'reply' | 'system'>('all');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // 检查登录状态
   useEffect(() => {
@@ -56,24 +57,6 @@ export default function NotificationsPage() {
     }
   };
 
-  // 获取未读通知数量
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await API.notifications.getUnreadCount();
-      if (response.success) {
-        setUnreadCount(response.data.count);
-      }
-    } catch (error) {
-      console.error('获取未读数量失败:', error);
-    }
-  };
-
-  // 初始加载
-  useEffect(() => {
-    fetchNotifications(1);
-    fetchUnreadCount();
-  }, []);
-
   // 筛选变化时重新加载
   useEffect(() => {
     setPage(1);
@@ -101,8 +84,8 @@ export default function NotificationsPage() {
         )
       );
       
-      // 更新未读数量
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      // 更新全局未读数量
+      decrementUnreadCount();
     } catch (error) {
       console.error('标记已读失败:', error);
     }
@@ -118,7 +101,8 @@ export default function NotificationsPage() {
         prev.map(notification => ({ ...notification, is_read: true }))
       );
       
-      setUnreadCount(0);
+      // 清空全局未读数量
+      clearUnreadCount();
     } catch (error) {
       console.error('标记全部已读失败:', error);
     }
@@ -182,7 +166,7 @@ export default function NotificationsPage() {
     // 根据通知类型跳转
     if (notification.type === 'comment' || notification.type === 'reply') {
       // 跳转到相关帖子
-      navigate(`/post/${notification.related_id}`);
+      navigate(`/post/${notification.post_id}`);
     }
   };
 
@@ -215,7 +199,7 @@ export default function NotificationsPage() {
             {[
               { key: 'all', label: '全部', count: notifications.length },
               { key: 'comment', label: '帖子评论', count: notifications.filter(n => n.type === 'comment').length },
-              { key: 'reply', label: '评论回复', count: notifications.filter(n => n.type === 'reply').length },
+              // { key: 'reply', label: '评论回复', count: notifications.filter(n => n.type === 'reply').length },
               { key: 'system', label: '系统通知', count: notifications.filter(n => n.type === 'system').length }
             ].map((tab) => (
               <button
