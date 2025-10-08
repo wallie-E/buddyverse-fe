@@ -198,9 +198,9 @@ export default function NotificationsPage() {
           <div className="flex border-b border-gray-200">
             {[
               { key: 'all', label: '全部', count: notifications.length },
-              { key: 'comment', label: '帖子评论', count: notifications.filter(n => n.type === 'comment').length },
-              // { key: 'reply', label: '评论回复', count: notifications.filter(n => n.type === 'reply').length },
-              { key: 'system', label: '系统通知', count: notifications.filter(n => n.type === 'system').length }
+              // { key: 'comment', label: '帖子评论', count: notifications.filter(n => n.type === 'comment').length },
+              // // { key: 'reply', label: '评论回复', count: notifications.filter(n => n.type === 'reply').length },
+              // { key: 'system', label: '系统通知', count: notifications.filter(n => n.type === 'system').length }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -328,7 +328,7 @@ export default function NotificationsPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-4 mt-8">
+        {/* <div className="grid grid-cols-2 gap-4 mt-8">
           <button
             onClick={() => navigate('/my-posts')}
             className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
@@ -344,7 +344,7 @@ export default function NotificationsPage() {
             <h4 className="font-semibold text-gray-900 mb-2">浏览帖子</h4>
             <p className="text-sm text-gray-600">发现更多有趣的内容</p>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

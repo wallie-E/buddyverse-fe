@@ -35,7 +35,19 @@ api.interceptors.response.use(
   (error) => {
     // 统一错误处理
     if (error.response?.status === 401) {
-      // 清除token并跳转到登录页
+      // 检查是否是token无效导致的401，还是密码错误等业务逻辑错误
+      const errorMessage = error.response?.data?.message || '';
+      
+      // 如果是密码错误、邮箱不存在等业务逻辑错误，不自动重定向
+      if (errorMessage.includes('邮箱或密码错误') || 
+          errorMessage.includes('邮箱不存在') ||
+          errorMessage.includes('密码错误')) {
+        // 返回错误信息，让业务逻辑处理
+        const errorMessage = error.response?.data?.message || '网络错误，请稍后重试';
+        return Promise.reject(new Error(errorMessage));
+      }
+      
+      // 如果是token无效导致的401，才自动清除token并重定向
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

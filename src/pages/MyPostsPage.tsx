@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrashIcon, EyeIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { message } from 'antd';
 import { API, authUtils } from '../api';
 import type { Post } from '../api/types';
 
 export default function MyPostsPage() {
   const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,7 +75,7 @@ export default function MyPostsPage() {
       setPosts(prev => prev.filter(post => post.id !== postId));
     } catch (error) {
       console.error('删除帖子失败:', error);
-      alert('删除失败，请重试');
+      messageApi.error('删除失败，请重试');
     }
   };
 
@@ -89,23 +91,25 @@ export default function MyPostsPage() {
     });
   };
 
-  const currentUser = authUtils.getCurrentUser();
+  // const currentUser = authUtils.getCurrentUser();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <>
+      {contextHolder}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">我的帖子</h1>
-              <p className="text-gray-600 mt-1">管理你发布的所有帖子</p>
+              {/* <p className="text-gray-600 mt-1">管理你发布的所有帖子</p> */}
             </div>
           </div>
         </div>
 
         {/* User Info */}
-        {currentUser && (
+        {/* {currentUser && (
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -122,7 +126,7 @@ export default function MyPostsPage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Error Message */}
         {error && (
@@ -158,7 +162,11 @@ export default function MyPostsPage() {
         ) : (
           <div className="space-y-4">
             {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div 
+                key={post.id} 
+                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200"
+                onClick={() => navigate(`/post/${post.id}`)}
+              >
                 {/* Post Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -177,15 +185,21 @@ export default function MyPostsPage() {
                   
                   {/* Action Buttons */}
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => navigate(`/post/${post.id}`)}
+                    {/* <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/post/${post.id}`);
+                      }}
                       className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
                       title="查看详情"
                     >
                       <EyeIcon className="h-4 w-4" />
-                    </button>
+                    </button> */}
                     <button
-                      onClick={() => handleDeletePost(post.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePost(post.id);
+                      }}
                       className="p-2 text-gray-500 hover:text-red-600 transition-colors"
                       title="删除帖子"
                     >
@@ -218,12 +232,7 @@ export default function MyPostsPage() {
                     </span>
                   </div>
                   
-                  <button
-                    onClick={() => navigate(`/post/${post.id}`)}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    查看详情
-                  </button>
+                 
                 </div>
               </div>
             ))}
@@ -244,7 +253,7 @@ export default function MyPostsPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-4 mt-8">
+        {/* <div className="grid grid-cols-2 gap-4 mt-8">
           <button
             onClick={() => navigate('/profile')}
             className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
@@ -260,8 +269,9 @@ export default function MyPostsPage() {
             <h4 className="font-semibold text-gray-900 mb-2">通知中心</h4>
             <p className="text-sm text-gray-600">查看评论和回复消息</p>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
+    </>
   );
 } 
