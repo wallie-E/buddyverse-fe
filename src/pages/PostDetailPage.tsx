@@ -1,20 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeftIcon, ShareIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, MapPinIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useParams } from 'react-router-dom';
+import { message } from 'antd';
 import { getPostById } from '../api/posts';
 import { getPostComments, createComment } from '../api/comments';
-import { adaptOrganizedComments } from '../utils/apiAdapter';
-import type { Comment, User } from '../types';
+import { authUtils } from '../api';
+import type { User } from '../types';
 import type { Post as ApiPost } from '../api/types';
+
+// 评论类型
+interface CommentData {
+  id: number;
+  user_id: number;
+  content: string;
+  created_at: string;
+  author_name: string;
+}
 
 const PostDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [messageApi, contextHolder] = message.useMessage();
   const [post, setPost] = useState<ApiPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentData[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   
@@ -90,11 +101,10 @@ const PostDetailPage = () => {
       try {
         setCommentsLoading(true);
         const response = await getPostComments(id, { page: 1, limit: COMMENTS_PER_PAGE });
+        console.log('response',response);
         if (response.success) {
-          const adaptedComments = adaptOrganizedComments(response.data.list);
-          // 只显示顶级评论，过滤掉回复
-          const topLevelComments = adaptedComments.filter(comment => !comment.parentId);
-          setComments(topLevelComments);
+          // 直接使用返回的数据，不进行转换
+          setComments(response.data.list as unknown as CommentData[]);
           
           // 检查是否还有更多评论
           const { pagination } = response.data;
@@ -133,11 +143,8 @@ const PostDetailPage = () => {
       const response = await getPostComments(id, { page: nextPage, limit: COMMENTS_PER_PAGE });
       
       if (response.success) {
-        const adaptedComments = adaptOrganizedComments(response.data.list);
-        const topLevelComments = adaptedComments.filter(comment => !comment.parentId);
-        
-        // 追加新评论到现有列表
-        setComments(prev => [...prev, ...topLevelComments]);
+        // 直接使用返回的数据，追加到现有列表
+        setComments(prev => [...prev, ...(response.data.list as unknown as CommentData[])]);
         
         // 更新分页状态
         const { pagination } = response.data;
@@ -208,10 +215,8 @@ const PostDetailPage = () => {
           // 重新获取第一页评论列表（包含新评论）
           const commentsResponse = await getPostComments(post.id.toString(), { page: 1, limit: COMMENTS_PER_PAGE });
           if (commentsResponse.success) {
-            const adaptedComments = adaptOrganizedComments(commentsResponse.data.list);
-            // 只显示顶级评论
-            const topLevelComments = adaptedComments.filter(comment => !comment.parentId);
-            setComments(topLevelComments);
+            // 直接使用返回的数据
+            setComments(commentsResponse.data.list as unknown as CommentData[]);
             
             // 重置分页状态
             const { pagination } = commentsResponse.data;
@@ -221,48 +226,74 @@ const PostDetailPage = () => {
 
           // 更新帖子的评论数量
           setPost(prev => prev ? { ...prev, comment_count: prev.comment_count + 1 } : null);
+          
+          // 显示成功消息
+          messageApi.success('评论发送成功');
         } else {
-          alert(response.message || '发送评论失败');
+          messageApi.error(response.message || '发送评论失败');
         }
       }else{
         if(response.success){
-          alert('评论发送成功');
+          messageApi.success('评论发送成功');
         }else{
-          alert(response.message || '发送评论失败');
+          messageApi.error(response.message || '发送评论失败');
         }
       }
 
     } catch (err) {
-      alert(err instanceof Error ? err.message : '发送评论失败');
+      messageApi.error(err instanceof Error ? err.message : '发送评论失败');
     } finally {
       setNewComment('');
       setSubmitLoading(false);
     }
   };
 
-  // 获取用户头像
-  const getUserAvatar = (user: User) => {
-    return user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nickname)}&background=random&color=fff`;
-  };
 
   // 获取帖子作者头像
   const getPostAuthorAvatar = (authorName: string) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff`;
   };
 
+  // 处理头像点击
+  const handleAuthorAvatarClick = () => {
+    if (!post) return;
+    
+    // 如果是当前用户，跳转到个人资料页面
+    if (isPostAuthor) {
+      navigate('/profile');
+    } else {
+      // 否则跳转到用户资料页面
+      navigate(`/user/${post.user_id}`);
+    }
+  };
+
+  // 处理评论者头像点击
+  const handleCommenterAvatarClick = (commenterUserId: string) => {
+    const currentUser = authUtils.getCurrentUser();
+    
+    // 如果是当前用户，跳转到个人资料页面
+    if (currentUser && currentUser.id?.toString() === commenterUserId) {
+      navigate('/profile');
+    } else {
+      // 否则跳转到用户资料页面
+      navigate(`/user/${commenterUserId}`);
+    }
+  };
+
   // 渲染单个评论
-  const renderComment = (comment: Comment) => (
+  const renderComment = (comment: CommentData) => (
     <div key={comment.id} className="bg-white rounded-2xl p-4 shadow-sm">
       <div className="flex space-x-3">
         <img
-          src={getUserAvatar(comment.author)}
-          alt={comment.author.nickname}
-          className="w-10 h-10 rounded-full flex-shrink-0"
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author_name)}&background=random&color=fff`}
+          alt={comment.author_name}
+          className="w-10 h-10 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => handleCommenterAvatarClick(comment.user_id.toString())}
         />
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-1">
-            <span className="font-medium text-gray-900">{comment.author.nickname}</span>
-            {post && comment.authorId === post.user_id?.toString() && (
+            <span className="font-medium text-gray-900">{comment.author_name}</span>
+            {post && comment.user_id.toString() === post.user_id?.toString() && (
               <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                 <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -274,7 +305,7 @@ const PostDetailPage = () => {
             {comment.content}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">{getTimeAgo(comment.createdAt)}</span>
+            <span className="text-xs text-gray-500">{getTimeAgo(comment.created_at)}</span>
           </div>
         </div>
       </div>
@@ -311,8 +342,10 @@ const PostDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 顶部导航栏 */}
+    <>
+      {contextHolder}
+      <div className="min-h-screen bg-gray-50">
+        {/* 顶部导航栏 */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="flex items-center justify-between px-4 py-3">
           <button
@@ -340,7 +373,8 @@ const PostDetailPage = () => {
               <img
                 src={getPostAuthorAvatar(post.author_name)}
                 alt={post.author_name}
-                className="w-12 h-12 rounded-full"
+                className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={handleAuthorAvatarClick}
               />
               <div>
                 <div className="flex items-center space-x-2">
@@ -460,7 +494,7 @@ const PostDetailPage = () => {
             <div className="max-w-2xl mx-auto">
               <div className="flex items-center space-x-3">
                 <img
-                  src={getUserAvatar(currentUser)}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.nickname)}&background=random&color=fff`}
                   alt={currentUser.nickname}
                   className="w-8 h-8 rounded-full flex-shrink-0"
                 />
@@ -514,6 +548,7 @@ const PostDetailPage = () => {
         <div className="h-20"></div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -12,6 +12,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import CreatePostPage from './pages/CreatePostPage';
 import ProfilePage from './pages/ProfilePage';
+import UserProfilePage from './pages/UserProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import MyPostsPage from './pages/MyPostsPage';
 import PostDetailPage from './pages/PostDetailPage';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/register" element={<LoginPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/user/:id" element={<UserProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/my-posts" element={<MyPostsPage />} />
             <Route path="/post/:id" element={<PostDetailPage />} />

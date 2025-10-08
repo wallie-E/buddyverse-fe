@@ -48,6 +48,7 @@ export interface Comment {
   parentId?: string; // 二级回复的父评论ID
   createdAt: string;
   replies?: Comment[];
+  user_id: string;
 }
 
 // 通知类型

@@ -5,6 +5,7 @@ import {
   CheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import { Select, Input } from 'antd';
 import { API, authUtils } from '../api';
 import type { User, UpdateProfileRequest } from '../api/types';
 
@@ -122,16 +123,6 @@ export default function ProfilePage() {
     }
   };
 
-  // 格式化注册时间
-  const formatJoinDate = (dateString?: string) => {
-    if (!dateString) return '未知';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   if (loading) {
     return (
@@ -166,7 +157,7 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">个人资料</h1>
-          <p className="text-gray-600 mt-1">管理你的个人信息</p>
+          {/* <p className="text-gray-600 mt-1">管理你的个人信息</p> */}
         </div>
 
         {/* Error Message */}
@@ -196,9 +187,6 @@ export default function ProfilePage() {
                 )}
               </div>
               <p className="text-gray-600 mt-1">{user.email}</p>
-              <p className="text-sm text-gray-500 mt-2">
-                加入于 {formatJoinDate(user.created_at)}
-              </p>
             </div>
 
             {!isEditing && (
@@ -220,15 +208,15 @@ export default function ProfilePage() {
                 <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-2">
                   昵称 *
                 </label>
-                <input
+                <Input
                   id="nickname"
-                  type="text"
                   value={editForm.nickname}
                   onChange={(e) => setEditForm(prev => ({ ...prev, nickname: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full"
+                  size="large"
                   placeholder="请输入昵称"
                   maxLength={20}
-                  required
+                  showCount
                 />
                 <p className="text-xs text-gray-500 mt-1">2-20字符</p>
               </div>
@@ -237,30 +225,33 @@ export default function ProfilePage() {
                 <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
                   性别
                 </label>
-                <select
+                <Select
                   id="gender"
                   value={editForm.gender}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value as 'male' | 'female' | 'other' }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="male">男</option>
-                  <option value="female">女</option>
-                  <option value="other">其他</option>
-                </select>
+                  onChange={(value) => setEditForm(prev => ({ ...prev, gender: value as 'male' | 'female' }))}
+                  className="w-full"
+                  size="large"
+                  options={[
+                    { value: 'male', label: '男' },
+                    { value: 'female', label: '女' },
+                  ]}
+                />
               </div>
 
               <div>
                 <label htmlFor="signature" className="block text-sm font-medium text-gray-700 mb-2">
                   个人签名
                 </label>
-                <textarea
+                <Input.TextArea
                   id="signature"
                   value={editForm.signature}
                   onChange={(e) => setEditForm(prev => ({ ...prev, signature: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full"
+                  size="large"
                   placeholder="写点什么介绍一下自己吧..."
                   rows={3}
                   maxLength={200}
+                  showCount
                 />
                 <p className="text-xs text-gray-500 mt-1">最多200字符</p>
               </div>

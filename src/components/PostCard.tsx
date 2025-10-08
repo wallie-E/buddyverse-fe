@@ -1,5 +1,6 @@
-import { MapPinIcon, ChatBubbleLeftIcon, ShareIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import { authUtils } from '../api';
 import type { Post } from '../api/types';
 
 interface PostCardProps {
@@ -34,6 +35,19 @@ export default function PostCard({ post }: PostCardProps) {
     navigate(`/post/${post.id}`);
   };
 
+  const handleAvatarClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentUser = authUtils.getCurrentUser();
+    
+    // 如果是当前用户，跳转到个人资料页面
+    if (currentUser && currentUser.id?.toString() === post.user_id?.toString()) {
+      navigate('/profile');
+    } else {
+      // 否则跳转到用户资料页面
+      navigate(`/user/${post.user_id}`);
+    }
+  };
+
   return (
     <div 
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
@@ -41,7 +55,10 @@ export default function PostCard({ post }: PostCardProps) {
     >
       {/* User Info */}
       <div className="flex items-center space-x-3 mb-3">
-        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+        <div 
+          className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={handleAvatarClick}
+        >
           <span className="text-white font-medium">
             {post?.author_name?.charAt(0)}
           </span>
@@ -89,6 +106,9 @@ export default function PostCard({ post }: PostCardProps) {
           >
             <ChatBubbleLeftIcon className="h-4 w-4" />
             <span className="text-sm">{post.comment_count}</span>
+            {post.comment_visibility === 'private' && (
+              <EyeSlashIcon className="h-3 w-3 text-gray-400" title="评论仅作者可见" />
+            )}
           </button>
           
           <button 
@@ -99,8 +119,8 @@ export default function PostCard({ post }: PostCardProps) {
               console.log('分享帖子:', post.id);
             }}
           >
-            <ShareIcon className="h-4 w-4" />
-            <span className="text-sm">分享</span>
+            {/* <ShareIcon className="h-4 w-4" />
+            <span className="text-sm">分享</span> */}
           </button>
         </div>
         
