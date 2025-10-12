@@ -193,6 +193,16 @@ export interface AdminUserListParams extends PaginationParams {
 export interface AdminPostListParams extends PaginationParams {
   status?: 'active' | 'deleted';
   category_id?: number;
+  user_id?: number;
+}
+
+// 管理员获取用户帖子响应类型
+export interface AdminUserPostsResponse {
+  user: User;
+  posts: {
+    list: Post[];
+    pagination: Pagination;
+  };
 }
 
 export interface AdminCommentListParams extends PaginationParams {

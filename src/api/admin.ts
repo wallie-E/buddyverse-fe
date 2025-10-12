@@ -9,7 +9,8 @@ import type {
   PaginatedResponse,
   AdminUserListParams,
   AdminPostListParams,
-  AdminCommentListParams
+  AdminCommentListParams,
+  AdminUserPostsResponse
 } from './types';
 
 // 获取统计数据
@@ -40,6 +41,11 @@ export const adminPosts = {
   // 获取帖子列表
   list: async (params?: AdminPostListParams): Promise<ApiResponse<PaginatedResponse<Post>>> => {
     return api.get('/api/admin/posts', { params });
+  },
+
+  // 获取用户帖子（包含用户信息）
+  getUserPosts: async (userId: number, params?: Omit<AdminPostListParams, 'user_id'>): Promise<ApiResponse<AdminUserPostsResponse>> => {
+    return api.get('/api/admin/posts', { params: { ...params, user_id: userId } });
   },
 
   // 删除帖子
