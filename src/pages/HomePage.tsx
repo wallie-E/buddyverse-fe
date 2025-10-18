@@ -104,10 +104,10 @@ export default function HomePage() {
         {/* Welcome Section */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            寻找你的搭子
+            今天想找什么搭子？
           </h2>
           <p className="text-gray-600 mb-6">
-            在这里发现志同道合的伙伴，一起探索生活的美好
+            在这里发现有趣的人，开始美好的连接
           </p>
         </div>
 

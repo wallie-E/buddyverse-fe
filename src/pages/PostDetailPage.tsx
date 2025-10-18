@@ -211,9 +211,12 @@ const PostDetailPage = () => {
         // 移除回复相关参数，只支持顶级评论
       });
 
-      if (canViewComments) {
-        if (response.success) {
-          // 重新获取第一页评论列表（包含新评论）
+      if (response.success) {
+        // 无论评论是否可见，都要更新评论数量
+        setPost(prev => prev ? { ...prev, comment_count: prev.comment_count + 1 } : null);
+        
+        if (canViewComments) {
+          // 如果可以查看评论，重新获取第一页评论列表（包含新评论）
           const commentsResponse = await getPostComments(post.id.toString(), { page: 1, limit: COMMENTS_PER_PAGE });
           if (commentsResponse.success) {
             // 直接使用返回的数据
@@ -224,21 +227,12 @@ const PostDetailPage = () => {
             setHasMoreComments(pagination.page < pagination.pages);
             setCurrentPage(1);
           }
-
-          // 更新帖子的评论数量
-          setPost(prev => prev ? { ...prev, comment_count: prev.comment_count + 1 } : null);
-          
-          // 显示成功消息
-          messageApi.success('评论发送成功');
-        } else {
-          messageApi.error(response.message || '发送评论失败');
         }
-      }else{
-        if(response.success){
-          messageApi.success('评论发送成功');
-        }else{
-          messageApi.error(response.message || '发送评论失败');
-        }
+        
+        // 显示成功消息
+        messageApi.success('评论发送成功');
+      } else {
+        messageApi.error(response.message || '发送评论失败');
       }
 
     } catch (err) {
@@ -384,16 +378,16 @@ const PostDetailPage = () => {
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-gray-900 text-lg">{post.author_name}</span>
-                  <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  {/* <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                     <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                  </div>
+                  </div> */}
                 </div>
                 <span className="text-sm text-gray-500">{getTimeAgo(post.created_at)}</span>
               </div>
             </div>
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-4xl text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2">
+            <button className="min-w-20 inline-flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm mb-4">
               <span className="text-lg">{getSubCategoryIcon(post.subcategory_name)}</span>
               <span>{post.subcategory_name}</span>
             </button>
@@ -435,7 +429,7 @@ const PostDetailPage = () => {
         </div>
 
         {/* 评论可见性提示 */}
-        {post.comment_visibility === 'private' && !isPostAuthor && (
+        {/* {post.comment_visibility === 'private' && !isPostAuthor && (
           <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
@@ -447,18 +441,15 @@ const PostDetailPage = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* 评论区域 */}
         {canViewComments && (
           <div className="mt-8">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="text-start mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 评论 ({post?.comment_count || 0})
               </h3>
-              <p className="text-gray-600">
-                参与讨论，分享你的想法
-              </p>
             </div>
 
             {/* 评论加载状态 */}
@@ -474,7 +465,7 @@ const PostDetailPage = () => {
                 
                 {/* 空状态 */}
                 {comments.length === 0 && !loadingMore && (
-                  <div className="text-center py-16">
+                  <div className="text-center py-8">
                     <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
                       <span className="text-4xl">💬</span>
                     </div>
@@ -491,15 +482,7 @@ const PostDetailPage = () => {
 
         {/* 私有评论提示区域 - 当评论私有且用户不是作者时显示 */}
         {post.comment_visibility === 'private' && !isPostAuthor && canAddComments && (
-          <div className="mt-8">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                评论区域
-              </h3>
-              <p className="text-gray-600">
-                你可以给作者留言，但只有作者可以看到评论
-              </p>
-            </div>
+          <div className="mt-6">
             <div className="text-center py-16">
               <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-blue-200 to-purple-200 flex items-center justify-center mx-auto mb-6">
                 <span className="text-4xl">🔒</span>

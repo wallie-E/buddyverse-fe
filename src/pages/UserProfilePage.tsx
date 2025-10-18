@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeftIcon, MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { message } from 'antd';
 import { getUserProfile } from '../api/users';
 import { authUtils } from '../api';
+import { getSubCategoryIcon } from '../utils/categoryIcons';
 import type { User, Post } from '../api/types';
 
 const UserProfilePage = () => {
@@ -157,18 +158,6 @@ const UserProfilePage = () => {
       {contextHolder}
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
         {/* 顶部导航栏 */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-2 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
-            </button>
-            <h1 className="text-lg font-semibold text-gray-900">用户资料</h1>
-            <div className="w-10"></div> {/* 占位符保持居中 */}
-          </div>
-        </div>
 
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* 用户信息卡片 */}
@@ -231,11 +220,7 @@ const UserProfilePage = () => {
 
           {/* 用户帖子列表 */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">发布的帖子</h3>
-              <p className="text-gray-600">查看用户发布的所有帖子</p>
-            </div>
-            
+
             {posts.length === 0 ? (
               <div className="text-center py-16">
                 <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
@@ -256,10 +241,8 @@ const UserProfilePage = () => {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <span className="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200">
+                          <span className="mr-2">{getSubCategoryIcon(post.subcategory_name)}</span>
                           {post.subcategory_name}
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-medium bg-gray-200 text-gray-700">
-                          {post.category_name}
                         </span>
                       </div>
                       <span className="text-sm text-gray-500 font-medium">{formatDate(post.created_at)}</span>
@@ -272,7 +255,7 @@ const UserProfilePage = () => {
 
                     {/* 位置信息 */}
                     {post.location && (
-                      <div className="flex items-center space-x-2 mb-4 text-sm text-gray-500 bg-gray-100 rounded-xl px-4 py-2">
+                      <div className="flex items-center space-x-2 mb-4 text-sm py-2">
                         <MapPinIcon className="h-4 w-4" />
                         <span className="font-medium">{post.location}</span>
                       </div>
