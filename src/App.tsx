@@ -3,6 +3,7 @@ import './App.css';
 
 // Components
 import Header from './components/Header';
+import ScrollToTop from './components/ScrollToTop';
 
 // Contexts
 import { NotificationProvider } from './contexts/NotificationProvider';
@@ -37,6 +38,7 @@ function App() {
   return (
     <NotificationProvider>
       <Router>
+        <ScrollToTop />
         <div className="App">
           <Header />
           <Routes>

@@ -167,8 +167,7 @@ const createComment = async (postId: number) => {
   try {
     const response = await API.comments.createComment({
       post_id: postId,
-      content: '评论内容',
-      parent_id: null // 一级评论为null，二级回复填父评论ID
+      content: '评论内容'
     });
     
     if (response.success) {

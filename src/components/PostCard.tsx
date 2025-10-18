@@ -1,7 +1,8 @@
-import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { authUtils } from '../api';
 import type { Post } from '../api/types';
+import { getSubCategoryIcon } from '../utils/categoryIcons';
 
 interface PostCardProps {
   post: Post;
@@ -50,86 +51,61 @@ export default function PostCard({ post }: PostCardProps) {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg cursor-pointer"
       onClick={handleClick}
     >
-      {/* User Info */}
-      <div className="flex items-center space-x-3 mb-3">
-        <div 
-          className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={handleAvatarClick}
-        >
-          <span className="text-white font-medium">
-            {post?.author_name?.charAt(0)}
-          </span>
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <h3 className="font-medium text-gray-900">{post.author_name}</h3>
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              {post.subcategory_name}
-            </span>
+      <div className="p-6 pb-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div 
+                className="h-12 w-12 rounded-full ring-2 ring-white shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={handleAvatarClick}
+              >
+                {post?.author_name?.charAt(0)}
+              </div>
+              {/* 可以添加认证标识，暂时注释 */}
+              {/* {post.user.verified && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              )} */}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-900">{post.author_name}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+                <ClockIcon className="h-3 w-3" />
+                {formatDate(post.created_at)}
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-gray-500">{formatDate(post.created_at)}</p>
+          {post.subcategory_name && (
+            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm">
+              <span>{getSubCategoryIcon(post.subcategory_name)}</span>
+              <span>{post.subcategory_name}</span>
+            </span>
+          )}
         </div>
       </div>
-
-      {/* Post Content */}
-      <div className="mb-3">
-        <p className="text-gray-900 leading-relaxed">{post.content}</p>
-      </div>
-
-      {/* Location */}
-      {post.location && (
-        <div className="flex items-center space-x-1 mb-3 text-sm text-gray-500">
-          <MapPinIcon className="h-4 w-4" />
-          <span>{post.location}</span>
-        </div>
-      )}
-
-      {/* Category Badge */}
-      <div className="mb-3">
-        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
-          {post.category_name}
-        </span>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="flex items-center space-x-4">
-          <button 
-            className="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/post/${post.id}#comments`);
-            }}
-          >
+      <div className="px-6 pb-6">
+        <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors">
+          {post.content}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <MapPinIcon className="h-4 w-4" />
+            <span className="font-medium">{post.location || '未设置位置'}</span>
+          </div>
+          <div className="flex items-center gap-1 text-slate-500">
             <ChatBubbleLeftIcon className="h-4 w-4" />
-            <span className="text-sm">{post.comment_count}</span>
+            <span className="font-medium">{post.comment_count} 条评论</span>
             {post.comment_visibility === 'private' && (
-              <EyeSlashIcon className="h-3 w-3 text-gray-400" title="评论仅作者可见" />
+              <EyeSlashIcon className="h-3 w-3 text-gray-400 ml-1" title="评论仅作者可见" />
             )}
-          </button>
-          
-          <button 
-            className="flex items-center space-x-1 text-gray-500 hover:text-green-600 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              // TODO: 实现分享功能
-              console.log('分享帖子:', post.id);
-            }}
-          >
-            {/* <ShareIcon className="h-4 w-4" />
-            <span className="text-sm">分享</span> */}
-          </button>
+          </div>
         </div>
-        
-        <button 
-          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-          onClick={handleClick}
-        >
-          查看详情
-        </button>
       </div>
     </div>
   );

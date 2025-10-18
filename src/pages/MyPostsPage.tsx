@@ -96,16 +96,12 @@ export default function MyPostsPage() {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">我的帖子</h1>
-              {/* <p className="text-gray-600 mt-1">管理你发布的所有帖子</p> */}
-            </div>
-          </div>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">我的帖子</h1>
+          <p className="text-slate-600">管理你发布的所有帖子</p>
         </div>
 
         {/* User Info */}
@@ -130,120 +126,105 @@ export default function MyPostsPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-            {error}
-            <button 
-              onClick={() => fetchMyPosts(1)}
-              className="ml-2 text-red-700 underline"
-            >
-              重试
-            </button>
+          <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 text-red-600 px-6 py-4 rounded-2xl mb-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <span>{error}</span>
+              <button 
+                onClick={() => fetchMyPosts(1)}
+                className="ml-4 text-red-700 underline hover:text-red-800 transition-colors"
+              >
+                重试
+              </button>
+            </div>
           </div>
         )}
 
         {/* Posts List */}
         {loading && posts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-4">加载中...</p>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+            <p className="text-slate-600 text-lg font-medium">加载中...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">还没有发布帖子</h3>
-            <p className="text-gray-600 mb-4">开始分享你的想法，寻找志同道合的搭子吧！</p>
+          <div className="text-center py-16">
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">📝</span>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-3">还没有发布帖子</h3>
+            <p className="text-slate-600 mb-8 max-w-md mx-auto">开始分享你的想法，寻找志同道合的搭子吧！</p>
             <button
               onClick={() => navigate('/create-post')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 font-medium text-white"
             >
-              发布第一个帖子
+              发布第一个帖子 ✨
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {posts.map((post) => (
               <div 
                 key={post.id} 
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200"
+                className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg cursor-pointer"
                 onClick={() => navigate(`/post/${post.id}`)}
               >
-                {/* Post Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {post.subcategory_name}
-                      </span>
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                        {post.category_name}
+                <div className="p-6 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm">
+                          <span>{post.subcategory_name}</span>
+                        </span>
+                        <span className="text-sm text-slate-500">
+                          {formatDate(post.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePost(post.id);
+                        }}
+                        className="p-2 text-slate-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                        title="删除帖子"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="px-6 pb-6">
+                  <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors">
+                    {post.content}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <span>📍 {post.location || '未设置位置'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-slate-500">
+                      <ChatBubbleLeftIcon className="h-4 w-4" />
+                      <span className="font-medium">{post.comment_count} 条评论</span>
+                      <span className="text-xs text-slate-400 ml-2">
+                        {post.comment_visibility === 'public' ? '公开' : '私密'}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">
-                      发布于 {formatDate(post.created_at)}
-                    </p>
                   </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex items-center space-x-2">
-                    {/* <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/post/${post.id}`);
-                      }}
-                      className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
-                      title="查看详情"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                    </button> */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePost(post.id);
-                      }}
-                      className="p-2 text-gray-500 hover:text-red-600 transition-colors"
-                      title="删除帖子"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Post Content */}
-                <div className="mb-4">
-                  <p className="text-gray-900 leading-relaxed">{post.content}</p>
-                </div>
-
-                {/* Post Meta */}
-                {post.location && (
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <span>📍 {post.location}</span>
-                  </div>
-                )}
-
-                {/* Post Stats */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center space-x-1 text-gray-500">
-                      <ChatBubbleLeftIcon className="h-4 w-4" />
-                      <span className="text-sm">{post.comment_count} 条评论</span>
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      评论可见性: {post.comment_visibility === 'public' ? '公开' : '仅自己可见'}
-                    </span>
-                  </div>
-                  
-                 
                 </div>
               </div>
             ))}
             
             {/* Load More Button */}
             {hasMore && (
-              <div className="text-center pt-6">
+              <div className="text-center pt-8 col-span-full">
                 <button
                   onClick={loadMore}
                   disabled={loading}
-                  className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-full hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl font-medium"
                 >
                   {loading ? '加载中...' : '加载更多'}
                 </button>
@@ -252,24 +233,6 @@ export default function MyPostsPage() {
           </div>
         )}
 
-        {/* Quick Actions */}
-        {/* <div className="grid grid-cols-2 gap-4 mt-8">
-          <button
-            onClick={() => navigate('/profile')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
-          >
-            <h4 className="font-semibold text-gray-900 mb-2">个人资料</h4>
-            <p className="text-sm text-gray-600">编辑你的个人信息</p>
-          </button>
-          
-          <button
-            onClick={() => navigate('/notifications')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
-          >
-            <h4 className="font-semibold text-gray-900 mb-2">通知中心</h4>
-            <p className="text-sm text-gray-600">查看评论和回复消息</p>
-          </button>
-        </div> */}
       </div>
     </div>
     </>

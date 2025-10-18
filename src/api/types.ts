@@ -85,7 +85,6 @@ export interface Comment {
   id: number;
   content: string;
   created_at: string;
-  parent_id?: number;
   author_name: string;
   author_email?: string;
   post_id?: number;
@@ -102,8 +101,6 @@ export interface OrganizedComment extends Comment {
 export interface CreateCommentRequest {
   post_id: number;
   content: string;
-  parent_id?: number; // 根评论ID
-  reply_id?: number;  // 当回复某条回复时，传该回复ID
 }
 
 // 分类相关类型

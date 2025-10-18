@@ -54,7 +54,6 @@ const comments = adaptOrganizedComments(response.data.list);
 await createComment({
   post_id: parseInt(postId),
   content: commentText,
-  parent_id: replyToId ? parseInt(replyToId) : undefined
 });
 ```
 

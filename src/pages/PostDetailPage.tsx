@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeftIcon, ShareIcon, ChatBubbleLeftIcon, PaperAirplaneIcon, MapPinIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftIcon, PaperAirplaneIcon, MapPinIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
 import { getPostById } from '../api/posts';
 import { getPostComments, createComment } from '../api/comments';
 import { authUtils } from '../api';
+import { getSubCategoryIcon } from '../utils/categoryIcons';
 import type { User } from '../types';
 import type { Post as ApiPost } from '../api/types';
 
@@ -282,30 +283,30 @@ const PostDetailPage = () => {
 
   // 渲染单个评论
   const renderComment = (comment: CommentData) => (
-    <div key={comment.id} className="bg-white rounded-2xl p-4 shadow-sm">
-      <div className="flex space-x-3">
+    <div key={comment.id} className="bg-white rounded-2xl p-6 shadow-sm">
+      <div className="flex space-x-4">
         <img
           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author_name)}&background=random&color=fff`}
           alt={comment.author_name}
-          className="w-10 h-10 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+          className="w-12 h-12 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity shadow-sm"
           onClick={() => handleCommenterAvatarClick(comment.user_id.toString())}
         />
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="font-medium text-gray-900">{comment.author_name}</span>
+          <div className="flex items-center space-x-2 mb-2">
+            <span className="font-semibold text-gray-900 text-lg">{comment.author_name}</span>
             {post && comment.user_id.toString() === post.user_id?.toString() && (
-              <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <span className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </span>
             )}
           </div>
-          <p className="text-gray-900 text-sm leading-relaxed mb-2">
+          <p className="text-gray-900 text-base leading-relaxed mb-3">
             {comment.content}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">{getTimeAgo(comment.created_at)}</span>
+            <span className="text-sm text-gray-500">{getTimeAgo(comment.created_at)}</span>
           </div>
         </div>
       </div>
@@ -315,10 +316,10 @@ const PostDetailPage = () => {
   // 加载状态
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载中...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">加载中...</p>
         </div>
       </div>
     );
@@ -327,12 +328,16 @@ const PostDetailPage = () => {
   // 错误状态
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || '帖子不存在'}</p>
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-red-200 to-pink-200 flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">😞</span>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-3">出错了</h3>
+          <p className="text-red-600 mb-8 text-lg">{error || '帖子不存在'}</p>
           <button
             onClick={() => navigate('/')}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
           >
             返回首页
           </button>
@@ -344,43 +349,43 @@ const PostDetailPage = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
         {/* 顶部导航栏 */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
-          </button>
-          <h1 className="text-lg font-medium text-gray-900">帖子详情</h1>
-          <button className="p-2 -mr-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ShareIcon className="w-6 h-6 text-gray-600" />
-          </button>
-        </div>
-        <div className="text-center text-sm text-gray-500 pb-2">
-          参与讨论，结识新朋友
-        </div>
-      </div>
+        {/* <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+          <div className="flex items-center justify-between px-4 py-3">
+            <button
+              onClick={() => navigate('/')}
+              className="p-2 -ml-2 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-lg font-semibold text-gray-900">帖子详情</h1>
+            <button className="p-2 -mr-2 hover:bg-gray-100 rounded-xl transition-colors">
+              <ShareIcon className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
+          <div className="text-center text-sm text-gray-500 pb-2">
+            参与讨论，结识新朋友
+          </div>
+        </div> */}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 帖子内容 */}
-        <div className="bg-white mx-4 mt-4 rounded-2xl shadow-sm">
+        <div className="bg-white rounded-2xl shadow-sm">
           {/* 用户信息 */}
-          <div className="flex items-center justify-between p-4 pb-3">
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-between p-6 pb-4">
+            <div className="flex items-center space-x-4">
               <img
                 src={getPostAuthorAvatar(post.author_name)}
                 alt={post.author_name}
-                className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                className="w-14 h-14 rounded-full cursor-pointer hover:opacity-80 transition-opacity shadow-sm"
                 onClick={handleAuthorAvatarClick}
               />
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-medium text-gray-900">{post.author_name}</span>
-                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <span className="font-semibold text-gray-900 text-lg">{post.author_name}</span>
+                  <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -388,54 +393,57 @@ const PostDetailPage = () => {
                 <span className="text-sm text-gray-500">{getTimeAgo(post.created_at)}</span>
               </div>
             </div>
-            <button className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-600 transition-colors">
-              {post.subcategory_name}
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-4xl text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2">
+              <span className="text-lg">{getSubCategoryIcon(post.subcategory_name)}</span>
+              <span>{post.subcategory_name}</span>
             </button>
           </div>
 
           {/* 帖子内容 */}
-          <div className="px-4 pb-3">
-            <p className="text-gray-900 text-base leading-relaxed">
+          <div className="px-6 pb-4">
+            <p className="text-gray-900 text-lg leading-relaxed">
               {post.content}
             </p>
           </div>
 
           {/* 位置信息 */}
           {post.location && (
-            <div className="px-4 pb-4">
-              <div className="flex items-center space-x-1 text-gray-600">
+            <div className="px-6 pb-4">
+              <div className="flex items-center space-x-2 text-gray-600">
                 <MapPinIcon className="w-4 h-4" />
-                <span className="text-sm">{post.location}</span>
+                <span className="text-sm font-medium">{post.location}</span>
               </div>
             </div>
           )}
 
           {/* 互动区域 */}
-          <div className="border-t border-gray-100 px-4 py-3">
+          <div className="border-t border-gray-100 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1 text-gray-600">
+              <div className="flex items-center space-x-2 text-gray-600">
                 <ChatBubbleLeftIcon className="w-5 h-5" />
-                <span className="text-sm">{post.comment_count} 条评论</span>
+                <span className="text-sm font-medium">{post.comment_count} 条评论</span>
                 {post.comment_visibility === 'private' && (
                   <EyeSlashIcon className="w-4 h-4 text-gray-400" />
                 )}
               </div>
-              <button className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition-colors">
+              {/* <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors bg-gray-50 hover:bg-blue-50 rounded-xl px-3 py-2">
                 <ShareIcon className="w-5 h-5" />
-                <span className="text-sm">分享</span>
-              </button>
+                <span className="text-sm font-medium">分享</span>
+              </button> */}
             </div>
           </div>
         </div>
 
         {/* 评论可见性提示 */}
         {post.comment_visibility === 'private' && !isPostAuthor && (
-          <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
-            <div className="flex items-center space-x-3">
-              <EyeSlashIcon className="w-5 h-5 text-amber-600" />
+          <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                <EyeSlashIcon className="w-5 h-5 text-white" />
+              </div>
               <div>
-                <h3 className="text-sm font-medium text-amber-800">评论仅作者可见</h3>
-                <p className="text-sm text-amber-700">此帖子的评论设置为仅作者可见，但你仍然可以添加评论给作者。</p>
+                <h3 className="text-lg font-semibold text-amber-800">评论仅作者可见</h3>
+                <p className="text-sm text-amber-700 mt-1">此帖子的评论设置为仅作者可见，但你仍然可以添加评论给作者。</p>
               </div>
             </div>
           </div>
@@ -443,29 +451,37 @@ const PostDetailPage = () => {
 
         {/* 评论区域 */}
         {canViewComments && (
-          <div className="mx-4 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              评论 ({post?.comment_count || 0})
-            </h3>
-            <div className="text-sm text-gray-500 mb-4">
-              参与讨论，分享你的想法
+          <div className="mt-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                评论 ({post?.comment_count || 0})
+              </h3>
+              <p className="text-gray-600">
+                参与讨论，分享你的想法
+              </p>
             </div>
 
             {/* 评论加载状态 */}
             {commentsLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">加载评论中...</p>
               </div>
             ) : (
               // 评论列表
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {comments.map(comment => renderComment(comment))}
                 
                 {/* 空状态 */}
                 {comments.length === 0 && !loadingMore && (
-                  <div className="text-center py-8 text-gray-500">
-                    还没有评论，来发表第一条评论吧！
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+                      <span className="text-4xl">💬</span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-800 mb-3">还没有评论</h3>
+                    <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                      来发表第一条评论，开始讨论吧！
+                    </p>
                   </div>
                 )}
               </div>
@@ -475,48 +491,56 @@ const PostDetailPage = () => {
 
         {/* 私有评论提示区域 - 当评论私有且用户不是作者时显示 */}
         {post.comment_visibility === 'private' && !isPostAuthor && canAddComments && (
-          <div className="mx-4 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              评论区域
-            </h3>
-            <div className="text-sm text-gray-500 mb-4">
-              你可以给作者留言，但只有作者可以看到评论
+          <div className="mt-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                评论区域
+              </h3>
+              <p className="text-gray-600">
+                你可以给作者留言，但只有作者可以看到评论
+              </p>
             </div>
-            <div className="text-center py-8 text-gray-500">
-              评论仅作者可见，你的评论将直接发送给作者
+            <div className="text-center py-16">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-blue-200 to-purple-200 flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl">🔒</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-3">评论仅作者可见</h3>
+              <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                你的评论将直接发送给作者
+              </p>
             </div>
           </div>
         )}
 
         {/* 评论输入框 */}
         {canAddComments && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-            <div className="max-w-2xl mx-auto">
-              <div className="flex items-center space-x-3">
+          <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center space-x-4">
                 <img
                   src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.nickname)}&background=random&color=fff`}
                   alt={currentUser.nickname}
-                  className="w-8 h-8 rounded-full flex-shrink-0"
+                  className="w-10 h-10 rounded-full flex-shrink-0 shadow-sm"
                 />
-                <div className="flex-1 flex items-center space-x-2">
+                <div className="flex-1 flex items-center space-x-3">
                   <input
                     type="text"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="写下你的评论，参与讨论..."
-                    className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                    className="flex-1 bg-gray-100 rounded-2xl px-6 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm"
                     onKeyPress={(e) => e.key === 'Enter' && !submitLoading && handleSendComment()}
                     disabled={submitLoading}
                   />
                   <button
                     onClick={handleSendComment}
                     disabled={!newComment.trim() || submitLoading}
-                    className="p-2 text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    className="p-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     {submitLoading ? (
-                      <div className="w-4 h-4 animate-spin border-b border-white rounded-full"></div>
+                      <div className="w-5 h-5 animate-spin border-b-2 border-white rounded-full"></div>
                     ) : (
-                      <PaperAirplaneIcon className="w-4 h-4" />
+                      <PaperAirplaneIcon className="w-5 h-5" />
                     )}
                   </button>
                 </div>
@@ -527,19 +551,19 @@ const PostDetailPage = () => {
 
         {/* 加载更多评论的状态显示在页面底部 */}
         {canViewComments && loadingMore && (
-          <div className="mx-4 mt-6 mb-4">
-            <div className="text-center py-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-              <p className="text-gray-600">加载更多评论...</p>
+          <div className="mt-6 mb-4">
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 font-medium">加载更多评论...</p>
             </div>
           </div>
         )}
 
         {/* 没有更多评论的提示 */}
         {canViewComments && !hasMoreComments && comments.length > 0 && !loadingMore && (
-          <div className="mx-4 mt-6 mb-4">
-            <div className="text-center py-4 text-gray-500">
-              没有更多评论了
+          <div className="mt-6 mb-4">
+            <div className="text-center py-6 text-gray-500–">
+              <span className="text-sm font-medium">没有更多评论了</span>
             </div>
           </div>
         )}

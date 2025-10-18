@@ -58,7 +58,6 @@ export const testApiAdapters = () => {
           content: '回复评论',
           created_at: '2024-01-01T01:00:00.000Z',
           author_name: '回复用户',
-          parent_id: 1,
           post_id: 1,
           status: 'active'
         }

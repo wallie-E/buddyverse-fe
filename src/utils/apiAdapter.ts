@@ -58,7 +58,6 @@ export const adaptApiComment = (apiComment: ApiComment): Comment => {
     postId: apiComment.post_id?.toString() || '',
     authorId: author.id,
     author,
-    parentId: apiComment.parent_id?.toString(),
     createdAt: apiComment.created_at,
   };
 };
