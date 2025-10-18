@@ -99,7 +99,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="text-center mb-8">
@@ -153,33 +153,41 @@ export default function HomePage() {
               <p className="text-gray-600 mt-4">加载中...</p>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">暂无帖子</p>
+            <div className="text-center py-16">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl">🔍</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-3">暂无相关帖子</h3>
+              <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                {selectedCategoryId 
+                  ? `还没有人发布${categories.find(c => c.id === selectedCategoryId)?.name}相关的帖子，快来做第一个吧！`
+                  : "没有找到匹配的帖子，试试其他关键词吧～"}
+              </p>
               <button
                 onClick={handleCreateFirstPost}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 font-medium text-white"
               >
-                发布第一个帖子
+                发布第一篇帖子 ✨
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {posts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
-              
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="text-center pt-6">
-                  <button
-                    onClick={loadMore}
-                    disabled={loading}
-                    className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? '加载中...' : '加载更多'}
-                  </button>
-                </div>
-              )}
+            </div>
+          )}
+          
+          {/* Load More Button */}
+          {hasMore && posts.length > 0 && (
+            <div className="text-center pt-8">
+              <button
+                onClick={loadMore}
+                disabled={loading}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-full hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl"
+              >
+                {loading ? '加载中...' : '加载更多'}
+              </button>
             </div>
           )}
         </div>
