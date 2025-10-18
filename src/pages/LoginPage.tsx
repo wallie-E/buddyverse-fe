@@ -124,7 +124,9 @@ const LoginPage = () => {
                   className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
                   placeholder="请输入你的昵称"
                   required
+                  maxLength={8}
                 />
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-end">最多8个字符</p>
               </div>
             )}
 

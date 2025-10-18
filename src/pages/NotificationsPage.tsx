@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BellIcon, 
-  ChatBubbleLeftIcon, 
+import {
+  BellIcon,
+  ChatBubbleLeftIcon,
   TrashIcon,
   CheckIcon
 } from '@heroicons/react/24/outline';
@@ -33,20 +33,20 @@ export default function NotificationsPage() {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await API.notifications.getNotifications({
         page: pageNum,
         limit: 20,
         type: filterType === 'all' ? undefined : filterType
       });
-      
+
       if (response.success) {
         if (pageNum === 1) {
           setNotifications(response.data.list);
         } else {
           setNotifications(prev => [...prev, ...response.data.list]);
         }
-        
+
         setHasMore(response.data.pagination.page < response.data.pagination.pages);
       }
     } catch (error) {
@@ -74,16 +74,16 @@ export default function NotificationsPage() {
   const markAsRead = async (notificationId: number) => {
     try {
       await API.notifications.markAsRead(notificationId);
-      
+
       // 更新本地状态
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === notificationId
             ? { ...notification, is_read: true }
             : notification
         )
       );
-      
+
       // 更新全局未读数量
       decrementUnreadCount();
     } catch (error) {
@@ -95,12 +95,12 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     try {
       await API.notifications.markAllAsRead();
-      
+
       // 更新本地状态
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(notification => ({ ...notification, is_read: true }))
       );
-      
+
       // 清空全局未读数量
       clearUnreadCount();
     } catch (error) {
@@ -112,7 +112,7 @@ export default function NotificationsPage() {
   const deleteNotification = async (notificationId: number) => {
     try {
       await API.notifications.deleteNotification(notificationId);
-      
+
       // 从列表中移除
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     } catch (error) {
@@ -125,12 +125,12 @@ export default function NotificationsPage() {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    
+
     if (days > 0) {
       return `${days}天前`;
     } else if (hours > 0) {
@@ -162,7 +162,7 @@ export default function NotificationsPage() {
     if (!notification.is_read) {
       await markAsRead(notification.id);
     }
-    
+
     // 根据通知类型跳转
     if (notification.type === 'comment' || notification.type === 'reply') {
       // 跳转到相关帖子
@@ -174,11 +174,11 @@ export default function NotificationsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+            {/* <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
               <BellIcon className="h-8 w-8 text-white" />
-            </div>
+            </div> */}
             <div>
               <h1 className="text-3xl font-bold text-gray-900">通知中心</h1>
               <p className="text-gray-600 text-lg">
@@ -186,14 +186,6 @@ export default function NotificationsPage() {
               </p>
             </div>
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
-            >
-              全部标记已读
-            </button>
-          )}
         </div>
 
         {/* Filter Tabs */}
@@ -201,24 +193,34 @@ export default function NotificationsPage() {
           <div className="flex">
             {[
               { key: 'all', label: '全部', count: notifications.length },
-              { key: 'comment', label: '帖子评论', count: notifications.filter(n => n.type === 'comment').length },
+              { key: 'comment', label: '评论', count: notifications.filter(n => n.type === 'comment').length },
               // // { key: 'reply', label: '评论回复', count: notifications.filter(n => n.type === 'reply').length },
-              { key: 'system', label: '系统通知', count: notifications.filter(n => n.type === 'system').length }
+              { key: 'system', label: '通知', count: notifications.filter(n => n.type === 'system').length }
             ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key as 'all' | 'comment' | 'reply' | 'system')}
-                className={`flex-1 py-4 px-6 text-base font-semibold rounded-2xl m-2 transition-all duration-300 ${
-                  filter === tab.key
+                className={`flex-1 py-4 px-6 text-base font-semibold rounded-2xl m-2 transition-all duration-300 ${filter === tab.key
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 {tab.label} ({tab.count})
               </button>
             ))}
           </div>
         </div>
+
+        {unreadCount > 0 && (
+          <div className="text-end mb-4">
+            <button
+              onClick={markAllAsRead}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+            >
+              全部标记已读
+            </button>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -228,7 +230,7 @@ export default function NotificationsPage() {
                 <span className="text-white text-sm">!</span>
               </div>
               <span className="font-medium">{error}</span>
-              <button 
+              <button
                 onClick={() => fetchNotifications(1)}
                 className="ml-auto bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition-colors text-sm font-medium"
               >
@@ -251,7 +253,7 @@ export default function NotificationsPage() {
             </div>
             <h3 className="text-2xl font-bold text-slate-800 mb-3">暂无通知</h3>
             <p className="text-slate-600 mb-8 max-w-md mx-auto text-lg">
-              当有人评论或回复你的帖子时，你会在这里收到通知
+              当有人评论你的帖子时，你会在这里收到通知
             </p>
           </div>
         ) : (
@@ -259,20 +261,18 @@ export default function NotificationsPage() {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-2xl shadow-sm p-6 cursor-pointer hover:shadow-lg transition-all duration-300 ${
-                  !notification.is_read ? 'border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50' : 'border border-gray-100'
-                }`}
+                className={`bg-white rounded-2xl shadow-sm p-6 cursor-pointer hover:shadow-lg transition-all duration-300 ${!notification.is_read ? 'border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50' : 'border border-gray-100'
+                  }`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start space-x-4">
                   {/* Icon */}
                   <div className="flex-shrink-0 mt-1">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                      notification.type === 'comment' ? 'bg-gradient-to-r from-blue-100 to-blue-200' :
-                      notification.type === 'reply' ? 'bg-gradient-to-r from-green-100 to-green-200' :
-                      notification.type === 'system' ? 'bg-gradient-to-r from-purple-100 to-purple-200' :
-                      'bg-gradient-to-r from-gray-100 to-gray-200'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${notification.type === 'comment' ? 'bg-gradient-to-r from-blue-100 to-blue-200' :
+                        notification.type === 'reply' ? 'bg-gradient-to-r from-green-100 to-green-200' :
+                          notification.type === 'system' ? 'bg-gradient-to-r from-purple-100 to-purple-200' :
+                            'bg-gradient-to-r from-gray-100 to-gray-200'
+                      }`}>
                       {getNotificationIcon(notification.type)}
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export default function NotificationsPage() {
                             <CheckIcon className="h-5 w-5" />
                           </button>
                         )}
-                        
+
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -330,7 +330,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
             ))}
-            
+
             {/* Load More Button */}
             {hasMore && (
               <div className="text-center pt-8">
@@ -345,25 +345,6 @@ export default function NotificationsPage() {
             )}
           </div>
         )}
-
-        {/* Quick Actions */}
-        {/* <div className="grid grid-cols-2 gap-4 mt-8">
-          <button
-            onClick={() => navigate('/my-posts')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
-          >
-            <h4 className="font-semibold text-gray-900 mb-2">我的帖子</h4>
-            <p className="text-sm text-gray-600">查看我发布的所有帖子</p>
-          </button>
-          
-          <button
-            onClick={() => navigate('/')}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
-          >
-            <h4 className="font-semibold text-gray-900 mb-2">浏览帖子</h4>
-            <p className="text-sm text-gray-600">发现更多有趣的内容</p>
-          </button>
-        </div> */}
       </div>
     </div>
   );

@@ -96,7 +96,7 @@ export default function PostCard({ post }: PostCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <MapPinIcon className="h-4 w-4" />
-            <span className="font-medium">{post.location || '未设置位置'}</span>
+            <span className="font-medium max-w-48 sm:max-w-72">{post.location || '未设置位置'}</span>
           </div>
           <div className="flex items-center gap-1 text-slate-500">
             <ChatBubbleLeftIcon className="h-4 w-4" />
