@@ -7,7 +7,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 3001,
+    port: 3000,
     host: '0.0.0.0',
     allowedHosts: ['hzntwvsnjutr.sealoshzh.site'],
     proxy: {
@@ -16,5 +16,21 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 将React相关库分离
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // 将UI库分离
+          'ui-vendor': ['antd', '@heroicons/react'],
+          // 将工具库分离
+          'utils-vendor': ['axios', 'dayjs']
+        }
+      }
+    },
+    // 增加chunk大小警告限制
+    chunkSizeWarningLimit: 1000
   }
 })

@@ -60,6 +60,7 @@ export const mockComments: Comment[] = [
     postId: 'p1',
     authorId: '2',
     author: mockUsers[1],
+    user_id: '2',
     createdAt: '2024-01-28T10:30:00Z'
   },
   {
@@ -68,6 +69,7 @@ export const mockComments: Comment[] = [
     postId: 'p1',
     authorId: '1',
     author: mockUsers[0],
+    user_id: '1',
     parentId: 'c1',
     createdAt: '2024-01-28T11:00:00Z'
   },
@@ -77,6 +79,7 @@ export const mockComments: Comment[] = [
     postId: 'p1',
     authorId: '3',
     author: mockUsers[2],
+    user_id: '3',
     createdAt: '2024-01-28T11:15:00Z'
   }
 ];

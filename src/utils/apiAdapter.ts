@@ -58,6 +58,7 @@ export const adaptApiComment = (apiComment: ApiComment): Comment => {
     postId: apiComment.post_id?.toString() || '',
     authorId: author.id,
     author,
+    user_id: author.id, // 使用author.id作为user_id
     createdAt: apiComment.created_at,
   };
 };
