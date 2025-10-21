@@ -9,10 +9,10 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
-    allowedHosts: ['hzntwvsnjutr.sealoshzh.site'],
+    allowedHosts: ['bkyupjjmtxdq.sealoshzh.site'],
     proxy: {
       '/api': {
-        target: 'http://buddyverse-release-dmpcuy-cgolvzcbdfji.ns-kuoqmx4b.svc.cluster.local:3000',
+        target: 'http://buddyverse-release-iswupb-zgazuavctyfj.ns-kuoqmx4b.svc.cluster.local:3000',
         changeOrigin: true
       }
     }
