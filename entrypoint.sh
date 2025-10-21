@@ -11,20 +11,14 @@ fi
 # Development environment commands
 dev_commands() {
     echo "Running React development environment..."
-    npm run start
+    npm run dev
 }
 
 # Production environment commands
 prod_commands() {
     echo "Running React production environment..."
-    # Install serve if needed for production
-    if ! command -v serve &> /dev/null; then
-        echo "Installing serve package..."
-        npm install -g serve
-    fi
-    npm run build
-    echo "Starting production server..."
-    npx serve -s build
+    npm run dev
+   
 }
 
 # Check environment variables to determine the running environment

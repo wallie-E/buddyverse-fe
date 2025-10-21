@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
-    allowedHosts: ['hzntwvsnjutr.sealoshzh.site'],
+    allowedHosts: ['bkyupjjmtxdq.sealoshzh.site'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
