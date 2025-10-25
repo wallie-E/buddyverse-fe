@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
 import type { Category } from '../api/types';
 import { getSubCategoryIcon } from '../utils/categoryIcons';
@@ -19,9 +19,27 @@ export default function CategoryFilter({
   onSubCategoryChange
 }: CategoryFilterProps) {
   const [isSubDropdownOpen, setIsSubDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
   const subCategories = selectedCategory?.subcategories || [];
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsSubDropdownOpen(false);
+      }
+    };
+
+    if (isSubDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSubDropdownOpen]);
 
   // 分类图标映射
   const getCategoryIcon = (categoryName: string) => {
@@ -78,7 +96,7 @@ export default function CategoryFilter({
         <div className="mt-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-slate-600 font-medium">细分类型：</span>
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSubDropdownOpen(!isSubDropdownOpen)}
                 className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl hover:bg-white transition-all min-w-[140px] shadow-sm border border-slate-200/50"
