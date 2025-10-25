@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrashIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, ChatBubbleLeftIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { message } from 'antd';
 import { API, authUtils } from '../api';
 import type { Post } from '../api/types';
@@ -101,28 +101,7 @@ export default function MyPostsPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">我的帖子</h1>
-          <p className="text-slate-600">管理你发布的所有帖子</p>
         </div>
-
-        {/* User Info */}
-        {/* {currentUser && (
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">
-                  {currentUser.nickname.charAt(0)}
-                </span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{currentUser.nickname}</h3>
-                <p className="text-gray-600">{currentUser.email}</p>
-                {currentUser.signature && (
-                  <p className="text-sm text-gray-500 mt-1">{currentUser.signature}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )} */}
 
         {/* Error Message */}
         {error && (
@@ -204,7 +183,8 @@ export default function MyPostsPage() {
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <span>📍 {post.location || '未设置位置'}</span>
+                      <MapPinIcon className="h-4 w-4" />
+                      <span className="text-sm font-medium max-w-32 sm:max-w-60 truncate">{post.location || '未设置位置'}</span>
                     </div>
                     <div className="flex items-center gap-1 text-slate-500">
                       <ChatBubbleLeftIcon className="h-4 w-4" />

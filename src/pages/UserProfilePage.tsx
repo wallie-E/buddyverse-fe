@@ -180,9 +180,9 @@ const UserProfilePage = () => {
               
               <h2 className="text-3xl font-bold text-gray-900 mb-3">{user.nickname || '未知用户'}</h2>
               
-              {user.signature && (
-                <p className="text-gray-600 mb-6 leading-relaxed text-lg max-w-2xl mx-auto">{user.signature}</p>
-              )}
+              <p className="text-gray-600 mb-6 leading-relaxed text-lg max-w-2xl mx-auto">
+                {user.signature || '该用户暂无介绍'}
+              </p>
               
               <div className="flex items-center justify-center space-x-8 text-base text-gray-500">
                 <div className="flex items-center space-x-2">
@@ -193,12 +193,11 @@ const UserProfilePage = () => {
                     {user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : '其他'}
                   </span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">📅</span>
+                {/* <div className="flex items-center space-x-2">
                   <span className="font-medium">
                     加入于 {user.created_at ? formatJoinDate(user.created_at) : '未知'}
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -255,9 +254,9 @@ const UserProfilePage = () => {
 
                     {/* 位置信息 */}
                     {post.location && (
-                      <div className="flex items-center space-x-2 mb-4 text-sm py-2">
+                      <div className="flex items-center space-x-2 mb-4 text-sm py-2 text-gray-600">
                         <MapPinIcon className="h-4 w-4" />
-                        <span className="font-medium">{post.location}</span>
+                        <span className="text-sm font-medium max-w-[90%] truncate">{post.location}</span>
                       </div>
                     )}
 
