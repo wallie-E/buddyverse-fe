@@ -12,7 +12,7 @@ export default defineConfig({
     allowedHosts: ['mkwxlsnrowlw.sealosbja.site','jplnacmzyuno.sealosbja.site'],
     proxy: {
       '/api': {
-        target: 'http://dz-bg.ns-z580ek8h.svc.cluster.local:8080',
+        target: 'http://dz-bg-release-ryibfj-hjnikzxajlgk.ns-z580ek8h.svc.cluster.local:8080',
         changeOrigin: true
       }
     }

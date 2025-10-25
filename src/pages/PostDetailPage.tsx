@@ -405,7 +405,7 @@ const PostDetailPage = () => {
             <div className="px-6 pb-4">
               <div className="flex items-center space-x-2 text-gray-600">
                 <MapPinIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">{post.location}</span>
+                <span className="text-sm font-medium max-w-[90%] truncate">{post.location}</span>
               </div>
             </div>
           )}

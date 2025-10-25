@@ -90,13 +90,13 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
       </div>
       <div className="px-6 pb-6">
-        <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors">
+        <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors truncate">
           {post.content}
         </p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <MapPinIcon className="h-4 w-4" />
-            <span className="font-medium max-w-48 sm:max-w-72">{post.location || '未设置位置'}</span>
+            <span className="font-medium max-w-48 sm:max-w-60 truncate">{post.location || '未设置位置'}</span>
           </div>
           <div className="flex items-center gap-1 text-slate-500">
             <ChatBubbleLeftIcon className="h-4 w-4" />
