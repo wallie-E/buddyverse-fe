@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API基础URL
-export const BASE_URL = 'http://buddyverse.ns-kuoqmx4b.svc.cluster.local:3000';
+export const BASE_URL = import.meta.env.VITE_API_URL;
 
 // 创建axios实例
 const api = axios.create({

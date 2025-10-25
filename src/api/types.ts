@@ -176,6 +176,7 @@ export interface PaginationParams {
 export interface PostListParams extends PaginationParams {
   category_id?: number;
   subcategory_id?: number;
+  location?: string;
 }
 
 export interface NotificationListParams extends PaginationParams {
