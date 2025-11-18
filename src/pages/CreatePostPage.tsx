@@ -225,6 +225,7 @@ const CreatePostPage = () => {
                       </div>
                     </span>
                   </Radio>
+                  <div></div>
                   <Radio value="private" className="w-full">
                     <span className="flex items-center text-slate-700">
                       <EyeSlashIcon className="h-5 w-5 mr-3 text-orange-500" />

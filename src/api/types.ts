@@ -29,6 +29,7 @@ export interface User {
   gender: 'male' | 'female' | 'other';
   avatar?: string;
   signature?: string;
+  wechat_id?: string;
   role: 'user' | 'admin';
   status?: 'active' | 'inactive' | 'banned';
   created_at?: string;
@@ -54,6 +55,7 @@ export interface UpdateProfileRequest {
   nickname?: string;
   gender?: 'male' | 'female' | 'other';
   signature?: string;
+  wechat_id?: string;
 }
 
 // 帖子相关类型
@@ -130,7 +132,7 @@ export interface SubcategoriesResponse {
 // 通知相关类型
 export interface Notification {
   id: number;
-  type: 'comment' | 'reply' | 'system';
+  type: 'comment' | 'reply' | 'system' | 'wechat_exchange_request' | 'wechat_exchange_confirmed';
   title: string;
   content: string;
   post_id: number;
@@ -180,7 +182,7 @@ export interface PostListParams extends PaginationParams {
 }
 
 export interface NotificationListParams extends PaginationParams {
-  type?: 'comment' | 'reply' | 'system';
+  type?: 'comment' | 'reply' | 'system' | 'wechat_exchange_request' | 'wechat_exchange_confirmed';
 }
 
 export interface AdminUserListParams extends PaginationParams {
