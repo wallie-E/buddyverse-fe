@@ -6,6 +6,7 @@ export * from './comments';
 export * from './categories';
 export * from './notifications';
 export * from './admin';
+export * from './wechatExchange';
 
 // 导出类型定义
 export * from './types';
@@ -21,6 +22,7 @@ import * as commentsAPI from './comments';
 import * as categoriesAPI from './categories';
 import * as notificationsAPI from './notifications';
 import * as adminAPI from './admin';
+import * as wechatExchangeAPI from './wechatExchange';
 
 export const API = {
   auth: authAPI,
@@ -29,7 +31,8 @@ export const API = {
   comments: commentsAPI,
   categories: categoriesAPI,
   notifications: notificationsAPI,
-  admin: adminAPI
+  admin: adminAPI,
+  wechatExchange: wechatExchangeAPI
 };
 
 export default API; 

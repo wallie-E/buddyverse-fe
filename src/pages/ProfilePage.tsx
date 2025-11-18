@@ -19,7 +19,8 @@ export default function ProfilePage() {
   const [editForm, setEditForm] = useState<UpdateProfileRequest>({
     nickname: '',
     gender: 'other',
-    signature: ''
+    signature: '',
+    wechat_id: ''
   });
 
   // 检查登录状态
@@ -42,7 +43,8 @@ export default function ProfilePage() {
         setEditForm({
           nickname: response.data.nickname,
           gender: response.data.gender,
-          signature: response.data.signature || ''
+          signature: response.data.signature || '',
+          wechat_id: response.data.wechat_id || ''
         });
       }
     } catch (error) {
@@ -64,7 +66,8 @@ export default function ProfilePage() {
       setEditForm({
         nickname: user.nickname,
         gender: user.gender,
-        signature: user.signature || ''
+        signature: user.signature || '',
+        wechat_id: user.wechat_id || ''
       });
       setIsEditing(true);
     }
@@ -95,7 +98,8 @@ export default function ProfilePage() {
       const updateData: UpdateProfileRequest = {
         nickname: editForm.nickname.trim(),
         gender: editForm.gender,
-        signature: editForm.signature?.trim() || undefined
+        signature: editForm.signature?.trim() || undefined,
+        wechat_id: editForm.wechat_id?.trim() || undefined
       };
 
       const response = await API.users.updateProfile(updateData);
@@ -271,6 +275,23 @@ export default function ProfilePage() {
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">最多200字符</p>
               </div>
 
+              <div>
+                <label htmlFor="wechat_id" className="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
+                  微信号
+                </label>
+                <Input
+                  id="wechat_id"
+                  value={editForm.wechat_id}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, wechat_id: e.target.value }))}
+                  className="w-full h-10 sm:h-12 text-base sm:text-lg"
+                  size="large"
+                  placeholder="请输入微信号"
+                />
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
+                  微信号只有在你和别人交换时，才会告知对方
+                </p>
+              </div>
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6">
                 <button
@@ -309,6 +330,16 @@ export default function ProfilePage() {
                     {user.role === 'admin' ? '👑 管理员' : '👤 普通用户'}
                   </p>
                 </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">微信号</label>
+                <p className="text-lg sm:text-xl font-medium text-gray-900 mb-2">
+                  {user.wechat_id || '未设置'}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  微信号只有在你和别人交换时，才会告知对方
+                </p>
               </div>
 
               {user.signature && (
