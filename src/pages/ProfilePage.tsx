@@ -324,12 +324,12 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
+                {/* <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
                   <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">角色</label>
                   <p className="text-lg sm:text-xl font-medium text-gray-900">
                     {user.role === 'admin' ? '👑 管理员' : '👤 普通用户'}
                   </p>
-                </div>
+                </div> */}
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
@@ -375,7 +375,7 @@ export default function ProfilePage() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                 <span className="text-lg sm:text-2xl">🔔</span>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">通知中心</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">消息中心</h3>
             </div>
             <p className="text-sm sm:text-base text-gray-600">查看评论和回复消息</p>
           </button>

@@ -95,3 +95,18 @@ export const getMyExchanges = async (params?: GetMyExchangesParams): Promise<Api
   return api.get('/api/wechat-exchange/my-exchanges', { params });
 };
 
+// 更新微信请求参数
+export interface UpdateWechatRequest {
+  targetUserId: number;
+}
+
+// 更新微信响应
+export interface UpdateWechatResponse {
+  otherWechat: string;
+}
+
+// 更新微信
+export const updateWechat = async (data: UpdateWechatRequest): Promise<ApiResponse<UpdateWechatResponse>> => {
+  return api.post('/api/wechat-exchange/update-wechat', data);
+};
+

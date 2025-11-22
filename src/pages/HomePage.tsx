@@ -68,21 +68,16 @@ export default function HomePage() {
     }
   };
 
-  // 防抖处理位置搜索
+  // 统一处理筛选条件变化（位置搜索防抖，分类切换即时）
   useEffect(() => {
+    // 有搜索词时防抖 500ms，无搜索词时（如初始加载或仅切换分类）几乎立即执行
     const timeoutId = setTimeout(() => {
       setPage(1);
       fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-    }, 500); // 500ms 防抖延迟
+    }, location ? 500 : 0);
 
     return () => clearTimeout(timeoutId);
-  }, [location]);
-
-  // 分类变化时立即搜索
-  useEffect(() => {
-    setPage(1);
-    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-  }, [selectedCategoryId, selectedSubCategoryId]);
+  }, [location, selectedCategoryId, selectedSubCategoryId]);
 
   // 加载更多
   const loadMore = () => {
