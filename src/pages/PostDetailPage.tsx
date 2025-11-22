@@ -6,7 +6,7 @@ import { MessageCircleMore } from 'lucide-react';
 import { getPostById } from '../api/posts';
 import { getPostComments, createComment } from '../api/comments';
 import { authUtils } from '../api';
-import { getExchangeInfo, createExchangeRequest } from '../api/wechatExchange';
+import { getExchangeInfo, createExchangeRequest, confirmExchange, updateWechat } from '../api/wechatExchange';
 import type { WechatExchangeInfo } from '../api/wechatExchange';
 import { getSubCategoryIcon } from '../utils/categoryIcons';
 import type { User } from '../types';
@@ -45,6 +45,7 @@ const PostDetailPage = () => {
   const [exchangeInfo, setExchangeInfo] = useState<WechatExchangeInfo | null>(null);
   const [exchangeInfoLoading, setExchangeInfoLoading] = useState(false);
   const [exchangeSubmitting, setExchangeSubmitting] = useState(false);
+  const [updatingWechat, setUpdatingWechat] = useState(false);
 
   // 获取当前用户（模拟）
   const getCurrentUser = (): User => {
@@ -285,6 +286,47 @@ const PostDetailPage = () => {
     }
   };
 
+  // 检查是否可以发起交换请求（1小时内限制）
+  const canInitiateExchange = (targetUserId: number): { allowed: boolean; remainingTime?: number } => {
+    const currentUser = authUtils.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      return { allowed: true }; // 如果没有用户信息，允许（实际应该不会发生）
+    }
+
+    const currentUserId = currentUser.id.toString();
+    const storageKey = `wechat_exchange_${currentUserId}_${targetUserId}`;
+    const lastRequestTime = localStorage.getItem(storageKey);
+
+    if (!lastRequestTime) {
+      return { allowed: true }; // 没有记录，允许
+    }
+
+    const lastTime = parseInt(lastRequestTime, 10);
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // 1小时的毫秒数
+    const timeDiff = now - lastTime;
+
+    if (timeDiff < oneHour) {
+      const remainingMs = oneHour - timeDiff;
+      const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+      return { allowed: false, remainingTime: remainingMinutes };
+    }
+
+    return { allowed: true }; // 超过1小时，允许
+  };
+
+  // 记录交换请求时间戳
+  const recordExchangeRequest = (targetUserId: number) => {
+    const currentUser = authUtils.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      return;
+    }
+
+    const currentUserId = currentUser.id.toString();
+    const storageKey = `wechat_exchange_${currentUserId}_${targetUserId}`;
+    localStorage.setItem(storageKey, Date.now().toString());
+  };
+
   // 获取交换信息
   const fetchExchangeInfo = async (targetUserId: number) => {
     try {
@@ -361,6 +403,13 @@ const PostDetailPage = () => {
       ? parseInt(exchangeTargetUser.id) 
       : exchangeTargetUser.id;
 
+    // 检查1小时内是否已经发起过请求
+    const { allowed, remainingTime } = canInitiateExchange(targetUserId);
+    if (!allowed) {
+      messageApi.warning(`您在一个小时内已经向该用户发起过交换请求，请等待 ${remainingTime} 分钟后再试`);
+      return;
+    }
+
     try {
       setExchangeSubmitting(true);
       
@@ -374,6 +423,8 @@ const PostDetailPage = () => {
       });
 
       if (response.success) {
+        // 记录请求时间戳
+        recordExchangeRequest(targetUserId);
         messageApi.success(isUpdate ? '交换请求已重新发送' : '交换微信请求已发送');
         // 重新获取交换信息
         await fetchExchangeInfo(targetUserId);
@@ -382,6 +433,53 @@ const PostDetailPage = () => {
       }
     } catch (err) {
       messageApi.error(err instanceof Error ? err.message : '发送交换请求失败');
+    } finally {
+      setExchangeSubmitting(false);
+    }
+  };
+
+  // 确认接受交换
+  const handleAcceptExchange = async () => {
+    // 检查当前用户是否配置了微信号
+    const user = authUtils.getCurrentUser();
+    const hasWechat = user && user.wechat_id && user.wechat_id.trim() !== '';
+    
+    if (!hasWechat) {
+      messageApi.warning('请先配置微信号');
+      setExchangeModalVisible(false);
+      setExchangeTargetUser(null);
+      setExchangeInfo(null);
+      navigate('/profile');
+      return;
+    }
+
+    if (!exchangeInfo?.exchangeNo) {
+      messageApi.error('交换信息无效');
+      return;
+    }
+
+    try {
+      setExchangeSubmitting(true);
+      const response = await confirmExchange({
+        exchangeNo: exchangeInfo.exchangeNo,
+        wechatId: user.wechat_id!,
+        action: 'accept'
+      });
+
+      if (response.success) {
+        messageApi.success('交换成功');
+        // 重新获取交换信息以展示对方微信号
+        if (exchangeTargetUser?.id) {
+          const targetUserId = typeof exchangeTargetUser.id === 'string' 
+            ? parseInt(exchangeTargetUser.id) 
+            : exchangeTargetUser.id;
+          await fetchExchangeInfo(targetUserId);
+        }
+      } else {
+        messageApi.error(response.message || '确认交换失败');
+      }
+    } catch (err) {
+      messageApi.error(err instanceof Error ? err.message : '确认交换失败');
     } finally {
       setExchangeSubmitting(false);
     }
@@ -400,6 +498,44 @@ const PostDetailPage = () => {
     setExchangeTargetUser(null);
     setExchangeInfo(null);
     navigate('/profile');
+  };
+
+  // 更新微信
+  const handleUpdateWechat = async () => {
+    if (!exchangeTargetUser) return;
+
+    const targetUserId = typeof exchangeTargetUser.id === 'string' 
+      ? parseInt(exchangeTargetUser.id) 
+      : exchangeTargetUser.id;
+
+    // 检查1小时内是否已经发起过请求
+    const { allowed, remainingTime } = canInitiateExchange(targetUserId);
+    if (!allowed) {
+      messageApi.warning(`您在一个小时内已经向该用户发起过交换请求，请等待 ${remainingTime} 分钟后再试`);
+      return;
+    }
+
+    try {
+      setUpdatingWechat(true);
+      const response = await updateWechat({ targetUserId });
+
+      if (response.success && response.data) {
+        // 记录请求时间戳
+        recordExchangeRequest(targetUserId);
+        // 更新交换信息中的微信号
+        setExchangeInfo(prev => prev ? {
+          ...prev,
+          otherWechat: response.data!.otherWechat
+        } : null);
+        messageApi.success('微信更新成功');
+      } else {
+        messageApi.error(response.message || '更新微信失败');
+      }
+    } catch (err) {
+      messageApi.error(err instanceof Error ? err.message : '更新微信失败');
+    } finally {
+      setUpdatingWechat(false);
+    }
   };
 
   // 渲染单个评论
@@ -483,24 +619,6 @@ const PostDetailPage = () => {
     <>
       {contextHolder}
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        {/* 顶部导航栏 */}
-        {/* <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 -ml-2 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
-            </button>
-            <h1 className="text-lg font-semibold text-gray-900">帖子详情</h1>
-            <button className="p-2 -mr-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <ShareIcon className="w-6 h-6 text-gray-600" />
-            </button>
-          </div>
-          <div className="text-center text-sm text-gray-500 pb-2">
-            参与讨论，结识新朋友
-          </div>
-        </div> */}
 
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* 帖子内容 */}
@@ -517,11 +635,6 @@ const PostDetailPage = () => {
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="font-semibold text-gray-900 text-lg">{post.author_name}</span>
-                    {/* <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div> */}
                   </div>
                   <span className="text-sm text-gray-500">{getTimeAgo(post.created_at)}</span>
                 </div>
@@ -726,12 +839,40 @@ const PostDetailPage = () => {
                   您可前往管理微信号
                 </button>
               </p>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={handleUpdateWechat}
+                  disabled={updatingWechat}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updatingWechat ? '更新中...' : '更新微信'}
+                </button>
+              </div>
+            </div>
+          ) : exchangeInfo?.exists && exchangeInfo.status === 0 && exchangeInfo.waitingFor === 'me' ? (
+            // 等待我确认
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+                确认交换微信
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed text-center mb-6">
+                {exchangeTargetUser?.name} 请求与您交换微信。
+                <br />
+                确认后，双方将互相看到对方的微信号。
+              </p>
+              <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handleCancelExchange}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
-                  确定
+                  取消
+                </button>
+                <button
+                  onClick={handleAcceptExchange}
+                  disabled={exchangeSubmitting}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {exchangeSubmitting ? '处理中...' : '确认交换'}
                 </button>
               </div>
             </div>
@@ -744,7 +885,6 @@ const PostDetailPage = () => {
               <p className="text-gray-600 text-sm leading-relaxed text-center mb-6">
                 您已向 {exchangeTargetUser?.name} 发送交换微信请求，等待对方确认。
                 <br />
-                您可以点击"重新发送"更新交换时间。
               </p>
               <div className="flex items-center justify-center gap-4">
                 <button

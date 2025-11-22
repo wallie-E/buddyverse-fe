@@ -140,6 +140,8 @@ export interface Notification {
   related_type: string;
   is_read: boolean;
   created_at: string;
+  sender_id?: number;
+  sender_nickname?: string;
 }
 
 export interface UnreadCountResponse {
