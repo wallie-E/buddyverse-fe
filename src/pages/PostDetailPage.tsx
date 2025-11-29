@@ -388,12 +388,8 @@ const PostDetailPage = () => {
     const hasWechat = user && user.wechat_id && user.wechat_id.trim() !== '';
     
     if (!hasWechat) {
-      // 如果没有配置微信号，跳转到个人信息页
-      messageApi.warning('请先配置微信号');
-      setExchangeModalVisible(false);
-      setExchangeTargetUser(null);
-      setExchangeInfo(null);
-      navigate('/profile');
+      // 如果没有配置微信号，提示用户
+      messageApi.warning('请前往个人页面设置微信号');
       return;
     }
 
@@ -419,7 +415,8 @@ const PostDetailPage = () => {
       const response = await createExchangeRequest({
         targetUserId,
         wechatId: user.wechat_id!,
-        isUpdate: isUpdate || false
+        isUpdate: isUpdate || false,
+        subcategoryName: post?.subcategory_name || '',
       });
 
       if (response.success) {
@@ -445,11 +442,7 @@ const PostDetailPage = () => {
     const hasWechat = user && user.wechat_id && user.wechat_id.trim() !== '';
     
     if (!hasWechat) {
-      messageApi.warning('请先配置微信号');
-      setExchangeModalVisible(false);
-      setExchangeTargetUser(null);
-      setExchangeInfo(null);
-      navigate('/profile');
+      messageApi.warning('请前往个人页面设置微信号');
       return;
     }
 

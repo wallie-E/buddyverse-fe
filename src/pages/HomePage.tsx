@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API } from '../api';
 import type { Post, Category } from '../api/types';
@@ -16,6 +16,7 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -39,7 +40,12 @@ export default function HomePage() {
   // 获取帖子列表
   const fetchPosts = async (pageNum = 1, categoryId?: number, subCategoryId?: number, locationParam?: string) => {
     try {
-      setLoading(true);
+      // 第一页使用 loading，后续页面使用 loadingMore
+      if (pageNum === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError('');
 
       const response = await API.posts.getPosts({
@@ -64,7 +70,11 @@ export default function HomePage() {
       console.error('获取帖子列表失败:', error);
       setError('获取帖子列表失败，请刷新重试');
     } finally {
-      setLoading(false);
+      if (pageNum === 1) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -80,11 +90,12 @@ export default function HomePage() {
   }, [location, selectedCategoryId, selectedSubCategoryId]);
 
   // 加载更多
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading || loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
     fetchPosts(nextPage, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-  };
+  }, [hasMore, loading, loadingMore, page, selectedCategoryId, selectedSubCategoryId, location]);
 
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
@@ -94,6 +105,26 @@ export default function HomePage() {
   const handleSubCategoryChange = (subCategoryId: number | null) => {
     setSelectedSubCategoryId(subCategoryId);
   };
+
+  // 滚动监听，实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore || loading || loadingMore) return;
+
+      // 检查是否滚动到页面底部附近
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到底部附近时（距离底部100px以内）触发加载
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loading, loadingMore, loadMore]);
 
   // 处理发布第一个帖子点击事件
   const handleCreateFirstPost = () => {
@@ -217,16 +248,11 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Load More Button */}
-          {hasMore && posts.length > 0 && (
-            <div className="text-center pt-8">
-              <button
-                onClick={loadMore}
-                disabled={loading}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-full hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl"
-              >
-                {loading ? '加载中...' : '加载更多'}
-              </button>
+          {/* 滚动加载提示 */}
+          {loadingMore && posts.length > 0 && (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
             </div>
           )}
         </div>

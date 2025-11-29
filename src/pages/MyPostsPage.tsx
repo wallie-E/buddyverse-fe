@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrashIcon, ChatBubbleLeftIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { message } from 'antd';
@@ -10,6 +10,7 @@ export default function MyPostsPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -25,7 +26,12 @@ export default function MyPostsPage() {
   // 获取用户帖子
   const fetchMyPosts = async (pageNum = 1) => {
     try {
-      setLoading(true);
+      // 第一页使用 loading，后续页面使用 loadingMore
+      if (pageNum === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError('');
       
       const response = await API.users.getUserPosts({
@@ -46,7 +52,11 @@ export default function MyPostsPage() {
       console.error('获取我的帖子失败:', error);
       setError('获取帖子失败，请刷新重试');
     } finally {
-      setLoading(false);
+      if (pageNum === 1) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -56,11 +66,32 @@ export default function MyPostsPage() {
   }, []);
 
   // 加载更多
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading || loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
     fetchMyPosts(nextPage);
-  };
+  }, [hasMore, loading, loadingMore, page]);
+
+  // 滚动监听，实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore || loading || loadingMore) return;
+
+      // 检查是否滚动到页面底部附近
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到底部附近时（距离底部100px以内）触发加载
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loading, loadingMore, loadMore]);
 
   // 删除帖子
   const handleDeletePost = async (postId: number) => {
@@ -197,19 +228,14 @@ export default function MyPostsPage() {
                 </div>
               </div>
             ))}
-            
-            {/* Load More Button */}
-            {hasMore && (
-              <div className="text-center pt-8 col-span-full">
-                <button
-                  onClick={loadMore}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-full hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl font-medium"
-                >
-                  {loading ? '加载中...' : '加载更多'}
-                </button>
-              </div>
-            )}
+          </div>
+        )}
+
+        {/* 滚动加载提示 */}
+        {loadingMore && posts.length > 0 && (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
           </div>
         )}
 
