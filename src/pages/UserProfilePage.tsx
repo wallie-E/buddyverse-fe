@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { message } from 'antd';
@@ -61,8 +61,8 @@ const UserProfilePage = () => {
   }, [id, navigate, isCurrentUser]);
 
   // 加载更多帖子
-  const loadMorePosts = async () => {
-    if (!id || !hasMore || loadingMore) return;
+  const loadMorePosts = useCallback(async () => {
+    if (!id || !hasMore || loading || loadingMore) return;
 
     try {
       setLoadingMore(true);
@@ -80,7 +80,27 @@ const UserProfilePage = () => {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [id, hasMore, loading, loadingMore, currentPage, messageApi]);
+
+  // 滚动监听，实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore || loading || loadingMore) return;
+
+      // 检查是否滚动到页面底部附近
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到底部附近时（距离底部100px以内）触发加载
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        loadMorePosts();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loading, loadingMore, loadMorePosts]);
 
   // 格式化时间
   const formatDate = (dateString: string) => {
@@ -278,19 +298,14 @@ const UserProfilePage = () => {
                     </div>
                   </div>
                 ))}
-                
-                {/* 加载更多按钮 */}
-                {hasMore && (
-                  <div className="text-center pt-8">
-                    <button
-                      onClick={loadMorePosts}
-                      disabled={loadingMore}
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
-                    >
-                      {loadingMore ? '加载中...' : '加载更多'}
-                    </button>
-                  </div>
-                )}
+              </div>
+            )}
+
+            {/* 滚动加载提示 */}
+            {loadingMore && posts.length > 0 && (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
               </div>
             )}
           </div>

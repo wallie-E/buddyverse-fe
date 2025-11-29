@@ -10,14 +10,17 @@ import { getMyExchanges, getExchangeInfo, confirmExchange, updateWechat } from '
 import type { WechatExchangeRecord, WechatExchangeInfo } from '../api/wechatExchange';
 import { useNotification } from '../hooks/useNotification';
 import type { Notification } from '../api/types';
+import { getSubCategoryIcon } from '../utils/categoryIcons';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const { unreadCount, decrementUnreadCount, clearUnreadCount } = useNotification();
+  const { unreadCount, decrementUnreadCount, clearUnreadCount, fetchUnreadCount } = useNotification();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [exchangeRecords, setExchangeRecords] = useState<WechatExchangeRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [exchangeLoading, setExchangeLoading] = useState(false);
+  const [loadingMoreExchanges, setLoadingMoreExchanges] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'comment' | 'wechat'>('comment');
   const [page, setPage] = useState(1);
@@ -45,10 +48,36 @@ export default function NotificationsPage() {
     }
   }, [navigate]);
 
+  // 进入页面时刷新未读数量
+  useEffect(() => {
+    if (authUtils.isAuthenticated()) {
+      fetchUnreadCount();
+    }
+  }, [fetchUnreadCount]);
+
+  // 当页面可见性变化时（用户切换回标签页）刷新未读数量
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && authUtils.isAuthenticated()) {
+        fetchUnreadCount();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchUnreadCount]);
+
   // 获取通知列表
   const fetchNotifications = useCallback(async (pageNum = 1, filterType: 'comment' = 'comment') => {
     try {
-      setLoading(true);
+      // 第一页使用 loading，后续页面使用 loadingMore
+      if (pageNum === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError('');
 
       const response = await API.notifications.getNotifications({
@@ -70,17 +99,21 @@ export default function NotificationsPage() {
       console.error('获取通知失败:', error);
       setError('获取通知失败，请刷新重试');
     } finally {
-      setLoading(false);
+      if (pageNum === 1) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
   }, []);
 
   // 加载更多
-  const loadMore = () => {
-    if (filter === 'wechat') return;
+  const loadMore = useCallback(() => {
+    if (filter === 'wechat' || !hasMore || loading || loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
     fetchNotifications(nextPage, 'comment');
-  };
+  }, [filter, hasMore, loading, loadingMore, page, fetchNotifications]);
 
   // 标记单个通知为已读
   const markAsRead = async (notificationId: number) => {
@@ -157,7 +190,12 @@ export default function NotificationsPage() {
   // 获取微信交换记录
   const fetchExchangeRecords = useCallback(async (pageNum = 1) => {
     try {
-      setExchangeLoading(true);
+      // 第一页使用 exchangeLoading，后续页面使用 loadingMoreExchanges
+      if (pageNum === 1) {
+        setExchangeLoading(true);
+      } else {
+        setLoadingMoreExchanges(true);
+      }
       const response = await getMyExchanges({
         page: pageNum,
         limit: 20
@@ -175,7 +213,11 @@ export default function NotificationsPage() {
     } catch (error) {
       console.error('获取交换记录失败:', error);
     } finally {
-      setExchangeLoading(false);
+      if (pageNum === 1) {
+        setExchangeLoading(false);
+      } else {
+        setLoadingMoreExchanges(false);
+      }
     }
   }, []);
 
@@ -202,11 +244,41 @@ export default function NotificationsPage() {
   }, [filter, fetchNotifications, fetchExchangeRecords]);
 
   // 加载更多交换记录
-  const loadMoreExchanges = () => {
+  const loadMoreExchanges = useCallback(() => {
+    if (!hasMoreExchanges || exchangeLoading || loadingMoreExchanges) return;
     const nextPage = exchangePage + 1;
     setExchangePage(nextPage);
     fetchExchangeRecords(nextPage);
-  };
+  }, [hasMoreExchanges, exchangeLoading, loadingMoreExchanges, exchangePage, fetchExchangeRecords]);
+
+  // 滚动监听，实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      // 根据当前筛选类型决定加载哪个列表
+      if (filter === 'wechat') {
+        if (!hasMoreExchanges || exchangeLoading || loadingMoreExchanges) return;
+      } else {
+        if (!hasMore || loading || loadingMore) return;
+      }
+
+      // 检查是否滚动到页面底部附近
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到底部附近时（距离底部100px以内）触发加载
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        if (filter === 'wechat') {
+          loadMoreExchanges();
+        } else {
+          loadMore();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filter, hasMore, hasMoreExchanges, loading, loadingMore, exchangeLoading, loadingMoreExchanges, loadMore, loadMoreExchanges]);
 
   // 获取交换状态文本
   const getExchangeStatusText = (status: number) => {
@@ -522,8 +594,17 @@ export default function NotificationsPage() {
                   <div
                     key={record.id}
                     onClick={() => handleExchangeRecordClick(record)}
-                    className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer"
+                    className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer relative"
                   >
+                    {/* 细分类型标签 - 右上角 */}
+                    {record.subcategoryName && (
+                      <div className="absolute top-4 right-4">
+                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-sm px-2 py-1 rounded-full text-xs">
+                          <span>{getSubCategoryIcon(record.subcategoryName)}</span>
+                          <span>{record.subcategoryName}</span>
+                        </span>
+                      </div>
+                    )}
                    <div className="flex items-start space-x-4">
                      {/* Avatar */}
                      <div className="flex-shrink-0 mt-1">
@@ -542,7 +623,7 @@ export default function NotificationsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
+                            <div className="flex items-center space-x-3 mb-2 flex-wrap">
                               <h4 className="text-lg font-semibold text-gray-900">
                                 {record.myRole === 'initiator' ? '我向' : ''} {record.otherNickname} {record.myRole === 'receiver' ? '向我' : ''}发起交换
                               </h4>
@@ -567,19 +648,6 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                 ))}
-
-                {/* Load More Button */}
-                {hasMoreExchanges && (
-                  <div className="text-center pt-8">
-                    <button
-                      onClick={loadMoreExchanges}
-                      disabled={exchangeLoading}
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
-                    >
-                      {exchangeLoading ? '加载中...' : '加载更多'}
-                    </button>
-                  </div>
-                )}
               </div>
             )
           ) : loading && notifications.length === 0 ? (
@@ -670,19 +738,22 @@ export default function NotificationsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
 
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="text-center pt-8">
-                  <button
-                    onClick={loadMore}
-                    disabled={loading}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
-                  >
-                    {loading ? '加载中...' : '加载更多'}
-                  </button>
-                </div>
-              )}
+          {/* 滚动加载提示 - 评论列表 */}
+          {filter === 'comment' && loadingMore && notifications.length > 0 && (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
+            </div>
+          )}
+
+          {/* 滚动加载提示 - 微信交换记录列表 */}
+          {filter === 'wechat' && loadingMoreExchanges && exchangeRecords.length > 0 && (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
             </div>
           )}
         </div>

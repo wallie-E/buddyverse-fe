@@ -25,6 +25,7 @@ export interface CreateExchangeRequest {
   targetUserId: number;
   wechatId: string;
   isUpdate?: boolean;
+  subcategoryName?: string;
 }
 
 // 发起交换请求响应
@@ -81,6 +82,7 @@ export interface WechatExchangeRecord {
   otherWechat?: string;
   createdAt: string;
   completedAt?: string;
+  subcategoryName?: string;
 }
 
 // 获取我的交换记录列表参数
