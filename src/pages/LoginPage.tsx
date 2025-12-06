@@ -85,27 +85,27 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-6">
+    <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">搭子社区</h1>
-          <p className="text-gray-600 text-lg">
+          <h1 className="text-4xl font-medium text-slate-900 mb-3 tracking-tight font-sans">搭子社区</h1>
+          <p className="text-slate-500 text-lg font-normal font-sans leading-relaxed">
             {isRegisterPage ? '加入我们，寻找志同道合的搭子' : '欢迎回来，继续你的搭子之旅'}
           </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-sm p-8">
+        <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 错误提示 */}
             {error && (
-              <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 text-red-600 px-6 py-4 rounded-2xl shadow-sm">
+              <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem]">
                 <div className="flex items-center space-x-3">
                   <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm">!</span>
+                    <span className="text-white text-sm font-sans">!</span>
                   </div>
-                  <span className="font-medium">{error}</span>
+                  <span className="font-medium font-sans">{error}</span>
                 </div>
               </div>
             )}
@@ -113,7 +113,7 @@ const LoginPage = () => {
             {/* 注册时的昵称字段 */}
             {isRegisterPage && (
               <div>
-                <label htmlFor="nickname" className="block text-lg font-semibold text-gray-900 mb-3">
+                <label htmlFor="nickname" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   昵称
                 </label>
                 <input
@@ -121,18 +121,18 @@ const LoginPage = () => {
                   type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+                  className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
                   placeholder="请输入你的昵称"
                   required
                   maxLength={8}
                 />
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-end">最多8个字符</p>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 sm:mt-2 text-end font-sans">最多8个字符</p>
               </div>
             )}
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-lg font-semibold text-gray-900 mb-3">
+              <label htmlFor="email" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                 邮箱地址
               </label>
               <input
@@ -143,14 +143,14 @@ const LoginPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+                className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
                 placeholder="请输入你的邮箱"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-lg font-semibold text-gray-900 mb-3">
+              <label htmlFor="password" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                 密码
               </label>
               <div className="relative">
@@ -162,7 +162,7 @@ const LoginPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-6 py-4 pr-14 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+                  className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
                   placeholder={isRegisterPage ? '请设置密码（6-20位）' : '请输入密码'}
                   minLength={6}
                   maxLength={20}
@@ -170,7 +170,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-6 w-6" />
@@ -184,7 +184,7 @@ const LoginPage = () => {
             {/* Confirm Password for Register */}
             {isRegisterPage && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-lg font-semibold text-gray-900 mb-3">
+                <label htmlFor="confirmPassword" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   确认密码
                 </label>
                 <div className="relative">
@@ -195,13 +195,13 @@ const LoginPage = () => {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-6 py-4 pr-14 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+                    className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
                     placeholder="请再次输入密码"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeSlashIcon className="h-6 w-6" />
@@ -217,20 +217,20 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              className="w-full bg-slate-900 text-white py-4 px-6 rounded-full font-medium text-lg hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-sans"
             >
               {isLoading ? '处理中...' : (isRegisterPage ? '立即注册' : '立即登录')}
             </button>
 
             {/* Switch between login and register */}
             <div className="text-center pt-4">
-              <span className="text-gray-600 text-base">
+              <span className="text-slate-500 text-base font-normal font-sans">
                 {isRegisterPage ? '已有账号？' : '还没有账号？'}
               </span>
               <button
                 type="button"
                 onClick={() => navigate(isRegisterPage ? '/login' : '/register')}
-                className="text-blue-600 hover:text-blue-700 font-semibold text-base ml-2 transition-colors"
+                className="text-slate-600 hover:text-slate-800 font-medium text-base ml-2 transition-colors font-sans"
               >
                 {isRegisterPage ? '去登录' : '去注册'}
               </button>
