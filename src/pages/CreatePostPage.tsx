@@ -80,12 +80,12 @@ const CreatePostPage = () => {
 
   if (isLoadingCategories) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="w-16 h-16 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-600"></div>
           </div>
-          <p className="text-slate-600 text-lg font-medium">加载中...</p>
+          <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
         </div>
       </div>
     );
@@ -94,24 +94,24 @@ const CreatePostPage = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="min-h-screen bg-slate-50/50">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 sticky top-0 z-10">
-          <div className="flex items-center justify-between px-4 py-4">
+        <div className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-10">
+          <div className="flex items-center justify-between px-4 py-4 max-w-2xl mx-auto">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center text-slate-600 hover:text-slate-900 transition-colors"
+              className="flex items-center text-slate-600 hover:text-slate-900 transition-colors font-sans"
             >
               <ChevronLeftIcon className="h-5 w-5 mr-1" />
               返回
             </button>
-            <h1 className="text-lg font-semibold text-slate-900">发布帖子</h1>
+            <h1 className="text-lg font-medium text-slate-900 font-sans">发布帖子</h1>
             <div className="w-12"></div> {/* 占位符保持居中 */}
           </div>
         </div>
 
         {/* Form */}
-        <div className="max-w-2xl mx-auto p-6">
+        <div className="max-w-2xl mx-auto px-4 py-12">
           <Form
             form={form}
             onFinish={handleSubmit}
@@ -122,10 +122,10 @@ const CreatePostPage = () => {
            
 
           {/* 帖子内容 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <Form.Item
               name="content"
-              label={<span className="text-slate-700 font-medium text-base">帖子内容</span>}
+              label={<span className="text-slate-900 font-medium text-lg font-sans">帖子内容</span>}
               rules={[
                 { required: true, message: '请输入帖子内容' },
                 { max: 150, message: '最多150字' }
@@ -136,17 +136,17 @@ const CreatePostPage = () => {
                 rows={6}
                 maxLength={150}
                 showCount
-                className="rounded-xl border-slate-200 focus:border-blue-500 focus:shadow-sm"
+                className="rounded-2xl border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
                 style={{ resize: 'none' }}
               />
             </Form.Item>
           </div>
 
           {/* 发布位置 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <Form.Item
               name="location"
-              label={<span className="text-slate-700 font-medium text-base">发布位置</span>}
+              label={<span className="text-slate-900 font-medium text-lg font-sans">发布位置</span>}
               rules={[
                 { required: true, message: '请输入发布位置' },
                 { max: 200, message: '最多200字' }
@@ -156,21 +156,21 @@ const CreatePostPage = () => {
                 placeholder="输入你的位置，如：北京市朝阳区"
                 maxLength={200}
                 prefix={<MapPinIcon className="h-4 w-4 text-slate-400" />}
-                className="rounded-xl border-slate-200 focus:border-blue-500 focus:shadow-sm"
+                className="rounded-full border-0 ring-1 ring-slate-100 bg-slate-50/50 h-12 font-sans"
               />
             </Form.Item>
           </div>
 
           {/* 分类选择 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <Form.Item
               name="category_id"
-              label={<span className="text-slate-700 font-medium text-base">主分类</span>}
+              label={<span className="text-slate-900 font-medium text-lg font-sans">主分类</span>}
               rules={[{ required: true, message: '请选择主分类' }]}
             >
               <Select
                 placeholder="请选择主分类"
-                className="rounded-xl"
+                className="rounded-full"
                 onChange={(value) => {
                   setSelectedCategoryId(value);
                   const selectedCategory = categories.find(cat => cat.id === value);
@@ -193,10 +193,10 @@ const CreatePostPage = () => {
             {currentSubCategories.length > 0 && (
               <Form.Item
                 name="subcategory_id"
-                label={<span className="text-slate-700 font-medium text-base">细分类型</span>}
+                label={<span className="text-slate-900 font-medium text-lg font-sans">细分类型</span>}
                 rules={[{ required: true, message: '请选择细分类型' }]}
               >
-                <Select placeholder="请选择细分类型" className="rounded-xl">
+                <Select placeholder="请选择细分类型" className="rounded-full">
                   {currentSubCategories.map((subCategory) => (
                     <Select.Option key={subCategory.id} value={subCategory.id}>
                       {subCategory.name}
@@ -208,30 +208,30 @@ const CreatePostPage = () => {
           </div>
 
           {/* 评论可见性设置 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <Form.Item
               name="comment_visibility"
-              label={<span className="text-slate-700 font-medium text-base">评论设置</span>}
+              label={<span className="text-slate-900 font-medium text-lg font-sans">评论设置</span>}
               rules={[{ required: true, message: '请选择评论可见性' }]}
             >
               <Radio.Group>
                 <div className="space-y-4">
                   <Radio value="public" className="w-full">
-                    <span className="flex items-center text-slate-700">
+                    <span className="flex items-center text-slate-700 font-sans">
                       <EyeIcon className="h-5 w-5 mr-3 text-green-500" />
                       <div>
-                        <div className="font-medium">公开评论</div>
-                        <div className="text-sm text-slate-500">所有人都可以看到评论</div>
+                        <div className="font-medium font-sans">公开评论</div>
+                        <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">所有人都可以看到评论</div>
                       </div>
                     </span>
                   </Radio>
                   <div></div>
                   <Radio value="private" className="w-full">
-                    <span className="flex items-center text-slate-700">
+                    <span className="flex items-center text-slate-700 font-sans">
                       <EyeSlashIcon className="h-5 w-5 mr-3 text-orange-500" />
                       <div>
-                        <div className="font-medium">仅我可见</div>
-                        <div className="text-sm text-slate-500">只有你能看到别人的评论</div>
+                        <div className="font-medium font-sans">仅我可见</div>
+                        <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">只有你能看到别人的评论</div>
                       </div>
                     </span>
                   </Radio>
@@ -241,15 +241,15 @@ const CreatePostPage = () => {
           </div>
 
           {/* 提交按钮 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-200/50">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <Form.Item>
               <Button
                 htmlType="submit"
                 loading={isLoading}
                 size="large"
-                className="w-full h-12 !bg-gradient-to-r !from-blue-500 !to-purple-600 hover:!from-blue-600 hover:!to-purple-700 !text-white !rounded-lg !font-medium !transition-all !duration-200 !flex !items-center !justify-center !space-x-2 !border-0"
+                className="w-full h-12 !bg-slate-900 !text-white !rounded-full !font-medium !transition-all !duration-300 !flex !items-center !justify-center !space-x-2 !border-0 hover:!shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:!scale-[1.02] font-sans"
                 style={{
-                  background: 'linear-gradient(to right, #3b82f6, #9333ea)',
+                  background: '#0f172a',
                   border: 'none',
                   color: 'white'
                 }}

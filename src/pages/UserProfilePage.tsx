@@ -139,10 +139,10 @@ const UserProfilePage = () => {
     return (
       <>
         {contextHolder}
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+        <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-            <p className="text-gray-600 text-lg font-medium">加载中...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-200 border-t-slate-600 mx-auto mb-6"></div>
+            <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
           </div>
         </div>
       </>
@@ -154,16 +154,16 @@ const UserProfilePage = () => {
     return (
       <>
         {contextHolder}
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+        <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-red-200 to-pink-200 flex items-center justify-center mx-auto mb-6">
+            <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">😞</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-3">出错了</h3>
-            <p className="text-red-600 mb-8 text-lg">{error || '用户不存在'}</p>
+            <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">出错了</h3>
+            <p className="text-red-600 mb-8 text-lg font-normal font-sans leading-relaxed">{error || '用户不存在'}</p>
             <button
               onClick={() => navigate('/')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+              className="bg-slate-900 text-white px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
             >
               返回首页
             </button>
@@ -176,15 +176,13 @@ const UserProfilePage = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        {/* 顶部导航栏 */}
-
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-slate-50/50">
+        <div className="max-w-4xl mx-auto px-4 py-12">
           {/* 用户信息卡片 */}
-          <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8 mb-8">
             {/* 用户头像和基本信息 */}
             <div className="text-center">
-              <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="w-32 h-32 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
@@ -192,32 +190,27 @@ const UserProfilePage = () => {
                     className="w-32 h-32 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="text-white font-bold text-4xl">
+                  <span className="text-white font-medium text-4xl font-sans">
                     {user.nickname.charAt(0)}
                   </span>
                 )}
               </div>
               
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">{user.nickname || '未知用户'}</h2>
+              <h2 className="text-3xl font-medium text-slate-900 mb-3 font-sans tracking-tight">{user.nickname || '未知用户'}</h2>
               
-              <p className="text-gray-600 mb-6 leading-relaxed text-lg max-w-2xl mx-auto">
+              <p className="text-slate-500 mb-6 leading-loose text-lg max-w-2xl mx-auto font-normal font-sans">
                 {user.signature || '该用户暂无介绍'}
               </p>
               
-              <div className="flex items-center justify-center space-x-8 text-base text-gray-500">
+              <div className="flex items-center justify-center space-x-8 text-base text-slate-500">
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">
                     {user.gender === 'male' ? '👨' : user.gender === 'female' ? '👩' : '🤖'}
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium font-sans">
                     {user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : '其他'}
                   </span>
                 </div>
-                {/* <div className="flex items-center space-x-2">
-                  <span className="font-medium">
-                    加入于 {user.created_at ? formatJoinDate(user.created_at) : '未知'}
-                  </span>
-                </div> */}
               </div>
             </div>
           </div>
@@ -238,61 +231,61 @@ const UserProfilePage = () => {
           </div> */}
 
           {/* 用户帖子列表 */}
-          <div className="bg-white rounded-2xl shadow-sm p-8">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
 
             {posts.length === 0 ? (
               <div className="text-center py-16">
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+                <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">📝</span>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 mb-3">还没有发布任何帖子</h3>
-                <p className="text-slate-600 text-lg">这个用户还没有发布任何内容</p>
+                <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">还没有发布任何帖子</h3>
+                <p className="text-slate-500 text-lg font-normal font-sans leading-relaxed">这个用户还没有发布任何内容</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {posts.map((post) => (
                   <div 
                     key={post.id} 
-                    className="bg-gray-50 rounded-2xl p-6 hover:bg-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                    className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
                     onClick={() => navigate(`/post/${post.id}`)}
                   >
                     {/* 帖子头部信息 */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <span className="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-semibold bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200">
-                          <span className="mr-2">{getSubCategoryIcon(post.subcategory_name)}</span>
-                          {post.subcategory_name}
+                        <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
+                          <span>{getSubCategoryIcon(post.subcategory_name)}</span>
+                          <span>{post.subcategory_name}</span>
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500 font-medium">{formatDate(post.created_at)}</span>
+                      <span className="text-sm text-slate-400 font-normal font-sans">{formatDate(post.created_at)}</span>
                     </div>
 
                     {/* 帖子内容 */}
                     <div className="mb-4">
-                      <p className="text-gray-900 leading-relaxed text-lg line-clamp-2">{post.content}</p>
+                      <p className="text-slate-900 leading-loose text-lg line-clamp-2 font-normal font-sans">{post.content}</p>
                     </div>
 
                     {/* 位置信息 */}
                     {post.location && (
-                      <div className="flex items-center space-x-2 mb-4 text-sm py-2 text-gray-600">
+                      <div className="flex items-center space-x-2 mb-4 text-sm py-2 text-slate-500">
                         <MapPinIcon className="h-4 w-4" />
-                        <span className="text-sm font-medium max-w-[90%] truncate">{post.location}</span>
+                        <span className="text-sm font-normal max-w-[90%] truncate font-sans">{post.location}</span>
                       </div>
                     )}
 
                     {/* 帖子统计 */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                       <div className="flex items-center space-x-6">
-                        <div className="flex items-center space-x-2 text-gray-500">
+                        <div className="flex items-center space-x-2 text-slate-500">
                           <ChatBubbleLeftIcon className="h-5 w-5" />
-                          <span className="text-sm font-medium">{post.comment_count} 条评论</span>
+                          <span className="text-sm font-medium font-sans">{post.comment_count} 条评论</span>
                           {post.comment_visibility === 'private' && (
-                            <EyeSlashIcon className="h-4 w-4 text-gray-400" title="评论仅作者可见" />
+                            <EyeSlashIcon className="h-4 w-4 text-slate-400" title="评论仅作者可见" />
                           )}
                         </div>
                       </div>
                       
-                      <span className="text-sm text-blue-600 hover:text-blue-800 font-semibold group-hover:text-blue-800 transition-colors">
+                      <span className="text-sm text-slate-600 hover:text-slate-800 font-medium group-hover:text-slate-800 transition-colors font-sans">
                         查看详情 →
                       </span>
                     </div>
@@ -304,8 +297,8 @@ const UserProfilePage = () => {
             {/* 滚动加载提示 */}
             {loadingMore && posts.length > 0 && (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-600 mx-auto"></div>
+                <p className="text-slate-500 mt-2 text-sm font-normal font-sans">加载更多...</p>
               </div>
             )}
           </div>

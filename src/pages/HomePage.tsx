@@ -137,14 +137,14 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-slate-50/50">
+      <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Welcome Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-medium text-slate-800 mb-4 tracking-tight font-sans">
             今天想找什么搭子？
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-slate-500 font-normal text-lg leading-relaxed font-sans">
             在这里发现有趣的人，开始美好的连接
           </p>
         </div>
@@ -152,11 +152,11 @@ export default function HomePage() {
 
         {/* Location Search */}
         <div className="mb-6">
-          <div className="relative max-w-md mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <div className="relative max-w-md mx-auto group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
+              <svg className="h-5 w-5 text-slate-400 group-focus-within:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
             <input
@@ -164,15 +164,15 @@ export default function HomePage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="搜索位置如：北京、朝阳区、三里屯..."
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md"
+              className="block w-full pl-12 pr-10 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-2 focus:ring-slate-200/50 focus:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 placeholder:text-slate-400 text-slate-600"
             />
             {location && (
               <button
                 onClick={() => setLocation('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center"
               >
-                <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="h-5 w-5 text-slate-300 hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             )}
@@ -192,11 +192,11 @@ export default function HomePage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-2xl mb-8 text-center">
             {error}
             <button
               onClick={() => fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined)}
-              className="ml-2 text-red-700 underline"
+              className="ml-2 font-medium underline decoration-red-300 underline-offset-2 hover:text-red-700 transition-colors"
             >
               重试
             </button>
@@ -235,9 +235,10 @@ export default function HomePage() {
               </p>
               <button
                 onClick={handleCreateFirstPost}
-                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 font-medium text-white"
+                className="h-12 px-10 bg-white border border-slate-200 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 text-slate-700 font-medium flex items-center gap-2 mx-auto group font-sans"
               >
-                发布第一篇帖子 ✨
+                <span>发布第一篇帖子</span>
+                <span className="group-hover:rotate-12 transition-transform">✨</span>
               </button>
             </div>
           ) : (

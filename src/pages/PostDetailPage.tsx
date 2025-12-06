@@ -255,11 +255,6 @@ const PostDetailPage = () => {
   };
 
 
-  // 获取帖子作者头像
-  const getPostAuthorAvatar = (authorName: string) => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff`;
-  };
-
   // 处理头像点击
   const handleAuthorAvatarClick = () => {
     if (!post) return;
@@ -533,39 +528,37 @@ const PostDetailPage = () => {
 
   // 渲染单个评论
   const renderComment = (comment: CommentData) => (
-    <div key={comment.id} className="bg-white rounded-2xl p-6 shadow-sm">
-      <div className="flex space-x-4">
-        <img
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author_name)}&background=random&color=fff`}
-          alt={comment.author_name}
-          className="w-12 h-12 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity shadow-sm"
+    <div key={comment.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)]">
+      <div className="flex gap-4">
+        <div 
+          className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-lg flex-shrink-0 cursor-pointer hover:bg-slate-200 transition-colors"
           onClick={() => handleCommenterAvatarClick(comment.user_id.toString())}
-        />
+        >
+          {comment.author_name.charAt(0)}
+        </div>
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="font-semibold text-gray-900 text-lg">{comment.author_name}</span>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="font-medium text-slate-900 text-base font-sans">{comment.author_name}</span>
             {post && comment.user_id.toString() === post.user_id?.toString() && (
-              <span className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <span className="w-5 h-5 bg-slate-800 rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </span>
             )}
           </div>
-          <p className="text-gray-900 text-base leading-relaxed mb-3">
+          <p className="text-slate-600 text-base leading-loose mb-4 font-sans">
             {comment.content}
           </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{getTimeAgo(comment.created_at)}</span>
-            </div>
+          <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+            <span className="text-sm text-slate-400 font-normal font-sans">{getTimeAgo(comment.created_at)}</span>
             {currentUser.id?.toString() !== comment.user_id.toString() && (
               <button
                 onClick={() => handleExchangeWechatWithCommenter(comment)}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-green-50 to-green-50 hover:from-green-100 hover:to-green-100 text-green-600 transition-colors ml-auto"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 font-medium text-sm font-sans"
               >
                 <MessageCircleMore className="h-4 w-4" />
-                <span className="font-medium text-sm">交换微信</span>
+                <span>交换微信</span>
               </button>
             )}
           </div>
@@ -578,10 +571,10 @@ const PostDetailPage = () => {
   // 加载状态
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-          <p className="text-gray-600 text-lg font-medium">加载中...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-slate-400 mx-auto mb-6"></div>
+          <p className="text-slate-500 text-base font-medium font-sans">加载中...</p>
         </div>
       </div>
     );
@@ -590,16 +583,16 @@ const PostDetailPage = () => {
   // 错误状态
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-red-200 to-pink-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">😞</span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 mb-3">出错了</h3>
-          <p className="text-red-600 mb-8 text-lg">{error || '帖子不存在'}</p>
+          <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">出错了</h3>
+          <p className="text-slate-500 mb-8 text-base leading-relaxed font-sans">{error || '帖子不存在'}</p>
           <button
             onClick={() => navigate('/')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+            className="bg-white border border-slate-200 text-slate-700 px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 font-medium font-sans"
           >
             返回首页
           </button>
@@ -611,67 +604,69 @@ const PostDetailPage = () => {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="min-h-screen bg-slate-50/50">
 
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-12">
           {/* 帖子内容 */}
-          <div className="bg-white rounded-2xl shadow-sm">
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] overflow-hidden">
             {/* 用户信息 */}
-            <div className="flex items-center justify-between p-6 pb-4">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={getPostAuthorAvatar(post.author_name)}
-                  alt={post.author_name}
-                  className="w-14 h-14 rounded-full cursor-pointer hover:opacity-80 transition-opacity shadow-sm"
+            <div className="flex items-center justify-between p-8 pb-6">
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-lg cursor-pointer hover:bg-slate-200 transition-colors"
                   onClick={handleAuthorAvatarClick}
-                />
+                >
+                  {post.author_name.charAt(0)}
+                </div>
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-gray-900 text-lg">{post.author_name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-slate-900 text-base font-sans">{post.author_name}</span>
                   </div>
-                  <span className="text-sm text-gray-500">{getTimeAgo(post.created_at)}</span>
+                  <span className="text-sm text-slate-400 font-normal font-sans">{getTimeAgo(post.created_at)}</span>
                 </div>
               </div>
-              <button className="min-w-20 inline-flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm mb-4">
-                <span className="text-lg">{getSubCategoryIcon(post.subcategory_name)}</span>
-                <span>{post.subcategory_name}</span>
-              </button>
+              {post.subcategory_name && (
+                <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
+                  <span>{getSubCategoryIcon(post.subcategory_name)}</span>
+                  <span>{post.subcategory_name}</span>
+                </span>
+              )}
             </div>
 
             {/* 帖子内容 */}
-            <div className="px-6 pb-4">
-              <p className="text-gray-900 text-lg leading-relaxed">
+            <div className="px-8 pb-6">
+              <p className="text-slate-700 text-[1.05rem] leading-loose font-normal font-sans">
                 {post.content}
               </p>
             </div>
 
             {/* 位置信息 */}
             {post.location && (
-              <div className="px-6 pb-4">
-                <div className="flex items-center space-x-2 text-gray-600">
+              <div className="px-8 pb-6">
+                <div className="flex items-center gap-2 text-slate-400">
                   <MapPinIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium max-w-[90%] truncate">{post.location}</span>
+                  <span className="text-sm font-medium max-w-[90%] truncate font-sans">{post.location}</span>
                 </div>
               </div>
             )}
 
             {/* 互动区域 */}
-            <div className="border-t border-gray-100 px-6 py-4">
+            <div className="border-t border-slate-50 px-8 py-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-gray-600">
+                <div className="flex items-center gap-2 text-slate-400 font-sans">
                   <ChatBubbleLeftIcon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{post.comment_count} 条评论</span>
+                  <span className="text-sm font-medium">{post.comment_count}</span>
                   {post.comment_visibility === 'private' && (
-                    <EyeSlashIcon className="w-4 h-4 text-gray-400" />
+                    <EyeSlashIcon className="w-4 h-4 ml-1" />
                   )}
                 </div>
                 {!isPostAuthor && (
                   <button
                     onClick={handleExchangeWechatWithPostAuthor}
-                    className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-green-50 to-green-50 hover:from-green-100 hover:to-green-100 text-green-600 transition-colors ml-auto"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 font-medium text-sm font-sans"
                   >
                     <MessageCircleMore className="h-4 w-4" />
-                    <span className="font-medium text-sm">交换微信</span>
+                    <span>交换微信</span>
                   </button>
                 )}
               </div>
@@ -681,9 +676,9 @@ const PostDetailPage = () => {
 
           {/* 评论区域 */}
           {canViewComments && (
-            <div className="mt-8">
-              <div className="text-start mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <div className="mt-10">
+              <div className="text-start mb-8">
+                <h3 className="text-lg font-medium text-slate-800 font-sans">
                   评论 ({post?.comment_count || 0})
                 </h3>
               </div>
@@ -691,8 +686,8 @@ const PostDetailPage = () => {
               {/* 评论加载状态 */}
               {commentsLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">加载评论中...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+                  <p className="text-slate-500 font-sans">加载评论中...</p>
                 </div>
               ) : (
                 // 评论列表
@@ -701,12 +696,12 @@ const PostDetailPage = () => {
 
                   {/* 空状态 */}
                   {comments.length === 0 && !loadingMore && (
-                    <div className="text-center py-8">
-                      <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+                    <div className="text-center py-12">
+                      <div className="w-20 h-20 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
                         <span className="text-4xl">💬</span>
                       </div>
-                      <h3 className="text-2xl font-bold text-slate-800 mb-3">还没有评论</h3>
-                      <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                      <h3 className="text-xl font-medium text-slate-800 mb-3 font-sans">还没有评论</h3>
+                      <p className="text-slate-500 mb-8 max-w-md mx-auto leading-relaxed font-sans">
                         来发表第一条评论，开始讨论吧！
                       </p>
                     </div>
@@ -718,13 +713,13 @@ const PostDetailPage = () => {
 
           {/* 私有评论提示区域 - 当评论私有且用户不是作者时显示 */}
           {post.comment_visibility === 'private' && !isPostAuthor && canAddComments && (
-            <div className="mt-6">
+            <div className="mt-10">
               <div className="text-center py-16">
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-blue-200 to-purple-200 flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">🔒</span>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 mb-3">评论仅作者可见</h3>
-                <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                <h3 className="text-xl font-medium text-slate-800 mb-3 font-sans">评论仅作者可见</h3>
+                <p className="text-slate-500 mb-8 max-w-md mx-auto leading-relaxed font-sans">
                   你的评论将直接发送给作者
                 </p>
               </div>
@@ -733,28 +728,26 @@ const PostDetailPage = () => {
 
           {/* 评论输入框 */}
           {canAddComments && (
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-6">
+            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 p-6">
               <div className="max-w-4xl mx-auto">
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.nickname)}&background=random&color=fff`}
-                    alt={currentUser.nickname}
-                    className="w-10 h-10 rounded-full flex-shrink-0 shadow-sm"
-                  />
-                  <div className="flex-1 flex items-center space-x-3">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium flex-shrink-0">
+                    {currentUser.nickname.charAt(0)}
+                  </div>
+                  <div className="flex-1 flex items-center gap-3">
                     <input
                       type="text"
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="写下你的评论，参与讨论..."
-                      className="flex-1 bg-gray-100 rounded-2xl px-6 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm"
+                      className="flex-1 bg-white rounded-full px-6 py-3 text-base border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-2 focus:ring-slate-200/50 focus:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 placeholder:text-slate-400 text-slate-600 font-sans"
                       onKeyPress={(e) => e.key === 'Enter' && !submitLoading && handleSendComment()}
                       disabled={submitLoading}
                     />
                     <button
                       onClick={handleSendComment}
                       disabled={!newComment.trim() || submitLoading}
-                      className="p-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl hover:from-blue-700 hover:to-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="p-3 text-white bg-slate-900 rounded-full hover:bg-slate-800 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300"
                     >
                       {submitLoading ? (
                         <div className="w-5 h-5 animate-spin border-b-2 border-white rounded-full"></div>
@@ -770,19 +763,19 @@ const PostDetailPage = () => {
 
           {/* 加载更多评论的状态显示在页面底部 */}
           {canViewComments && loadingMore && (
-            <div className="mt-6 mb-4">
+            <div className="mt-8 mb-4">
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 font-medium">加载更多评论...</p>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-400 mx-auto mb-3"></div>
+                <p className="text-slate-500 text-sm font-medium font-sans">加载更多评论...</p>
               </div>
             </div>
           )}
 
           {/* 没有更多评论的提示 */}
           {canViewComments && !hasMoreComments && comments.length > 0 && !loadingMore && (
-            <div className="mt-6 mb-4">
-              <div className="text-center py-6 text-gray-500–">
-                <span className="text-sm font-medium">没有更多评论了</span>
+            <div className="mt-8 mb-4">
+              <div className="text-center py-6">
+                <span className="text-sm font-medium text-slate-400 font-sans">没有更多评论了</span>
               </div>
             </div>
           )}
@@ -801,33 +794,33 @@ const PostDetailPage = () => {
         footer={null}
         styles={{
           content: {
-            borderRadius: '16px',
-            padding: '24px',
+            borderRadius: '2rem',
+            padding: '32px',
           },
         }}
       >
-        <div className="py-4">
+        <div className="py-2">
           {exchangeInfoLoading ? (
             // 加载状态
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">加载中...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto mb-4"></div>
+              <p className="text-slate-500 font-sans">加载中...</p>
             </div>
           ) : exchangeInfo?.exists && exchangeInfo.status === 1 ? (
             // 已经交换成功，显示对方的微信号
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              <h3 className="text-xl font-medium text-slate-800 mb-6 text-center font-sans">
                 交换成功
               </h3>
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-600 mb-2">对方的微信号：</p>
-                <p className="text-lg font-semibold text-gray-900">{exchangeInfo.otherWechat || '未设置'}</p>
+              <div className="bg-slate-50 rounded-2xl p-5 mb-6 ring-1 ring-slate-100">
+                <p className="text-sm text-slate-500 mb-2 font-sans">对方的微信号：</p>
+                <p className="text-lg font-medium text-slate-800 font-sans">{exchangeInfo.otherWechat || '未设置'}</p>
               </div>
-              <p className="text-gray-500 text-xs text-center mb-6">
+              <p className="text-slate-400 text-xs text-center mb-6 leading-relaxed font-sans">
                 双方确认交换后，可以在通知里看到对方的微信号。
                 <button
                   onClick={handleManageWechat}
-                  className="text-blue-600 hover:text-blue-700 underline ml-1 transition-colors"
+                  className="text-slate-600 hover:text-slate-800 underline ml-1 transition-colors font-sans"
                 >
                   您可前往管理微信号
                 </button>
@@ -836,7 +829,7 @@ const PostDetailPage = () => {
                 <button
                   onClick={handleUpdateWechat}
                   disabled={updatingWechat}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-full hover:bg-slate-800 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 font-medium font-sans disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {updatingWechat ? '更新中...' : '更新微信'}
                 </button>
@@ -845,10 +838,10 @@ const PostDetailPage = () => {
           ) : exchangeInfo?.exists && exchangeInfo.status === 0 && exchangeInfo.waitingFor === 'me' ? (
             // 等待我确认
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              <h3 className="text-xl font-medium text-slate-800 mb-6 text-center font-sans">
                 确认交换微信
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center mb-6">
+              <p className="text-slate-500 text-sm leading-relaxed text-center mb-8 font-sans">
                 {exchangeTargetUser?.name} 请求与您交换微信。
                 <br />
                 确认后，双方将互相看到对方的微信号。
@@ -856,14 +849,14 @@ const PostDetailPage = () => {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handleCancelExchange}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full hover:bg-slate-50 hover:shadow-sm transition-all duration-300 font-medium font-sans"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleAcceptExchange}
                   disabled={exchangeSubmitting}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-full hover:bg-slate-800 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 font-medium font-sans disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {exchangeSubmitting ? '处理中...' : '确认交换'}
                 </button>
@@ -872,24 +865,23 @@ const PostDetailPage = () => {
           ) : exchangeInfo?.exists && exchangeInfo.status === 0 && exchangeInfo.waitingFor === 'other' ? (
             // 等待对方确认，可以重新发送
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              <h3 className="text-xl font-medium text-slate-800 mb-6 text-center font-sans">
                 等待对方确认
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center mb-6">
+              <p className="text-slate-500 text-sm leading-relaxed text-center mb-8 font-sans">
                 您已向 {exchangeTargetUser?.name} 发送交换微信请求，等待对方确认。
-                <br />
               </p>
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handleCancelExchange}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full hover:bg-slate-50 hover:shadow-sm transition-all duration-300 font-medium font-sans"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleConfirmExchange}
                   disabled={exchangeSubmitting}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-full hover:bg-slate-800 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 font-medium font-sans disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {exchangeSubmitting ? '发送中...' : '重新发送'}
                 </button>
@@ -898,14 +890,14 @@ const PostDetailPage = () => {
           ) : (
             // 未交换过，显示初始状态
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              <h3 className="text-xl font-medium text-slate-800 mb-6 text-center font-sans">
                 确定与{exchangeTargetUser?.name ? ` ${exchangeTargetUser.name} ` : '对方'}交换微信吗？
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed text-center mb-6">
+              <p className="text-slate-500 text-sm leading-relaxed text-center mb-8 font-sans">
                 双方确认交换后，可以在通知里看到对方的微信号。
                 <button
                   onClick={handleManageWechat}
-                  className="text-blue-600 hover:text-blue-700 underline ml-1 transition-colors"
+                  className="text-slate-600 hover:text-slate-800 underline ml-1 transition-colors font-sans"
                 >
                   您可前往管理微信号
                 </button>
@@ -913,14 +905,14 @@ const PostDetailPage = () => {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handleCancelExchange}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-full hover:bg-slate-50 hover:shadow-sm transition-all duration-300 font-medium font-sans"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleConfirmExchange}
                   disabled={exchangeSubmitting}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-full hover:bg-slate-800 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 font-medium font-sans disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {exchangeSubmitting ? '发送中...' : '确定'}
                 </button>

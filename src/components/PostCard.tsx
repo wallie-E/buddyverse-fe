@@ -1,4 +1,4 @@
-import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { authUtils } from '../api';
 import type { Post } from '../api/types';
@@ -51,15 +51,15 @@ export default function PostCard({ post }: PostCardProps) {
 
   return (
     <div 
-      className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg cursor-pointer"
+      className="group hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 border border-slate-100 bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] cursor-pointer"
       onClick={handleClick}
     >
-      <div className="p-6 pb-4">
-        <div className="flex items-start justify-between">
+      <div className="p-8">
+        <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="relative">
               <div 
-                className="h-12 w-12 rounded-full ring-2 ring-white shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+                className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold text-lg cursor-pointer hover:bg-slate-200 transition-colors"
                 onClick={handleAvatarClick}
               >
                 {post?.author_name?.charAt(0)}
@@ -73,36 +73,35 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-900">{post.author_name}</span>
+                <span className="font-medium text-slate-900 font-sans">{post.author_name}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                <ClockIcon className="h-3 w-3" />
+              <div className="flex items-center gap-2 text-sm text-slate-400 mt-0.5 font-normal font-sans">
                 {formatDate(post.created_at)}
               </div>
             </div>
           </div>
           {post.subcategory_name && (
-            <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm">
+            <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
               <span>{getSubCategoryIcon(post.subcategory_name)}</span>
               <span>{post.subcategory_name}</span>
             </span>
           )}
         </div>
-      </div>
-      <div className="px-6 pb-6">
-        <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors truncate">
-          {post.content}
-        </p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="mb-6">
+          <p className="text-slate-600 text-[1.05rem] leading-loose font-normal group-hover:text-slate-800 transition-colors line-clamp-3 font-sans">
+            {post.content}
+          </p>
+        </div>
+        <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+          <div className="flex items-center gap-2 text-sm text-slate-400 group-hover:text-slate-500 transition-colors font-sans">
             <MapPinIcon className="h-4 w-4" />
             <span className="font-medium max-w-48 sm:max-w-60 truncate">{post.location || '未设置位置'}</span>
           </div>
-          <div className="flex items-center gap-1 text-slate-500">
+          <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-slate-500 transition-colors text-sm font-sans">
             <ChatBubbleLeftIcon className="h-4 w-4" />
-            <span className="font-medium">{post.comment_count} 条评论</span>
+            <span className="font-medium">{post.comment_count}</span>
             {post.comment_visibility === 'private' && (
-              <EyeSlashIcon className="h-3 w-3 text-gray-400 ml-1" title="评论仅作者可见" />
+              <EyeSlashIcon className="h-3 w-3 ml-1" title="评论仅作者可见" />
             )}
           </div>
         </div>

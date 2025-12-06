@@ -130,10 +130,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-          <p className="text-gray-600 text-lg font-medium">加载中...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-200 border-t-slate-600 mx-auto mb-6"></div>
+          <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
         </div>
       </div>
     );
@@ -141,16 +141,16 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-red-200 to-pink-200 flex items-center justify-center mx-auto mb-6">
+          <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">😞</span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 mb-3">未找到用户信息</h3>
-          <p className="text-gray-600 mb-8 text-lg">请重新登录</p>
+          <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">未找到用户信息</h3>
+          <p className="text-slate-500 mb-8 text-lg font-normal font-sans leading-relaxed">请重新登录</p>
           <button
             onClick={() => navigate('/login')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
+            className="bg-slate-900 text-white px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
           >
             重新登录
           </button>
@@ -160,32 +160,32 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+    <div className="min-h-screen bg-slate-50/50">
+      <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">个人资料</h1>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-medium text-slate-800 mb-2 tracking-tight font-sans">个人资料</h1>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 text-red-600 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl mb-4 sm:mb-6 shadow-sm">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-xs sm:text-sm">!</span>
+          <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem] mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-sans">!</span>
               </div>
-              <span className="font-medium text-sm sm:text-base break-words">{error}</span>
+              <span className="font-medium text-base break-words font-sans">{error}</span>
             </div>
           </div>
         )}
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8 mb-8">
+        <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8 mb-8">
           {/* Avatar and Basic Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 mb-8">
             {/* Avatar */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white font-bold text-2xl sm:text-3xl">
+            <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex-shrink-0">
+              <span className="text-white font-medium text-3xl font-sans">
                 {user.nickname.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -193,16 +193,16 @@ export default function ProfilePage() {
             {/* User Info */}
             <div className="flex-1 w-full sm:w-auto text-center sm:text-left">
               <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate" title={user.nickname}>
+                <h2 className="text-2xl font-medium text-slate-900 truncate font-sans" title={user.nickname}>
                   {user.nickname}
                 </h2>
                 {user.role === 'admin' && (
-                  <span className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 rounded-2xl text-xs sm:text-sm font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200 self-center sm:self-auto">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-slate-50 text-slate-700 ring-1 ring-slate-100 self-center sm:self-auto font-sans">
                     👑 管理员
                   </span>
                 )}
               </div>
-              <p className="text-gray-600 mt-2 text-base sm:text-lg truncate" title={user.email}>
+              <p className="text-slate-500 mt-2 text-lg truncate font-normal font-sans leading-relaxed" title={user.email}>
                 {user.email}
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             {!isEditing && (
               <button
                 onClick={startEditing}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2"
+                className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-full font-medium hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 flex items-center space-x-2 font-sans"
               >
                 <PencilSquareIcon className="h-4 w-4" />
                 <span>编辑资料</span>
@@ -222,130 +222,131 @@ export default function ProfilePage() {
           {/* Profile Details */}
           {isEditing ? (
             // 编辑表单
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-6">
               <div>
-                <label htmlFor="nickname" className="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
+                <label htmlFor="nickname" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   昵称 *
                 </label>
                 <Input
                   id="nickname"
                   value={editForm.nickname}
                   onChange={(e) => setEditForm(prev => ({ ...prev, nickname: e.target.value }))}
-                  className="w-full h-10 sm:h-12 text-base sm:text-lg"
+                  className="w-full h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
                   size="large"
                   placeholder="请输入昵称"
                   maxLength={8}
                   showCount
                 />
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">2-20字符</p>
+                <p className="text-sm text-slate-500 mt-2 font-normal font-sans">2-8字符</p>
               </div>
 
               <div>
-                <label htmlFor="gender" className="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
+                <label htmlFor="gender" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   性别
                 </label>
                 <Select
                   id="gender"
                   value={editForm.gender}
                   onChange={(value) => setEditForm(prev => ({ ...prev, gender: value as 'male' | 'female' }))}
-                  className="w-full h-10 sm:h-12"
+                  className="w-full"
                   size="large"
                   options={[
                     { value: 'male', label: '男' },
                     { value: 'female', label: '女' },
                   ]}
+                  style={{ borderRadius: '9999px' }}
                 />
               </div>
 
               <div>
-                <label htmlFor="signature" className="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
+                <label htmlFor="signature" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   个人签名
                 </label>
                 <Input.TextArea
                   id="signature"
                   value={editForm.signature}
                   onChange={(e) => setEditForm(prev => ({ ...prev, signature: e.target.value }))}
-                  className="w-full text-base sm:text-lg"
+                  className="w-full text-lg rounded-2xl border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
                   size="large"
                   placeholder="写点什么介绍一下自己吧..."
                   rows={3}
                   maxLength={200}
                   showCount
                 />
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">最多200字符</p>
+                <p className="text-sm text-slate-500 mt-2 font-normal font-sans">最多200字符</p>
               </div>
 
               <div>
-                <label htmlFor="wechat_id" className="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">
+                <label htmlFor="wechat_id" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   微信号
                 </label>
                 <Input
                   id="wechat_id"
                   value={editForm.wechat_id}
                   onChange={(e) => setEditForm(prev => ({ ...prev, wechat_id: e.target.value }))}
-                  className="w-full h-10 sm:h-12 text-base sm:text-lg"
+                  className="w-full h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
                   size="large"
                   placeholder="请输入微信号"
                 />
-                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
+                <p className="text-sm text-slate-500 mt-2 font-normal font-sans leading-relaxed">
                   微信号只有在你和别人交换时，才会告知对方
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <button
                   onClick={saveProfile}
                   disabled={isUpdating}
-                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 sm:px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
+                  className="flex items-center justify-center space-x-2 bg-slate-900 text-white px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 font-medium font-sans"
                 >
-                  <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-sm sm:text-base">{isUpdating ? '保存中...' : '保存'}</span>
+                  <CheckIcon className="h-5 w-5" />
+                  <span className="text-base">{isUpdating ? '保存中...' : '保存'}</span>
                 </button>
 
                 <button
                   onClick={cancelEditing}
                   disabled={isUpdating}
-                  className="flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 px-6 sm:px-8 py-3 rounded-2xl hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 font-medium"
+                  className="flex items-center justify-center space-x-2 bg-white border border-slate-200 text-slate-700 px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 disabled:opacity-50 font-medium font-sans"
                 >
-                  <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-sm sm:text-base">取消</span>
+                  <XMarkIcon className="h-5 w-5" />
+                  <span className="text-base">取消</span>
                 </button>
               </div>
             </div>
           ) : (
             // 显示资料
-            <div className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">性别</label>
-                  <p className="text-lg sm:text-xl font-medium text-gray-900">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                  <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">性别</label>
+                  <p className="text-xl font-medium text-slate-900 font-sans leading-relaxed">
                     {user.gender === 'male' ? '👨 男' : user.gender === 'female' ? '👩 女' : '🤖 其他'}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">个性签名</label>
-                  <p className="text-lg sm:text-xl font-medium text-gray-900">
+                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                  <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">个性签名</label>
+                  <p className="text-xl font-medium text-slate-900 font-sans leading-relaxed">
                     {user.signature || '未设置'}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">微信号</label>
-                <p className="text-lg sm:text-xl font-medium text-gray-900 mb-2">
+              <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">微信号</label>
+                <p className="text-xl font-medium text-slate-900 mb-2 font-sans leading-relaxed">
                   {user.wechat_id || '未设置'}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500">
+                <p className="text-sm text-slate-500 font-normal font-sans leading-relaxed">
                   微信号只有在你和别人交换时，才会告知对方
                 </p>
               </div>
 
               {user.signature && (
-                <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2 sm:mb-3">个性签名</label>
-                  <p className="text-base sm:text-lg text-gray-900 leading-relaxed break-words">{user.signature}</p>
+                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                  <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">个性签名</label>
+                  <p className="text-lg text-slate-900 leading-loose break-words font-normal font-sans">{user.signature}</p>
                 </div>
               )}
             </div>
@@ -353,46 +354,46 @@ export default function ProfilePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <button
             onClick={() => navigate('/my-posts')}
-            className="bg-white p-4 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 text-left group"
+            className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-left group"
           >
-            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-lg sm:text-2xl">📝</span>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">📝</span>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">我的帖子</h3>
+              <h3 className="text-xl font-medium text-slate-900 group-hover:text-slate-700 transition-colors truncate font-sans">我的帖子</h3>
             </div>
-            <p className="text-sm sm:text-base text-gray-600">查看和管理我发布的帖子</p>
+            <p className="text-base text-slate-500 font-normal font-sans leading-relaxed">查看和管理我发布的帖子</p>
           </button>
 
           <button
             onClick={() => navigate('/notifications')}
-            className="bg-white p-4 sm:p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 text-left group"
+            className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-left group"
           >
-            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-lg sm:text-2xl">🔔</span>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🔔</span>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">消息中心</h3>
+              <h3 className="text-xl font-medium text-slate-900 group-hover:text-slate-700 transition-colors truncate font-sans">消息中心</h3>
             </div>
-            <p className="text-sm sm:text-base text-gray-600">查看评论和回复消息</p>
+            <p className="text-base text-slate-500 font-normal font-sans leading-relaxed">查看评论和回复消息</p>
           </button>
         </div>
 
         {/* Admin Panel */}
         {user.role === 'admin' && (
-          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8 mb-8">
-            <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-lg sm:text-2xl">👑</span>
+          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8 mb-8">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">👑</span>
               </div>
-              <h3 className="text-lg sm:text-2xl font-bold text-gray-900">管理员功能</h3>
+              <h3 className="text-2xl font-medium text-slate-900 font-sans">管理员功能</h3>
             </div>
             <button
               onClick={() => navigate('/admin')}
-              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans text-base"
             >
               进入管理后台
             </button>
@@ -400,13 +401,13 @@ export default function ProfilePage() {
         )}
 
         {/* Logout */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-8">
-          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
-            <h3 className="text-lg sm:text-2xl font-bold text-gray-900">账户操作</h3>
+        <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
+          <div className="flex items-center space-x-4 mb-6">
+            <h3 className="text-2xl font-medium text-slate-900 font-sans">账户操作</h3>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full sm:w-auto bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl hover:from-red-700 hover:to-pink-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-sm sm:text-base"
+            className="w-full sm:w-auto bg-white border border-red-200 text-red-600 px-8 py-4 rounded-full hover:shadow-[0_8px_20px_rgba(220,38,38,0.12)] hover:scale-[1.02] hover:border-red-300 transition-all duration-300 font-medium font-sans text-base"
           >
             退出登录
           </button>

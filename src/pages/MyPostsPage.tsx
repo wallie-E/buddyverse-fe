@@ -127,21 +127,21 @@ export default function MyPostsPage() {
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-slate-50/50">
+        <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">我的帖子</h1>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-medium text-slate-800 tracking-tight font-sans">我的帖子</h1>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 text-red-600 px-6 py-4 rounded-2xl mb-6 shadow-lg">
+          <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem] mb-8">
             <div className="flex items-center justify-between">
-              <span>{error}</span>
+              <span className="font-medium font-sans">{error}</span>
               <button 
                 onClick={() => fetchMyPosts(1)}
-                className="ml-4 text-red-700 underline hover:text-red-800 transition-colors"
+                className="ml-4 bg-white border border-red-200 text-red-600 px-4 py-2 rounded-full hover:shadow-[0_4px_12px_rgba(220,38,38,0.12)] hover:scale-[1.02] transition-all duration-300 text-sm font-medium font-sans"
               >
                 重试
               </button>
@@ -152,21 +152,21 @@ export default function MyPostsPage() {
         {/* Posts List */}
         {loading && posts.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="w-16 h-16 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-600"></div>
             </div>
-            <p className="text-slate-600 text-lg font-medium">加载中...</p>
+            <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+            <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">📝</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-3">还没有发布帖子</h3>
-            <p className="text-slate-600 mb-8 max-w-md mx-auto">开始分享你的想法，寻找志同道合的搭子吧！</p>
+            <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">还没有发布帖子</h3>
+            <p className="text-slate-500 mb-8 max-w-md mx-auto font-normal font-sans leading-relaxed">开始分享你的想法，寻找志同道合的搭子吧！</p>
             <button
               onClick={() => navigate('/create-post')}
-              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 font-medium text-white"
+              className="h-12 px-8 bg-slate-900 text-white rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
             >
               发布第一个帖子 ✨
             </button>
@@ -176,17 +176,17 @@ export default function MyPostsPage() {
             {posts.map((post) => (
               <div 
                 key={post.id} 
-                className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg cursor-pointer"
+                className="group bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] overflow-hidden cursor-pointer hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
                 onClick={() => navigate(`/post/${post.id}`)}
               >
                 <div className="p-6 pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg px-3 py-1 rounded-full text-sm">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
                           <span>{post.subcategory_name}</span>
                         </span>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm text-slate-400 font-normal font-sans">
                           {formatDate(post.created_at)}
                         </span>
                       </div>
@@ -199,7 +199,7 @@ export default function MyPostsPage() {
                           e.stopPropagation();
                           handleDeletePost(post.id);
                         }}
-                        className="p-2 text-slate-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 rounded-full"
                         title="删除帖子"
                       >
                         <TrashIcon className="h-4 w-4" />
@@ -209,18 +209,18 @@ export default function MyPostsPage() {
                 </div>
                 
                 <div className="px-6 pb-6">
-                  <p className="text-slate-800 mb-6 leading-relaxed text-base group-hover:text-slate-900 transition-colors">
+                  <p className="text-slate-800 mb-6 leading-loose text-base font-normal font-sans group-hover:text-slate-900 transition-colors">
                     {post.content}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-slate-500">
                       <MapPinIcon className="h-4 w-4" />
-                      <span className="text-sm font-medium max-w-32 sm:max-w-60 truncate">{post.location || '未设置位置'}</span>
+                      <span className="text-sm font-normal max-w-32 sm:max-w-60 truncate font-sans">{post.location || '未设置位置'}</span>
                     </div>
                     <div className="flex items-center gap-1 text-slate-500">
                       <ChatBubbleLeftIcon className="h-4 w-4" />
-                      <span className="font-medium">{post.comment_count} 条评论</span>
-                      <span className="text-xs text-slate-400 ml-2">
+                      <span className="font-normal font-sans">{post.comment_count} 条评论</span>
+                      <span className="text-xs text-slate-400 ml-2 font-sans">
                         {post.comment_visibility === 'public' ? '公开' : '私密'}
                       </span>
                     </div>
@@ -234,8 +234,8 @@ export default function MyPostsPage() {
         {/* 滚动加载提示 */}
         {loadingMore && posts.length > 0 && (
           <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-600 mx-auto"></div>
+            <p className="text-slate-500 mt-2 text-sm font-normal font-sans">加载更多...</p>
           </div>
         )}
 
