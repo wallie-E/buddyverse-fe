@@ -99,7 +99,7 @@ export default function CategoryFilter({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSubDropdownOpen(!isSubDropdownOpen)}
-                className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl hover:bg-white transition-all min-w-[140px] shadow-sm border border-slate-200/50"
+                className="flex items-center justify-between bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl hover:bg-white transition-all min-w-[140px] shadow-sm border border-slate-200/50"
               >
                 <span className="text-sm font-medium text-slate-700">
                   {selectedSubCategoryId 
@@ -111,7 +111,7 @@ export default function CategoryFilter({
               </button>
 
               {isSubDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-sm border border-slate-200/50 rounded-xl shadow-xl z-10">
+                <div className="absolute top-full left-0 mt-2 w-40 bg-white/95 backdrop-blur-sm border border-slate-200/50 rounded-xl shadow-xl z-10">
                   <div className="py-2">
                     <button
                       onClick={() => {

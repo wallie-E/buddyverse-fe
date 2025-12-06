@@ -324,12 +324,12 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                {/* <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">角色</label>
+                <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2">个性签名</label>
                   <p className="text-lg sm:text-xl font-medium text-gray-900">
-                    {user.role === 'admin' ? '👑 管理员' : '👤 普通用户'}
+                    {user.signature || '未设置'}
                   </p>
-                </div> */}
+                </div>
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
@@ -344,7 +344,7 @@ export default function ProfilePage() {
 
               {user.signature && (
                 <div className="bg-gray-50 rounded-2xl p-4 sm:p-6">
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2 sm:mb-3">个人签名</label>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-600 mb-2 sm:mb-3">个性签名</label>
                   <p className="text-base sm:text-lg text-gray-900 leading-relaxed break-words">{user.signature}</p>
                 </div>
               )}
