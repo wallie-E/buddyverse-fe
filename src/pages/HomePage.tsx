@@ -140,7 +140,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-50/50">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Welcome Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-3xl font-medium text-slate-800 mb-4 tracking-tight font-sans">
             今天想找什么搭子？
           </h2>
@@ -153,8 +153,8 @@ export default function HomePage() {
         {/* Location Search */}
         <div className="mb-6">
           <div className="relative max-w-md mx-auto group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
-              <svg className="h-5 w-5 text-slate-400 group-focus-within:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200">
+              <svg className="h-5 w-5 text-slate-400 group-focus-within:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -164,7 +164,7 @@ export default function HomePage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="搜索位置如：北京、朝阳区、三里屯..."
-              className="block w-full pl-12 pr-10 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-2 focus:ring-slate-200/50 focus:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 placeholder:text-slate-400 text-slate-600"
+              className="block w-full pl-12 pr-10 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-1 focus:ring-slate-100 focus:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:outline-none transition-all duration-200 placeholder:text-slate-400 text-slate-600 caret-slate-600"
             />
             {location && (
               <button
@@ -207,14 +207,14 @@ export default function HomePage() {
         {/* Posts Section */}
         <div className="space-y-6">
           {/* Section Header */}
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               {selectedCategoryId
                 ? `${categories.find(c => c.id === selectedCategoryId)?.name || ''}帖子`
                 : '最新帖子'
               }
             </h3>
-          </div>
+          </div> */}
 
           {/* Posts List */}
           {loading && posts.length === 0 ? (

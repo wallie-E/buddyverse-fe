@@ -64,31 +64,33 @@ export default function CategoryFilter({
 
   return (
     <div className="mb-8">
-      <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-7 gap-2 bg-slate-100/50 rounded-[2rem] p-1.5">
-        {/* 全部分类 */}
-        <button
-          onClick={() => onCategoryChange(null)}
-          className={`flex flex-col items-center gap-2 py-4 px-2 rounded-[1.5rem] transition-all duration-300 ${
-            !selectedCategoryId ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          <span className="text-xl">🌟</span>
-          <span className="text-sm font-medium font-sans">全部</span>
-        </button>
-
-        {/* 分类列表 */}
-        {categories.map((category) => (
+      <div className="bg-slate-100/50 rounded-[2rem] p-1.5">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide max-w-full">
+          {/* 全部分类 */}
           <button
-            key={category.id}
-            onClick={() => onCategoryChange(category.id)}
-            className={`flex flex-col items-center gap-2 py-4 px-2 rounded-[1.5rem] transition-all duration-300 ${
-              selectedCategoryId === category.id ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
+            onClick={() => onCategoryChange(null)}
+            className={`flex flex-col items-center gap-2 py-4 px-4 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
+              !selectedCategoryId ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
             }`}
           >
-            <span className="text-xl">{getCategoryIcon(category.name)}</span>
-            <span className="text-sm font-medium font-sans">{category.name}</span>
+            <span className="text-xl">🌟</span>
+            <span className="text-sm font-medium font-sans whitespace-nowrap">全部</span>
           </button>
-        ))}
+
+          {/* 分类列表 */}
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => onCategoryChange(category.id)}
+              className={`flex flex-col items-center gap-2 py-4 px-4 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
+                selectedCategoryId === category.id ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <span className="text-xl">{getCategoryIcon(category.name)}</span>
+              <span className="text-sm font-medium font-sans whitespace-nowrap">{category.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 细分类型下拉选择 */}
