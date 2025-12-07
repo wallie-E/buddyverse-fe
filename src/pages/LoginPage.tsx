@@ -121,7 +121,7 @@ const LoginPage = () => {
                   type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
+                  className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                   placeholder="请输入你的昵称"
                   required
                   maxLength={8}
@@ -143,7 +143,7 @@ const LoginPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
+                className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                 placeholder="请输入你的邮箱"
               />
             </div>
@@ -162,7 +162,7 @@ const LoginPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
+                  className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                   placeholder={isRegisterPage ? '请设置密码（6-20位）' : '请输入密码'}
                   minLength={6}
                   maxLength={20}
@@ -195,7 +195,7 @@ const LoginPage = () => {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all duration-300 text-lg font-sans"
+                    className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                     placeholder="请再次输入密码"
                   />
                   <button

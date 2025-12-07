@@ -314,7 +314,7 @@ const AdminPage = () => {
               onSearch={handleSearch}
               onClear={handleSearchClear}
               allowClear
-              style={{ width: 300 }}
+              style={{ width: 300, caretColor: 'rgb(71, 85, 105)' }}
               enterButton
             />
           </div>

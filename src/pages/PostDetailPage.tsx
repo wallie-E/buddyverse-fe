@@ -740,7 +740,7 @@ const PostDetailPage = () => {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="写下你的评论，参与讨论..."
-                      className="flex-1 bg-white rounded-full px-6 py-3 text-base border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-2 focus:ring-slate-200/50 focus:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 placeholder:text-slate-400 text-slate-600 font-sans"
+                      className="flex-1 bg-white rounded-full px-6 py-3 text-base border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-1 focus:ring-slate-100 focus:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:outline-none transition-all duration-200 placeholder:text-slate-400 text-slate-600 caret-slate-600 font-sans"
                       onKeyPress={(e) => e.key === 'Enter' && !submitLoading && handleSendComment()}
                       disabled={submitLoading}
                     />

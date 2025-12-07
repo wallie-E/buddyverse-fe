@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   PencilSquareIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
-import { Select, Input } from 'antd';
 import { API, authUtils } from '../api';
 import type { User, UpdateProfileRequest } from '../api/types';
 
@@ -18,10 +18,31 @@ export default function ProfilePage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [editForm, setEditForm] = useState<UpdateProfileRequest>({
     nickname: '',
-    gender: 'other',
+    gender: 'male',
     signature: '',
     wechat_id: ''
   });
+
+  // 性别下拉菜单状态
+  const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
+  const genderDropdownRef = useRef<HTMLDivElement>(null);
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (genderDropdownRef.current && !genderDropdownRef.current.contains(event.target as Node)) {
+        setIsGenderDropdownOpen(false);
+      }
+    };
+
+    if (isGenderDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isGenderDropdownOpen]);
 
   // 检查登录状态
   useEffect(() => {
@@ -130,7 +151,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-200 border-t-slate-600 mx-auto mb-6"></div>
           <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
@@ -141,7 +162,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">😞</span>
@@ -160,7 +181,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -227,16 +248,20 @@ export default function ProfilePage() {
                 <label htmlFor="nickname" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   昵称 *
                 </label>
-                <Input
-                  id="nickname"
-                  value={editForm.nickname}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, nickname: e.target.value }))}
-                  className="w-full h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
-                  size="large"
-                  placeholder="请输入昵称"
-                  maxLength={8}
-                  showCount
-                />
+                <div className="relative">
+                  <input
+                    id="nickname"
+                    type="text"
+                    value={editForm.nickname}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, nickname: e.target.value }))}
+                    className="w-full px-6 py-4 h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-white focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 caret-slate-600 font-sans"
+                    placeholder="请输入昵称"
+                    maxLength={8}
+                  />
+                  <div className="text-right mt-2 text-sm text-slate-400 font-sans">
+                    {editForm.nickname?.length || 0}/8
+                  </div>
+                </div>
                 <p className="text-sm text-slate-500 mt-2 font-normal font-sans">2-8字符</p>
               </div>
 
@@ -244,35 +269,71 @@ export default function ProfilePage() {
                 <label htmlFor="gender" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   性别
                 </label>
-                <Select
-                  id="gender"
-                  value={editForm.gender}
-                  onChange={(value) => setEditForm(prev => ({ ...prev, gender: value as 'male' | 'female' }))}
-                  className="w-full"
-                  size="large"
-                  options={[
-                    { value: 'male', label: '男' },
-                    { value: 'female', label: '女' },
-                  ]}
-                  style={{ borderRadius: '9999px' }}
-                />
+                <div className="relative" ref={genderDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
+                    className="w-full flex items-center justify-between px-6 py-4 h-12 rounded-full border-0 ring-1 ring-slate-100 bg-white focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg text-slate-600 font-sans text-left"
+                  >
+                    <span>
+                      {editForm.gender === 'male' ? '男' : '女'}
+                    </span>
+                    <ChevronDownIcon className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${isGenderDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {isGenderDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-0 ring-1 ring-slate-100 rounded-[1.5rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] z-20 overflow-hidden">
+                      <div className="p-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditForm(prev => ({ ...prev, gender: 'male' }));
+                            setIsGenderDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 rounded-xl flex items-center justify-between transition-colors text-slate-600 font-sans"
+                        >
+                          <span>男</span>
+                          {editForm.gender === 'male' && (
+                            <CheckIcon className="h-4 w-4 text-slate-800" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditForm(prev => ({ ...prev, gender: 'female' }));
+                            setIsGenderDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 rounded-xl flex items-center justify-between transition-colors text-slate-600 font-sans"
+                        >
+                          <span>女</span>
+                          {editForm.gender === 'female' && (
+                            <CheckIcon className="h-4 w-4 text-slate-800" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
                 <label htmlFor="signature" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   个人签名
                 </label>
-                <Input.TextArea
-                  id="signature"
-                  value={editForm.signature}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, signature: e.target.value }))}
-                  className="w-full text-lg rounded-2xl border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
-                  size="large"
-                  placeholder="写点什么介绍一下自己吧..."
-                  rows={3}
-                  maxLength={200}
-                  showCount
-                />
+                <div className="relative">
+                  <textarea
+                    id="signature"
+                    value={editForm.signature}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, signature: e.target.value }))}
+                    className="w-full px-6 py-4 text-lg rounded-2xl border-0 ring-1 ring-slate-100 bg-white focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 caret-slate-600 font-sans resize-none"
+                    placeholder="写点什么介绍一下自己吧..."
+                    rows={3}
+                    maxLength={200}
+                  />
+                  <div className="text-right mt-2 text-sm text-slate-400 font-sans">
+                    {editForm.signature?.length || 0}/200
+                  </div>
+                </div>
                 <p className="text-sm text-slate-500 mt-2 font-normal font-sans">最多200字符</p>
               </div>
 
@@ -280,12 +341,12 @@ export default function ProfilePage() {
                 <label htmlFor="wechat_id" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
                   微信号
                 </label>
-                <Input
+                <input
                   id="wechat_id"
+                  type="text"
                   value={editForm.wechat_id}
                   onChange={(e) => setEditForm(prev => ({ ...prev, wechat_id: e.target.value }))}
-                  className="w-full h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-slate-50/50 font-sans"
-                  size="large"
+                  className="w-full px-6 py-4 h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-white focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 caret-slate-600 font-sans"
                   placeholder="请输入微信号"
                 />
                 <p className="text-sm text-slate-500 mt-2 font-normal font-sans leading-relaxed">
@@ -318,14 +379,14 @@ export default function ProfilePage() {
             // 显示资料
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                <div className="bg-white rounded-[2rem] p-6 border border-slate-100">
                   <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">性别</label>
                   <p className="text-xl font-medium text-slate-900 font-sans leading-relaxed">
-                    {user.gender === 'male' ? '👨 男' : user.gender === 'female' ? '👩 女' : '🤖 其他'}
+                    {user.gender === 'male' ? '👨 男' : '👩 女'}
                   </p>
                 </div>
 
-                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                <div className="bg-white rounded-[2rem] p-6 border border-slate-100">
                   <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">个性签名</label>
                   <p className="text-xl font-medium text-slate-900 font-sans leading-relaxed">
                     {user.signature || '未设置'}
@@ -333,7 +394,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+              <div className="bg-white rounded-[2rem] p-6 border border-slate-100">
                 <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">微信号</label>
                 <p className="text-xl font-medium text-slate-900 mb-2 font-sans leading-relaxed">
                   {user.wechat_id || '未设置'}
@@ -344,7 +405,7 @@ export default function ProfilePage() {
               </div>
 
               {user.signature && (
-                <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
+                <div className="bg-white rounded-[2rem] p-6 border border-slate-100">
                   <label className="block text-sm font-medium text-slate-600 mb-3 font-sans">个性签名</label>
                   <p className="text-lg text-slate-900 leading-loose break-words font-normal font-sans">{user.signature}</p>
                 </div>
