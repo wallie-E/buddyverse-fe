@@ -35,7 +35,7 @@ export default function Header() {
               <span className="text-white font-medium text-lg font-sans">搭</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-medium text-slate-800 tracking-tight group-hover:text-slate-900 transition-colors font-sans">搭子社区</h1>
+              <h1 className="text-lg font-medium text-slate-800 tracking-tight group-hover:text-slate-900 transition-colors font-sans">轻搭</h1>
               <p className="text-xs text-slate-500 font-normal tracking-wide font-sans">发现志同道合的伙伴</p>
             </div>
           </div>

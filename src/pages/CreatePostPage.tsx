@@ -167,6 +167,7 @@ const CreatePostPage = () => {
         <div className="max-w-2xl mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="space-y-6">
            
+           {/* <div className="text-slate-500 text-sm font-sans text-center">注意：每天只能发布1个帖子</div> */}
 
           {/* 帖子内容 */}
           <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
@@ -322,8 +323,8 @@ const CreatePostPage = () => {
               <div className="space-y-4">
                 <Radio value="public" className="w-full">
                   <span className="flex items-center text-slate-700 font-sans">
-                    <EyeIcon className="h-5 w-5 mr-3 text-green-500" />
-                    <div>
+                    {/* <EyeIcon className="h-5 w-5 mr-3 text-green-500" /> */}
+                    <div className="ml-2">
                       <div className="font-medium font-sans">公开评论</div>
                       <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">所有人都可以看到评论</div>
                     </div>
@@ -332,8 +333,8 @@ const CreatePostPage = () => {
                 <div></div>
                 <Radio value="private" className="w-full">
                   <span className="flex items-center text-slate-700 font-sans">
-                    <EyeSlashIcon className="h-5 w-5 mr-3 text-orange-500" />
-                    <div>
+                    {/* <EyeSlashIcon className="h-5 w-5 mr-3 text-orange-500" /> */}
+                    <div className="ml-2">
                       <div className="font-medium font-sans">仅我可见</div>
                       <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">只有你能看到别人的评论</div>
                     </div>

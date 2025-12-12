@@ -69,6 +69,7 @@ export interface Post {
   user_id?: number;
   author_name: string;
   author_email?: string;
+  author_gender?: 'male' | 'female' | 'other';
   category_name: string;
   subcategory_name: string;
   status?: 'active' | 'deleted';

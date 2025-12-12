@@ -89,7 +89,7 @@ const LoginPage = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
-          <h1 className="text-4xl font-medium text-slate-900 mb-3 tracking-tight font-sans">搭子社区</h1>
+          <h1 className="text-4xl font-medium text-slate-900 mb-3 tracking-tight font-sans">轻搭</h1>
           <p className="text-slate-500 text-lg font-normal font-sans leading-relaxed">
             {isRegisterPage ? '加入我们，寻找志同道合的搭子' : '欢迎回来，继续你的搭子之旅'}
           </p>
