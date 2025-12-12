@@ -69,7 +69,7 @@ export default function CategoryFilter({
           {/* 全部分类 */}
           <button
             onClick={() => onCategoryChange(null)}
-            className={`flex flex-col items-center gap-2 py-4 px-4 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
+            className={`flex flex-col items-center gap-2 py-4 px-4 sm:px-8 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
               !selectedCategoryId ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -82,7 +82,7 @@ export default function CategoryFilter({
             <button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
-              className={`flex flex-col items-center gap-2 py-4 px-4 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
+              className={`flex flex-col items-center gap-2 py-4 px-4 sm:px-8 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
                 selectedCategoryId === category.id ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
               }`}
             >

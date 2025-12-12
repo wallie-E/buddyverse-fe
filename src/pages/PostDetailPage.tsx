@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChatBubbleLeftIcon, PaperAirplaneIcon, MapPinIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useParams } from 'react-router-dom';
 import { message, Modal } from 'antd';
-import { MessageCircleMore } from 'lucide-react';
+import { MessageCircleMore, UserRound } from 'lucide-react';
 import { getPostById } from '../api/posts';
 import { getPostComments, createComment } from '../api/comments';
 import { authUtils } from '../api';
@@ -19,6 +19,7 @@ interface CommentData {
   content: string;
   created_at: string;
   author_name: string;
+  author_gender?: 'male' | 'female' | 'other';
 }
 
 const PostDetailPage = () => {
@@ -539,6 +540,18 @@ const PostDetailPage = () => {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-3">
             <span className="font-medium text-slate-900 text-base font-sans">{comment.author_name}</span>
+            {comment.author_gender && (
+              <UserRound 
+                className={`h-4 w-4 ${
+                  comment.author_gender === 'male' 
+                    ? 'text-blue-500' 
+                    : comment.author_gender === 'female' 
+                    ? 'text-pink-500' 
+                    : 'text-slate-400'
+                }`}
+                strokeWidth={2}
+              />
+            )}
             {post && comment.user_id.toString() === post.user_id?.toString() && (
               <span className="w-5 h-5 bg-slate-800 rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -621,6 +634,18 @@ const PostDetailPage = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-slate-900 text-base font-sans">{post.author_name}</span>
+                    {post.author_gender && (
+                      <UserRound 
+                        className={`h-4 w-4 ${
+                          post.author_gender === 'male' 
+                            ? 'text-blue-500' 
+                            : post.author_gender === 'female' 
+                            ? 'text-pink-500' 
+                            : 'text-slate-400'
+                        }`}
+                        strokeWidth={2}
+                      />
+                    )}
                   </div>
                   <span className="text-sm text-slate-400 font-normal font-sans">{getTimeAgo(post.created_at)}</span>
                 </div>

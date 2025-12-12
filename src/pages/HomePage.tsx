@@ -43,6 +43,7 @@ export default function HomePage() {
       // 第一页使用 loading，后续页面使用 loadingMore
       if (pageNum === 1) {
         setLoading(true);
+        setPosts([]); // 第一页时先清空旧数据
       } else {
         setLoadingMore(true);
       }
@@ -58,8 +59,10 @@ export default function HomePage() {
 
       if (response.success) {
         if (pageNum === 1) {
+          // 第一页直接替换结果
           setPosts(response.data.list);
         } else {
+          // 后续页面追加数据
           setPosts(prev => [...prev, ...response.data.list]);
         }
 
@@ -78,16 +81,11 @@ export default function HomePage() {
     }
   };
 
-  // 统一处理筛选条件变化（位置搜索防抖，分类切换即时）
+  // 处理分类切换（即时生效）
   useEffect(() => {
-    // 有搜索词时防抖 500ms，无搜索词时（如初始加载或仅切换分类）几乎立即执行
-    const timeoutId = setTimeout(() => {
-      setPage(1);
-      fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-    }, location ? 500 : 0);
-
-    return () => clearTimeout(timeoutId);
-  }, [location, selectedCategoryId, selectedSubCategoryId]);
+    setPage(1);
+    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
+  }, [selectedCategoryId, selectedSubCategoryId]);
 
   // 加载更多
   const loadMore = useCallback(() => {
@@ -104,6 +102,19 @@ export default function HomePage() {
 
   const handleSubCategoryChange = (subCategoryId: number | null) => {
     setSelectedSubCategoryId(subCategoryId);
+  };
+
+  // 处理位置搜索
+  const handleLocationSearch = () => {
+    setPage(1);
+    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
+  };
+
+  // 处理回车键搜索
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleLocationSearch();
+    }
   };
 
   // 滚动监听，实现无限滚动
@@ -163,19 +174,28 @@ export default function HomePage() {
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="搜索位置如：北京、朝阳区、三里屯..."
-              className="block w-full pl-12 pr-10 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-1 focus:ring-slate-100 focus:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:outline-none transition-all duration-200 placeholder:text-slate-400 text-slate-600 caret-slate-600"
+              onKeyPress={handleKeyPress}
+              placeholder="搜索位置如：北京、三里屯..."
+              className="block w-full pl-12 pr-28 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-1 focus:ring-slate-100 focus:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:outline-none transition-all duration-200 placeholder:text-slate-400 text-slate-600 caret-slate-600"
             />
-            {location && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-0 gap-1">
+              {location && (
+                <button
+                  onClick={() => setLocation('')}
+                  className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+                >
+                  <svg className="h-5 w-5 text-slate-300 hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
               <button
-                onClick={() => setLocation('')}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                onClick={handleLocationSearch}
+                className="px-6 py-3 bg-slate-800 text-white rounded-r-full hover:bg-slate-700 transition-colors duration-200 font-medium text-base shadow-sm h-full"
               >
-                <svg className="h-5 w-5 text-slate-300 hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                搜索
               </button>
-            )}
+            </div>
           </div>
         </div>
 

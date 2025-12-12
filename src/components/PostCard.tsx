@@ -1,4 +1,5 @@
 import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authUtils } from '../api';
 import type { Post } from '../api/types';
@@ -74,6 +75,18 @@ export default function PostCard({ post }: PostCardProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-medium text-slate-900 font-sans">{post.author_name}</span>
+                {post.author_gender && (
+                  <UserRound 
+                    className={`h-4 w-4 ${
+                      post.author_gender === 'male' 
+                        ? 'text-blue-500' 
+                        : post.author_gender === 'female' 
+                        ? 'text-pink-500' 
+                        : 'text-slate-400'
+                    }`}
+                    strokeWidth={2}
+                  />
+                )}
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-400 mt-0.5 font-normal font-sans">
                 {formatDate(post.created_at)}
