@@ -182,6 +182,7 @@ export interface PostListParams extends PaginationParams {
   category_id?: number;
   subcategory_id?: number;
   location?: string;
+  gender?: 'male' | 'female';
 }
 
 export interface NotificationListParams extends PaginationParams {

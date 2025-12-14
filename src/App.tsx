@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop';
 
 // Contexts
 import { NotificationProvider } from './contexts/NotificationProvider';
+import { GenderFilterProvider } from './contexts/GenderFilterContext';
 
 // Pages  
 import HomePage from './pages/HomePage';
@@ -37,6 +38,7 @@ function App() {
 
   return (
     <NotificationProvider>
+      <GenderFilterProvider>
       <Router>
         <ScrollToTop />
         <div className="App">
@@ -58,6 +60,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+      </GenderFilterProvider>
     </NotificationProvider>
   );
 }

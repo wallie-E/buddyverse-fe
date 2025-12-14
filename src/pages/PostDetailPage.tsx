@@ -38,6 +38,7 @@ const PostDetailPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreComments, setHasMoreComments] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [commentsTotal, setCommentsTotal] = useState(0);
   const COMMENTS_PER_PAGE = 20;
 
   // 交换微信弹窗相关状态
@@ -83,6 +84,7 @@ const PostDetailPage = () => {
         const response = await getPostById(id);
         if (response.success) {
           setPost(response.data);
+          setCommentsTotal(response.data.comment_count);
         } else {
           setError(response.message || '获取帖子失败');
         }
@@ -195,8 +197,9 @@ const PostDetailPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [loadMoreComments, hasMoreComments, loadingMore, post, currentUser.id]);
 
-  // 检查是否可以添加评论 - 所有人都可以添加评论
-  const canAddComments = post ? true : false;
+  // 检查是否可以添加评论 - 所有人都可以添加评论，但评论总数达到20时不能添加
+  const canAddComments = post ? (commentsTotal < 20) : false;
+  console.log('canAddComments', canAddComments, commentsTotal);
 
   // 处理时间显示
   const getTimeAgo = (date: string) => {
@@ -213,7 +216,7 @@ const PostDetailPage = () => {
 
   // 发送评论
   const handleSendComment = async () => {
-    if (!newComment.trim() || !canAddComments || !post || submitLoading) return;
+    if (!newComment.trim() || !post || submitLoading) return;
 
     try {
       setSubmitLoading(true);
@@ -537,7 +540,7 @@ const PostDetailPage = () => {
         >
           {comment.author_name.charAt(0)}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <span className="font-medium text-slate-900 text-base font-sans">{comment.author_name}</span>
             {comment.author_gender && (
@@ -560,7 +563,7 @@ const PostDetailPage = () => {
               </span>
             )}
           </div>
-          <p className="text-slate-600 text-base leading-loose mb-4 font-sans">
+          <p className="text-slate-600 text-base leading-loose mb-4 font-sans break-words" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {comment.content}
           </p>
           <div className="flex items-center justify-between pt-4 border-t border-slate-50">
@@ -737,7 +740,7 @@ const PostDetailPage = () => {
           )}
 
           {/* 私有评论提示区域 - 当评论私有且用户不是作者时显示 */}
-          {post.comment_visibility === 'private' && !isPostAuthor && canAddComments && (
+          {post.comment_visibility === 'private' && !isPostAuthor && (
             <div className="mt-10">
               <div className="text-center py-16">
                 <div className="w-20 h-20 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
@@ -756,9 +759,6 @@ const PostDetailPage = () => {
             <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 p-6">
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium flex-shrink-0">
-                    {currentUser.nickname.charAt(0)}
-                  </div>
                   <div className="flex-1 flex items-center gap-3">
                     <input
                       type="text"
@@ -781,6 +781,17 @@ const PostDetailPage = () => {
                       )}
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 评论达到上限提示 */}
+          {!canAddComments && (
+            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 p-6 py-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center py-1">
+                  <p className="text-slate-500 text-sm font-medium font-sans">帖子下最多只能有20条评论</p>
                 </div>
               </div>
             </div>

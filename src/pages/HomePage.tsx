@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API } from '../api';
 import type { Post, Category } from '../api/types';
 import { redirectToLoginIfNeeded } from '../utils/auth';
+import { useGenderFilter } from '../contexts/GenderFilterContext';
 
 // Components
 import CategoryFilter from '../components/CategoryFilter';
@@ -10,6 +11,7 @@ import PostCard from '../components/PostCard';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { selectedGender } = useGenderFilter();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null);
   const [location, setLocation] = useState<string>('');
@@ -38,7 +40,7 @@ export default function HomePage() {
   }, []);
 
   // 获取帖子列表
-  const fetchPosts = async (pageNum = 1, categoryId?: number, subCategoryId?: number, locationParam?: string) => {
+  const fetchPosts = async (pageNum = 1, categoryId?: number, subCategoryId?: number, locationParam?: string, genderParam?: 'male' | 'female' | null) => {
     try {
       // 第一页使用 loading，后续页面使用 loadingMore
       if (pageNum === 1) {
@@ -55,15 +57,20 @@ export default function HomePage() {
         category_id: categoryId || undefined,
         subcategory_id: subCategoryId || undefined,
         location: locationParam || undefined,
+        gender: genderParam || undefined,
       });
-
+      console.log('response.data.list',posts);
       if (response.success) {
         if (pageNum === 1) {
           // 第一页直接替换结果
           setPosts(response.data.list);
         } else {
-          // 后续页面追加数据
-          setPosts(prev => [...prev, ...response.data.list]);
+          // 后续页面追加数据，去重处理
+          setPosts(prev => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const newPosts = response.data.list.filter(p => !existingIds.has(p.id));
+            return [...prev, ...newPosts];
+          });
         }
 
         setHasMore(response.data.pagination.page < response.data.pagination.pages);
@@ -84,16 +91,16 @@ export default function HomePage() {
   // 处理分类切换（即时生效）
   useEffect(() => {
     setPage(1);
-    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-  }, [selectedCategoryId, selectedSubCategoryId]);
+    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined);
+  }, [selectedCategoryId, selectedSubCategoryId, selectedGender]);
 
   // 加载更多
   const loadMore = useCallback(() => {
     if (!hasMore || loading || loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchPosts(nextPage, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
-  }, [hasMore, loading, loadingMore, page, selectedCategoryId, selectedSubCategoryId, location]);
+    fetchPosts(nextPage, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined);
+  }, [hasMore, loading, loadingMore, page, selectedCategoryId, selectedSubCategoryId, location, selectedGender]);
 
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
@@ -107,7 +114,7 @@ export default function HomePage() {
   // 处理位置搜索
   const handleLocationSearch = () => {
     setPage(1);
-    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined);
+    fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined);
   };
 
   // 处理回车键搜索
@@ -215,7 +222,7 @@ export default function HomePage() {
           <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-2xl mb-8 text-center">
             {error}
             <button
-              onClick={() => fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined)}
+              onClick={() => fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined)}
               className="ml-2 font-medium underline decoration-red-300 underline-offset-2 hover:text-red-700 transition-colors"
             >
               重试
