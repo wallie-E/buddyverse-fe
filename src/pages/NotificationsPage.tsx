@@ -456,8 +456,8 @@ export default function NotificationsPage() {
           otherWechat: response.data!.otherWechat
         } : null);
         // 更新列表中的记录
-        setExchangeRecords(prev => prev.map(record => 
-          record.id === selectedExchangeRecord.id 
+        setExchangeRecords(prev => prev.map(record =>
+          record.id === selectedExchangeRecord.id
             ? { ...record, otherWechat: response.data!.otherWechat }
             : record
         ));
@@ -593,38 +593,29 @@ export default function NotificationsPage() {
                     onClick={() => handleExchangeRecordClick(record)}
                     className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-6 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer relative group"
                   >
-                    {/* 细分类型标签 - 右上角 */}
-                    {record.subcategoryName && (
-                      <div className="absolute top-4 right-4">
-                        <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
-                          <span>{getSubCategoryIcon(record.subcategoryName)}</span>
-                          <span>{record.subcategoryName}</span>
-                        </span>
+                    <div className="flex items-start space-x-4">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 mt-1">
+                        <div
+                          className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium cursor-pointer hover:bg-slate-800 transition-colors font-sans shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/user/${record.otherUserId}`);
+                          }}
+                        >
+                          {record.otherNickname?.charAt(0) || '?'}
+                        </div>
                       </div>
-                    )}
-                   <div className="flex items-start space-x-4">
-                     {/* Avatar */}
-                     <div className="flex-shrink-0 mt-1">
-                       <div 
-                         className="h-12 w-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium cursor-pointer hover:bg-slate-800 transition-colors font-sans shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           navigate(`/user/${record.otherUserId}`);
-                         }}
-                       >
-                         {record.otherNickname?.charAt(0) || '?'}
-                       </div>
-                     </div>
 
-                     {/* Content */}
+                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-3 mb-2 flex-wrap">
-                              <h4 className="text-lg font-medium text-slate-900 font-sans">
+                              <h4 className="text-base sm:text-lg font-medium text-slate-900 font-sans break-words">
                                 {record.myRole === 'initiator' ? '我向' : ''} {record.otherNickname} {record.myRole === 'receiver' ? '向我' : ''}发起交换
                               </h4>
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium font-sans ${getExchangeStatusColor(record.status)}`}>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium font-sans flex-shrink-0 ${getExchangeStatusColor(record.status)}`}>
                                 {getExchangeStatusText(record.status)}
                               </span>
                             </div>
@@ -635,14 +626,28 @@ export default function NotificationsPage() {
                               </div>
                             )}
 
-                            <p className="text-sm text-slate-400 mt-2 font-normal font-sans">
-                              {formatDate(record.createdAt)}
-                              {record.completedAt && ` · 完成于 ${formatDate(record.completedAt)}`}
-                            </p>
+                            <div className="flex">
+                              <p className="text-sm text-slate-400 mt-2 font-normal font-sans">
+                                {formatDate(record.createdAt)}
+                                {record.completedAt && ` · 完成于 ${formatDate(record.completedAt)}`}
+                              </p>
+                              {/* 细分类型标签 - 右下角 */}
+                              {record.subcategoryName && (
+                                <div className="absolute right-6">
+                                  <span className="inline-flex items-center gap-1.5 mt-1 px-3 py-1 text-slate-500 bg-slate-50 rounded-full text-xs font-medium  ring-slate-100 font-sans">
+                                    <span>{getSubCategoryIcon(record.subcategoryName)}</span>
+                                    <span>{record.subcategoryName}</span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
                           </div>
                         </div>
+
                       </div>
                     </div>
+
                   </div>
                 ))}
               </div>
@@ -688,9 +693,12 @@ export default function NotificationsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className={`text-base mt-2 leading-loose font-normal font-sans ${!notification.is_read ? 'text-slate-700' : 'text-slate-500'}`}>
-                            {notification.sender_nickname}评论了你：{notification.content}
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-lg font-medium font-sans ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
+                            {notification.sender_nickname}
+                          </p>
+                          <p className={`text-base mt-2 leading-loose font-normal font-sans break-words ${!notification.is_read ? 'text-slate-700' : 'text-slate-500'}`} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            {notification.content}
                           </p>
                           <p className="text-sm text-slate-400 mt-3 font-normal font-sans">
                             {formatDate(notification.created_at)}
@@ -837,17 +845,11 @@ export default function NotificationsPage() {
             // 其他状态（等待对方确认、已拒绝、已过期等）
             <div>
               <h3 className="text-2xl font-medium text-slate-900 mb-4 text-center font-sans tracking-tight">
-                交换详情
+                交换进度
               </h3>
-              <div className="mb-4">
-                <p className="text-sm text-slate-600 mb-2 font-normal font-sans">状态：</p>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium inline-block font-sans ${getExchangeStatusColor(selectedExchangeRecord?.status || 0)}`}>
-                  {getExchangeStatusText(selectedExchangeRecord?.status || 0)}
-                </span>
-              </div>
               {selectedExchangeRecord?.status === 0 && exchangeDetailInfo?.waitingFor === 'other' && (
                 <p className="text-slate-500 text-sm text-center mb-6 font-normal font-sans leading-relaxed">
-                  等待对方确认交换请求
+                  等待对方确认交换
                 </p>
               )}
               {selectedExchangeRecord?.status === 2 && (
