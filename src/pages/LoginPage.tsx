@@ -15,6 +15,7 @@ const LoginPage = () => {
   });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,11 +49,18 @@ const LoginPage = () => {
           setIsLoading(false);
           return;
         }
+
+        if (!gender || (gender !== 'male' && gender !== 'female')) {
+          setError('请选择性别');
+          setIsLoading(false);
+          return;
+        }
         
         const registerData: RegisterRequest = {
           email: formData.email,
           password: formData.password,
-          nickname: nickname.trim()
+          nickname: nickname.trim(),
+          gender: gender
         };
 
         const response = await API.auth.register(registerData);
@@ -127,6 +135,51 @@ const LoginPage = () => {
                   maxLength={8}
                 />
                 <p className="text-xs sm:text-sm text-slate-400 mt-1 sm:mt-2 text-end font-sans">最多8个字符</p>
+              </div>
+            )}
+
+            {/* 注册时的性别字段 */}
+            {isRegisterPage && (
+              <div>
+                <label className="block text-lg font-medium text-slate-900 mb-3 font-sans">
+                  性别
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={gender === 'male'}
+                      onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+                      className="sr-only"
+                    />
+                    <div className={`w-full px-6 py-4 rounded-full text-center font-medium text-lg transition-all duration-200 font-sans ${
+                      gender === 'male'
+                        ? 'bg-slate-900 text-white ring-1 ring-slate-900'
+                        : 'bg-slate-50/50 text-slate-600 ring-1 ring-slate-100 hover:bg-slate-100'
+                    }`}>
+                      男
+                    </div>
+                  </label>
+                  <label className="flex-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={gender === 'female'}
+                      onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+                      className="sr-only"
+                    />
+                    <div className={`w-full px-6 py-4 rounded-full text-center font-medium text-lg transition-all duration-200 font-sans ${
+                      gender === 'female'
+                        ? 'bg-slate-900 text-white ring-1 ring-slate-900'
+                        : 'bg-slate-50/50 text-slate-600 ring-1 ring-slate-100 hover:bg-slate-100'
+                    }`}>
+                      女
+                    </div>
+                  </label>
+                </div>
               </div>
             )}
 

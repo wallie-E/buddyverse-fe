@@ -75,7 +75,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   nickname: string;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
 }
 
 export interface PostForm {
