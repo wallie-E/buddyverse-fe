@@ -41,7 +41,8 @@ export default function ApiTestPage() {
       fn: () => API.auth.register({ 
         email: `test${Date.now()}@example.com`, 
         password: 'password123', 
-        nickname: '测试用户' 
+        nickname: '测试用户',
+        gender: 'male'
       })
     }
   ];

@@ -53,7 +53,8 @@ const handleRegister = async () => {
     const response = await API.auth.register({
       email: 'user@example.com',
       password: 'password123',
-      nickname: '用户昵称'
+      nickname: '用户昵称',
+      gender: 'male' // 或 'female'
     });
     
     if (response.success) {

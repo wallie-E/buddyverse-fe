@@ -44,6 +44,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   nickname: string;
+  gender: 'male' | 'female';
 }
 
 export interface LoginRequest {
