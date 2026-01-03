@@ -125,9 +125,16 @@ const PostDetailPage = () => {
           const { pagination } = response.data;
           setHasMoreComments(pagination.page < pagination.pages);
           setCurrentPage(1);
+        } else {
+          // 如果请求失败，设置 hasMoreComments 为 false 阻止后续加载
+          setHasMoreComments(false);
+          setComments([]);
         }
       } catch (err) {
         console.error('获取评论失败:', err);
+        // 出错时设置 hasMoreComments 为 false 阻止后续加载
+        setHasMoreComments(false);
+        setComments([]);
       } finally {
         setCommentsLoading(false);
       }
@@ -165,9 +172,14 @@ const PostDetailPage = () => {
         const { pagination } = response.data;
         setHasMoreComments(pagination.page < pagination.pages);
         setCurrentPage(nextPage);
+      } else {
+        // 如果请求失败，设置 hasMoreComments 为 false 阻止后续加载
+        setHasMoreComments(false);
       }
     } catch (err) {
       console.error('加载更多评论失败:', err);
+      // 出错时设置 hasMoreComments 为 false 阻止后续加载
+      setHasMoreComments(false);
     } finally {
       setLoadingMore(false);
     }
@@ -538,7 +550,7 @@ const PostDetailPage = () => {
           className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-lg flex-shrink-0 cursor-pointer hover:bg-slate-200 transition-colors"
           onClick={() => handleCommenterAvatarClick(comment.user_id.toString())}
         >
-          {comment.author_name.charAt(0)}
+          {comment?.author_name?.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-3">
@@ -632,7 +644,7 @@ const PostDetailPage = () => {
                   className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-lg cursor-pointer hover:bg-slate-200 transition-colors"
                   onClick={handleAuthorAvatarClick}
                 >
-                  {post.author_name.charAt(0)}
+                  {post?.author_name?.charAt(0)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
