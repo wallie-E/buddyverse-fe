@@ -4,13 +4,13 @@ import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../data/mockData';
 import { redirectToLoginIfNeeded } from '../utils/auth';
-import { useNotification } from '../hooks/useNotification';
+// import { useNotification } from '../hooks/useNotification';
 import { authUtils } from '../api';
 import { useGenderFilter } from '../contexts/GenderFilterContext';
 
 export default function Header() {
   const navigate = useNavigate();
-  const { unreadCount } = useNotification();
+  // const { unreadCount } = useNotification();
   const { selectedGender, setSelectedGender } = useGenderFilter();
   const currentUser = getCurrentUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -110,7 +110,7 @@ export default function Header() {
                 >
                  <PlusCircleIcon className="h-8 w-8 " />
                 </button>
-                <button
+                {/* <button
                   onClick={() => navigate('/notifications')}
                   className="relative p-2.5 text-slate-500 hover:bg-slate-50 rounded-full transition-all duration-300"
                 >
@@ -120,7 +120,7 @@ export default function Header() {
                       {unreadCount}
                     </span>
                   )}
-                </button>
+                </button> */}
                 <div className="relative" ref={mobileMenuRef}>
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -228,7 +228,7 @@ export default function Header() {
               <>
                 <button
                   onClick={handleCreatePost}
-                  className="bg-slate-900 text-white px-6 py-2.5 rounded-full font-medium shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:bg-slate-800 transition-all duration-300 flex items-center space-x-2 group"
+                  className="bg-slate-900 text-white px-6 py-2 rounded-full font-medium shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:bg-slate-800 transition-all duration-300 flex items-center space-x-2 group"
                 >
                   <PencilIcon className="h-4 w-4 group-hover:-rotate-12 transition-transform duration-300" />
                   <span>发布帖子</span>
@@ -236,7 +236,7 @@ export default function Header() {
 
                 <div className="h-6 w-px bg-slate-200 mx-2"></div>
 
-                <button
+                {/* <button
                   onClick={() => navigate('/notifications')}
                   className="relative p-2.5 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-full transition-all duration-300"
                 >
@@ -246,7 +246,7 @@ export default function Header() {
                       {unreadCount}
                     </span>
                   )}
-                </button>
+                </button> */}
 
                 <div className="relative" ref={menuRef}>
                   <button

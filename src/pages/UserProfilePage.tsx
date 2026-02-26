@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { message } from 'antd';
+import { MapPinIcon } from '@heroicons/react/24/outline';
+import { Copy, Check } from 'lucide-react';
+import { message, Modal } from 'antd';
 import { getUserProfile } from '../api/users';
 import { authUtils } from '../api';
+import { viewWechat } from '../api/wechatExchange';
 import { getSubCategoryIcon } from '../utils/categoryIcons';
+import { redirectToLoginIfNeeded } from '../utils/auth';
 import type { User, Post } from '../api/types';
 
 const UserProfilePage = () => {
@@ -18,6 +21,10 @@ const UserProfilePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [viewingWechat, setViewingWechat] = useState(false);
+  const [wechatModalOpen, setWechatModalOpen] = useState(false);
+  const [wechatIdInModal, setWechatIdInModal] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // 获取当前用户
   const currentUser = authUtils.getCurrentUser();
@@ -124,14 +131,37 @@ const UserProfilePage = () => {
     }
   };
 
-  // 格式化注册时间
-  const formatJoinDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  // 查看微信
+  const handleViewWechat = async () => {
+    if (!user?.id) return;
+    if (redirectToLoginIfNeeded(navigate)) return;
+    setViewingWechat(true);
+    try {
+      const res = await viewWechat(Number(user.id));
+      if (res.success && res.data?.wechatId) {
+        setWechatIdInModal(res.data.wechatId);
+        setWechatModalOpen(true);
+        setCopied(false);
+      } else {
+        messageApi.error('该用户账号异常，无法查看微信号');
+      }
+    } catch (err) {
+      messageApi.error('该用户账号异常，无法查看微信号');
+    } finally {
+      setViewingWechat(false);
+    }
+  };
+
+  const handleCopyWechat = async () => {
+    if (!wechatIdInModal) return;
+    try {
+      await navigator.clipboard.writeText(wechatIdInModal);
+      setCopied(true);
+      messageApi.success('微信号已复制');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      messageApi.error('复制失败');
+    }
   };
 
   // 加载状态
@@ -212,23 +242,20 @@ const UserProfilePage = () => {
                   </span>
                 </div>
               </div>
+
+              {/* 查看微信 */}
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={handleViewWechat}
+                  disabled={viewingWechat}
+                  className="inline-flex items-center gap-2 text-slate-600 text-sm font-sans px-4 py-2 rounded-full bg-slate-50 border border-slate-100 hover:bg-slate-100 disabled:opacity-60 transition-colors"
+                >
+                  {viewingWechat ? '查看中...' : '查看微信'}
+                </button>
+              </div>
             </div>
           </div>
-
-          {/* 用户统计信息 */}
-          {/* <div className="bg-white mx-4 mt-4 rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">用户统计</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{posts.length}</div>
-                <div className="text-sm text-gray-500">发布帖子</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">-</div>
-                <div className="text-sm text-gray-500">评论数量</div>
-              </div>
-            </div>
-          </div> */}
 
           {/* 用户帖子列表 */}
           <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
@@ -246,8 +273,8 @@ const UserProfilePage = () => {
                 {posts.map((post) => (
                   <div 
                     key={post.id} 
-                    className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
-                    onClick={() => navigate(`/post/${post.id}`)}
+                    className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6"
+                    // onClick={() => navigate(`/post/${post.id}`)}
                   >
                     {/* 帖子头部信息 */}
                     <div className="flex items-center justify-between mb-4">
@@ -272,23 +299,6 @@ const UserProfilePage = () => {
                         <span className="text-sm font-normal max-w-[90%] truncate font-sans">{post.location}</span>
                       </div>
                     )}
-
-                    {/* 帖子统计 */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                      <div className="flex items-center space-x-6">
-                        <div className="flex items-center space-x-2 text-slate-500">
-                          <ChatBubbleLeftIcon className="h-5 w-5" />
-                          <span className="text-sm font-medium font-sans">{post.comment_count} 条评论</span>
-                          {post.comment_visibility === 'private' && (
-                            <EyeSlashIcon className="h-4 w-4 text-slate-400" title="评论仅作者可见" />
-                          )}
-                        </div>
-                      </div>
-                      
-                      <span className="text-sm text-slate-600 hover:text-slate-800 font-medium group-hover:text-slate-800 transition-colors font-sans">
-                        查看详情 →
-                      </span>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -304,6 +314,34 @@ const UserProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* 微信号弹窗 */}
+      <Modal
+        title="微信号"
+        open={wechatModalOpen}
+        onCancel={() => setWechatModalOpen(false)}
+        footer={null}
+        centered
+        destroyOnHidden
+      >
+        {wechatIdInModal && (
+          <div className="flex items-center justify-between gap-4 py-2 px-4 mt-2 rounded-xl bg-green-50 border border-green-100">
+            <span className="text-green-700 font-medium text-lg font-sans truncate">{wechatIdInModal}</span>
+            <button
+              type="button"
+              onClick={handleCopyWechat}
+              className="flex-shrink-0 p-2 hover:bg-green-100 rounded-lg transition-colors"
+              title="复制微信号"
+            >
+              {copied ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Copy className="h-5 w-5 text-green-600" />
+              )}
+            </button>
+          </div>
+        )}
+      </Modal>
     </>
   );
 };

@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop';
 // Contexts
 import { NotificationProvider } from './contexts/NotificationProvider';
 import { GenderFilterProvider } from './contexts/GenderFilterContext';
+import '@ant-design/v5-patch-for-react-19';
 
 // Pages  
 import HomePage from './pages/HomePage';
@@ -37,7 +38,7 @@ function App() {
   }
 
   return (
-    <NotificationProvider>
+    // <NotificationProvider>
       <GenderFilterProvider>
       <Router>
         <ScrollToTop />
@@ -61,7 +62,7 @@ function App() {
         </div>
       </Router>
       </GenderFilterProvider>
-    </NotificationProvider>
+    // </NotificationProvider>
   );
 }
 
