@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeftIcon, MapPinIcon, EyeIcon, EyeSlashIcon, PencilIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { Radio, message } from 'antd';
-import { API } from '../api';
+import { ChevronLeftIcon, MapPinIcon, PencilIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { message, Modal } from 'antd';
+import { API, authUtils } from '../api';
 import type { Category, CreatePostRequest } from '../api/types';
 
 const CreatePostPage = () => {
@@ -12,8 +12,7 @@ const CreatePostPage = () => {
     content: '',
     location: '',
     category_id: 0,
-    subcategory_id: 0,
-    comment_visibility: 'public'
+    subcategory_id: 0
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +82,65 @@ const CreatePostPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    debugger
+    // 检查是否填写了微信号
+    const user = authUtils.getCurrentUser();
+    const hasWechat = user && user.wechat_id && user.wechat_id.trim() !== '';
+    
+    if (!hasWechat) {
+      Modal.confirm({
+        title: '请先设置微信号',
+        content: '发布帖子前需要先填写微信号，这样其他用户才能与您联系。是否现在前往个人资料页进行设置？',
+        okText: '去设置',
+        cancelText: '取消',
+        onOk: () => {
+          navigate('/profile');
+        },
+        centered: true,
+        className: 'modern-confirm-modal',
+        styles: {
+          body: {
+            padding: '32px 32px 24px',
+          },
+          header: {
+            padding: '0',
+            marginBottom: '16px',
+          },
+          content: {
+            borderRadius: '24px',
+            overflow: 'hidden',
+          },
+          footer: {
+            marginTop: '24px',
+            padding: '0',
+          },
+        },
+        okButtonProps: {
+          style: {
+            height: '48px',
+            borderRadius: '24px',
+            backgroundColor: '#0f172a',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: 500,
+            padding: '0 24px',
+          },
+        },
+        cancelButtonProps: {
+          style: {
+            height: '48px',
+            borderRadius: '24px',
+            border: '1px solid #e2e8f0',
+            fontSize: '16px',
+            fontWeight: 500,
+            padding: '0 24px',
+            color: '#64748b',
+            backgroundColor: '#fff',
+          },
+        },
+      });
+      return;
+    }
     
     // 表单验证
     if (!formData.content.trim()) {
@@ -179,7 +237,7 @@ const CreatePostPage = () => {
                 id="content"
                 value={formData.content}
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="分享你的想法，寻找志同道合的搭子..."
+                placeholder="找个小伙伴周末一起吃火锅～"
                 rows={6}
                 maxLength={150}
                 className="w-full px-6 py-4 rounded-2xl border-0 ring-1 ring-slate-100 focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans resize-none"
@@ -193,7 +251,7 @@ const CreatePostPage = () => {
           {/* 发布位置 */}
           <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
             <label htmlFor="location" className="block text-slate-900 font-medium text-lg mb-3 font-sans">
-              发布位置
+              当前位置
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -204,7 +262,7 @@ const CreatePostPage = () => {
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="输入你的位置，如：北京市朝阳区"
+                placeholder="北京市朝阳区"
                 maxLength={200}
                 className="w-full pl-12 pr-6 py-4 rounded-full border-0 ring-1 ring-slate-100 focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg h-12 caret-slate-600 font-sans"
               />
@@ -309,39 +367,6 @@ const CreatePostPage = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* 评论可见性设置 */}
-          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
-            <label className="block text-slate-900 font-medium text-lg mb-3 font-sans">
-              评论设置
-            </label>
-            <Radio.Group 
-              value={formData.comment_visibility}
-              onChange={(e) => setFormData(prev => ({ ...prev, comment_visibility: e.target.value }))}
-            >
-              <div className="space-y-4">
-                <Radio value="public" className="w-full">
-                  <span className="flex items-center text-slate-700 font-sans">
-                    {/* <EyeIcon className="h-5 w-5 mr-3 text-green-500" /> */}
-                    <div className="ml-2">
-                      <div className="font-medium font-sans">公开评论</div>
-                      <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">所有人都可以看到评论</div>
-                    </div>
-                  </span>
-                </Radio>
-                <div></div>
-                <Radio value="private" className="w-full">
-                  <span className="flex items-center text-slate-700 font-sans">
-                    {/* <EyeSlashIcon className="h-5 w-5 mr-3 text-orange-500" /> */}
-                    <div className="ml-2">
-                      <div className="font-medium font-sans">仅我可见</div>
-                      <div className="text-sm text-slate-500 font-normal font-sans leading-relaxed">只有你能看到别人的评论</div>
-                    </div>
-                  </span>
-                </Radio>
-              </div>
-            </Radio.Group>
           </div>
 
           {/* 提交按钮 */}

@@ -1,9 +1,13 @@
-import { MapPinIcon, ChatBubbleLeftIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { UserRound } from 'lucide-react';
+import { useState } from 'react';
+import { MapPinIcon } from '@heroicons/react/24/outline';
+import { UserRound, Copy, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { message, Modal } from 'antd';
 import { authUtils } from '../api';
+import { viewWechat } from '../api/wechatExchange';
 import type { Post } from '../api/types';
 import { getSubCategoryIcon } from '../utils/categoryIcons';
+import { redirectToLoginIfNeeded } from '../utils/auth';
 
 interface PostCardProps {
   post: Post;
@@ -11,6 +15,10 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
+  const [viewingWechat, setViewingWechat] = useState(false);
+  const [wechatModalOpen, setWechatModalOpen] = useState(false);
+  const [wechatIdInModal, setWechatIdInModal] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -50,10 +58,46 @@ export default function PostCard({ post }: PostCardProps) {
     }
   };
 
+  const handleViewWechat = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (redirectToLoginIfNeeded(navigate)) return;
+    if (post.user_id == null) {
+      message.error('该用户账号异常，无法查看微信号');
+      return;
+    }
+    setViewingWechat(true);
+    try {
+      const res = await viewWechat(Number(post.user_id));
+      if (res.success && res.data?.wechatId) {
+        setWechatIdInModal(res.data.wechatId);
+        setWechatModalOpen(true);
+        setCopied(false);
+      } else {
+        message.error('该用户账号异常，无法查看微信号');
+      }
+    } catch (err) {
+      message.error('该用户账号异常，无法查看微信号');
+    } finally {
+      setViewingWechat(false);
+    }
+  };
+
+  const handleCopyWechat = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!wechatIdInModal) return;
+    try {
+      await navigator.clipboard.writeText(wechatIdInModal);
+      setCopied(true);
+      message.success('微信号已复制');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      message.error('复制失败');
+    }
+  };
+
   return (
     <div 
-      className="group hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 border border-slate-100 bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] cursor-pointer"
-      onClick={handleClick}
+      className="group shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] border border-slate-100 bg-white rounded-[2rem] overflow-hidden"
     >
       <div className="p-8">
         <div className="flex items-start justify-between mb-6">
@@ -101,24 +145,53 @@ export default function PostCard({ post }: PostCardProps) {
           )}
         </div>
         <div className="mb-6">
-          <p className="text-slate-600 text-[1.05rem] leading-loose font-normal group-hover:text-slate-800 transition-colors line-clamp-3 font-sans">
+          <p className="text-slate-800 text-[1.05rem] leading-loose font-normal line-clamp-6 font-sans break-words">
             {post.content}
           </p>
         </div>
         <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-          <div className="flex items-center gap-2 text-sm text-slate-400 group-hover:text-slate-500 transition-colors font-sans">
+          <div className="flex items-center gap-2 text-sm text-slate-500 font-sans">
             <MapPinIcon className="h-4 w-4" />
-            <span className="font-medium max-w-48 sm:max-w-60 truncate">{post.location || '未设置位置'}</span>
+            <span className="font-medium max-w-52 sm:max-w-100 truncate">{post.location || '未设置位置'}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-slate-500 transition-colors text-sm font-sans">
-            <ChatBubbleLeftIcon className="h-4 w-4" />
-            <span className="font-medium">{post.comment_count}</span>
-            {post.comment_visibility === 'private' && (
-              <EyeSlashIcon className="h-3 w-3 ml-1" title="评论仅作者可见" />
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={handleViewWechat}
+            disabled={viewingWechat}
+            className="flex items-center gap-1.5 text-slate-500 text-sm font-sans px-2 py-1 rounded-full bg-slate-50 border border-slate-100 disabled:opacity-60 cursor-pointer"
+          >
+            {viewingWechat ? '查看中...' : '查看微信'}
+          </button>
         </div>
       </div>
+
+      {/* 微信号弹窗 */}
+      <Modal
+        title="微信号"
+        open={wechatModalOpen}
+        onCancel={() => setWechatModalOpen(false)}
+        footer={null}
+        centered
+        destroyOnHidden
+      >
+        {wechatIdInModal && (
+          <div className="flex items-center justify-between gap-4 py-2 px-4 mt-2 rounded-xl bg-green-50 border border-green-100">
+            <span className="text-green-700 font-medium text-lg font-sans truncate">{wechatIdInModal}</span>
+            <button
+              type="button"
+              onClick={handleCopyWechat}
+              className="flex-shrink-0 p-2 hover:bg-green-100 rounded-lg transition-colors"
+              title="复制微信号"
+            >
+              {copied ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Copy className="h-5 w-5 text-green-600" />
+              )}
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 } 

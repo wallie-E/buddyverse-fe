@@ -33,19 +33,19 @@ export default function MyPostsPage() {
         setLoadingMore(true);
       }
       setError('');
-      
+
       const response = await API.users.getUserPosts({
         page: pageNum,
         limit: 10
       });
-      
+
       if (response.success) {
         if (pageNum === 1) {
           setPosts(response.data.list);
         } else {
           setPosts(prev => [...prev, ...response.data.list]);
         }
-        
+
         setHasMore(response.data.pagination.page < response.data.pagination.pages);
       }
     } catch (error) {
@@ -101,7 +101,7 @@ export default function MyPostsPage() {
 
     try {
       await API.posts.deletePost(postId);
-      
+
       // 从列表中移除已删除的帖子
       setPosts(prev => prev.filter(post => post.id !== postId));
     } catch (error) {
@@ -129,118 +129,109 @@ export default function MyPostsPage() {
       {contextHolder}
       <div className="min-h-screen bg-slate-50/50">
         <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-medium text-slate-800 tracking-tight font-sans">我的帖子</h1>
-        </div>
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-medium text-slate-800 tracking-tight font-sans">我的帖子</h1>
+          </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem] mb-8">
-            <div className="flex items-center justify-between">
-              <span className="font-medium font-sans">{error}</span>
-              <button 
-                onClick={() => fetchMyPosts(1)}
-                className="ml-4 bg-white border border-red-200 text-red-600 px-4 py-2 rounded-full hover:shadow-[0_4px_12px_rgba(220,38,38,0.12)] hover:scale-[1.02] transition-all duration-300 text-sm font-medium font-sans"
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem] mb-8">
+              <div className="flex items-center justify-between">
+                <span className="font-medium font-sans">{error}</span>
+                <button
+                  onClick={() => fetchMyPosts(1)}
+                  className="ml-4 bg-white border border-red-200 text-red-600 px-4 py-2 rounded-full hover:shadow-[0_4px_12px_rgba(220,38,38,0.12)] hover:scale-[1.02] transition-all duration-300 text-sm font-medium font-sans"
+                >
+                  重试
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Posts List */}
+          {loading && posts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-600"></div>
+              </div>
+              <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl">📝</span>
+              </div>
+              <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">还没有发布帖子</h3>
+              <p className="text-slate-500 mb-8 max-w-md mx-auto font-normal font-sans leading-relaxed">开始分享你的想法，寻找志同道合的搭子吧！</p>
+              <button
+                onClick={() => navigate('/create-post')}
+                className="h-12 px-8 bg-slate-900 text-white rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
               >
-                重试
+                发布第一个帖子 ✨
               </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="group bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] overflow-hidden relative"
+                  // onClick={() => navigate(`/post/${post.id}`)}
+                >
+                  <div className="p-6 pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
+                            <span>{post.subcategory_name}</span>
+                          </span>
+                          <span className="text-sm text-slate-400 font-normal font-sans">
+                            {formatDate(post.created_at)}
+                          </span>
+                        </div>
+                      </div>
 
-        {/* Posts List */}
-        {loading && posts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-slate-600"></div>
-            </div>
-            <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">📝</span>
-            </div>
-            <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">还没有发布帖子</h3>
-            <p className="text-slate-500 mb-8 max-w-md mx-auto font-normal font-sans leading-relaxed">开始分享你的想法，寻找志同道合的搭子吧！</p>
-            <button
-              onClick={() => navigate('/create-post')}
-              className="h-12 px-8 bg-slate-900 text-white rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
-            >
-              发布第一个帖子 ✨
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {posts.map((post) => (
-              <div 
-                key={post.id} 
-                className="group bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] overflow-hidden cursor-pointer hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
-                onClick={() => navigate(`/post/${post.id}`)}
-              >
-                <div className="p-6 pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
-                          <span>{post.subcategory_name}</span>
-                        </span>
-                        <span className="text-sm text-slate-400 font-normal font-sans">
-                          {formatDate(post.created_at)}
-                        </span>
+                      {/* Action Buttons */}
+                      <div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePost(post.id);
+                          }}
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 rounded-full"
+                          title="删除帖子"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePost(post.id);
-                        }}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 rounded-full"
-                        title="删除帖子"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
                   </div>
-                </div>
-                
-                <div className="px-6 pb-6">
-                  <p className="text-slate-800 mb-6 leading-loose text-base font-normal font-sans group-hover:text-slate-900 transition-colors">
-                    {post.content}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
+
+                  <div className="px-6 pb-8">
+                    <p className="text-slate-800 mb-6 leading-loose text-base font-normal font-sans group-hover:text-slate-900 transition-colors  line-clamp-6 break-words">
+                      {post.content}
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-slate-500 absolute bottom-4">
                       <MapPinIcon className="h-4 w-4" />
                       <span className="text-sm font-normal max-w-32 sm:max-w-60 truncate font-sans">{post.location || '未设置位置'}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-slate-500">
-                      <ChatBubbleLeftIcon className="h-4 w-4" />
-                      <span className="font-normal font-sans">{post.comment_count} 条评论</span>
-                      <span className="text-xs text-slate-400 ml-2 font-sans">
-                        {post.comment_visibility === 'public' ? '公开' : '私密'}
-                      </span>
-                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* 滚动加载提示 */}
-        {loadingMore && posts.length > 0 && (
-          <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-600 mx-auto"></div>
-            <p className="text-slate-500 mt-2 text-sm font-normal font-sans">加载更多...</p>
-          </div>
-        )}
+          {/* 滚动加载提示 */}
+          {loadingMore && posts.length > 0 && (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-600 mx-auto"></div>
+              <p className="text-slate-500 mt-2 text-sm font-normal font-sans">加载更多...</p>
+            </div>
+          )}
 
+        </div>
       </div>
-    </div>
     </>
   );
 } 

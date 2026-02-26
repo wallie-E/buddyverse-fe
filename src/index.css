@@ -17,3 +17,45 @@
     display: none;
   }
 }
+
+/* Modern Confirm Modal Styles */
+.modern-confirm-modal .ant-modal-content {
+  border-radius: 24px !important;
+  box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.12) !important;
+  padding: 0 !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  line-height: 1.4 !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-content {
+  margin-top: 12px !important;
+  font-size: 16px !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-btns {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 24px !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-btns .ant-btn {
+  flex: 1 !important;
+  transition: all 0.3s ease !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-btns .ant-btn-primary:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.modern-confirm-modal .ant-modal-confirm-btns .ant-btn-default:hover {
+  border-color: #cbd5e1 !important;
+  background-color: #f8fafc !important;
+}

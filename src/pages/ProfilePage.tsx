@@ -349,9 +349,9 @@ export default function ProfilePage() {
                   className="w-full px-6 py-4 h-12 text-lg rounded-full border-0 ring-1 ring-slate-100 bg-white focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 caret-slate-600 font-sans"
                   placeholder="请输入微信号"
                 />
-                <p className="text-sm text-slate-500 mt-2 font-normal font-sans leading-relaxed">
+                {/* <p className="text-sm text-slate-500 mt-2 font-normal font-sans leading-relaxed">
                   微信号只有在你和别人交换时，才会告知对方
-                </p>
+                </p> */}
               </div>
 
               {/* Action Buttons */}
@@ -399,9 +399,9 @@ export default function ProfilePage() {
                 <p className="text-xl font-medium text-slate-900 mb-2 font-sans leading-relaxed">
                   {user.wechat_id || '未设置'}
                 </p>
-                <p className="text-sm text-slate-500 font-normal font-sans leading-relaxed">
+                {/* <p className="text-sm text-slate-500 font-normal font-sans leading-relaxed">
                   微信号只有在你和别人交换时，才会告知对方
-                </p>
+                </p> */}
               </div>
 
               {user.signature && (
@@ -415,7 +415,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-1 gap-6 mb-8">
           <button
             onClick={() => navigate('/my-posts')}
             className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-left group"
@@ -427,19 +427,6 @@ export default function ProfilePage() {
               <h3 className="text-xl font-medium text-slate-900 group-hover:text-slate-700 transition-colors truncate font-sans">我的帖子</h3>
             </div>
             <p className="text-base text-slate-500 font-normal font-sans leading-relaxed">查看和管理我发布的帖子</p>
-          </button>
-
-          <button
-            onClick={() => navigate('/notifications')}
-            className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 text-left group"
-          >
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">🔔</span>
-              </div>
-              <h3 className="text-xl font-medium text-slate-900 group-hover:text-slate-700 transition-colors truncate font-sans">消息中心</h3>
-            </div>
-            <p className="text-base text-slate-500 font-normal font-sans leading-relaxed">查看评论和回复消息</p>
           </button>
         </div>
 
@@ -460,19 +447,6 @@ export default function ProfilePage() {
             </button>
           </div>
         )}
-
-        {/* Logout */}
-        {/* <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <h3 className="text-2xl font-medium text-slate-900 font-sans">账户操作</h3>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full sm:w-auto bg-white border border-red-200 text-red-600 px-8 py-4 rounded-full hover:shadow-[0_8px_20px_rgba(220,38,38,0.12)] hover:scale-[1.02] hover:border-red-300 transition-all duration-300 font-medium font-sans text-base"
-          >
-            退出登录
-          </button>
-        </div> */}
       </div>
     </div>
   );

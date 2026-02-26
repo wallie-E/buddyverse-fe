@@ -112,3 +112,13 @@ export const updateWechat = async (data: UpdateWechatRequest): Promise<ApiRespon
   return api.post('/api/wechat-exchange/update-wechat', data);
 };
 
+// 查看微信响应
+export interface ViewWechatResponse {
+  wechatId: string;
+}
+
+// 查看微信（首页直接查看帖子作者微信号）
+export const viewWechat = async (targetUserId: number): Promise<ApiResponse<ViewWechatResponse>> => {
+  return api.post('/api/wechat-exchange/view', { targetUserId });
+};
+

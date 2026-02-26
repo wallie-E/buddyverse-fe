@@ -22,6 +22,23 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // 监听滚动，控制回到顶部按钮显示
+  useEffect(() => {
+    const SCROLL_THRESHOLD = 400;
+    const handleScrollVisibility = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setShowBackToTop(scrollTop > SCROLL_THRESHOLD);
+    };
+    window.addEventListener('scroll', handleScrollVisibility, { passive: true });
+    handleScrollVisibility(); // 初始检查
+    return () => window.removeEventListener('scroll', handleScrollVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // 获取分类列表
   useEffect(() => {
@@ -286,6 +303,20 @@ export default function HomePage() {
         </div>
 
       </div>
+
+      {/* 回到顶部悬浮按钮 */}
+      {showBackToTop && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          aria-label="回到顶部"
+          className="fixed bottom-8 right-6 z-50 w-12 h-12 rounded-full bg-slate-800/55 backdrop-blur-sm text-white shadow-lg hover:bg-slate-700/85 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center ring-2 ring-white/10"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
