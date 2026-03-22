@@ -2,7 +2,6 @@
 export * from './auth';
 export * from './users';
 export * from './posts';
-export * from './comments';
 export * from './categories';
 export * from './notifications';
 export * from './admin';
@@ -18,7 +17,6 @@ export { default as api, BASE_URL } from './config';
 import * as authAPI from './auth';
 import * as usersAPI from './users';
 import * as postsAPI from './posts';
-import * as commentsAPI from './comments';
 import * as categoriesAPI from './categories';
 import * as notificationsAPI from './notifications';
 import * as adminAPI from './admin';
@@ -28,7 +26,6 @@ export const API = {
   auth: authAPI,
   users: usersAPI,
   posts: postsAPI,
-  comments: commentsAPI,
   categories: categoriesAPI,
   notifications: notificationsAPI,
   admin: adminAPI,

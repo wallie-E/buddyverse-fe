@@ -1,10 +1,126 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeftIcon, TrashIcon, ChartBarIcon, UsersIcon, FireIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, TrashIcon, ChartBarIcon, UsersIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-import { Table, Button, Modal, Card, Tag, Input, Space, message, Popconfirm, Spin } from 'antd';
+import { Table, Button, Modal, Input, Space, message, Popconfirm, Spin, ConfigProvider, theme, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { getStats, adminUsers, adminPosts } from '../api/admin';
 import type { User, Post, AdminStats } from '../api/types';
+
+const SURFACE = '#1c1b1e';
+const SURFACE_LOW = '#131314';
+const SURFACE_HIGH = '#201f21';
+const PRIMARY = '#8ff5ff';
+const SECONDARY = '#d575ff';
+const TERTIARY = '#aaffdc';
+const TEXT = '#e0e0e3';
+const TEXT_SUB = '#8e8e93';
+
+const darkTheme = {
+  algorithm: theme.darkAlgorithm,
+  token: {
+    colorBgContainer: SURFACE,
+    colorBgElevated: SURFACE_HIGH,
+    colorText: TEXT,
+    colorTextSecondary: TEXT_SUB,
+    colorBorder: 'rgba(255,255,255,0.08)',
+    colorBorderSecondary: 'rgba(255,255,255,0.05)',
+    colorPrimary: PRIMARY,
+    colorPrimaryHover: '#a8f8ff',
+    colorError: '#ff6478',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    borderRadius: 12,
+    colorSplit: 'rgba(255,255,255,0.06)',
+    colorFillAlter: SURFACE_LOW,
+  },
+  components: {
+    Table: {
+      headerBg: SURFACE_LOW,
+      rowHoverBg: 'rgba(143,245,255,0.04)',
+      headerColor: TEXT_SUB,
+      borderColor: 'rgba(255,255,255,0.06)',
+      footerBg: SURFACE_LOW,
+    },
+    Input: {
+      colorBgContainer: SURFACE_LOW,
+      activeBorderColor: PRIMARY,
+      hoverBorderColor: 'rgba(143,245,255,0.3)',
+    },
+    Button: {
+      colorLink: PRIMARY,
+      colorLinkHover: '#a8f8ff',
+      colorLinkActive: '#a8f8ff',
+      colorErrorText: '#ff6478',
+    },
+    Popconfirm: {
+      colorBgElevated: SURFACE_HIGH,
+    },
+    Spin: {
+      colorPrimary: PRIMARY,
+    },
+    Pagination: {
+      colorBgContainer: SURFACE,
+    },
+  },
+};
+
+const StatCard = ({
+  label,
+  value,
+  sub,
+  subValue,
+  accentColor,
+  icon: Icon,
+}: {
+  label: string;
+  value: number | string;
+  sub: string;
+  subValue: number | string;
+  accentColor: string;
+  icon: React.ElementType;
+}) => (
+  <div
+    style={{
+      backgroundColor: SURFACE,
+      borderRadius: '1.25rem',
+      border: `1px solid ${accentColor}22`,
+      boxShadow: `0 4px 32px rgba(0,0,0,0.3), 0 0 40px ${accentColor}08`,
+      padding: '1.5rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem',
+    }}
+  >
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div>
+        <p style={{ color: TEXT_SUB, fontSize: '0.8rem', fontWeight: 500, marginBottom: '0.4rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          {label}
+        </p>
+        <p style={{ color: accentColor, fontSize: '2.25rem', fontWeight: 700, lineHeight: 1, fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>
+          {value}
+        </p>
+      </div>
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: '0.75rem',
+          backgroundColor: `${accentColor}14`,
+          border: `1px solid ${accentColor}25`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Icon style={{ width: 20, height: 20, color: accentColor }} />
+      </div>
+    </div>
+    <p style={{ color: TEXT_SUB, fontSize: '0.8rem' }}>
+      <span style={{ color: `${accentColor}bb`, fontWeight: 600 }}>{subValue}</span>
+      {'  '}{sub}
+    </p>
+  </div>
+);
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -14,138 +130,143 @@ const AdminPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
-  
-  // API相关状态
+
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [userPostsLoading, setUserPostsLoading] = useState(false);
 
-  // 获取统计数据
   const fetchStats = async () => {
     try {
       const response = await getStats();
       setStats(response.data);
-    } catch (error) {
-      console.error('获取统计数据失败:', error);
+    } catch {
       message.error('获取统计数据失败');
     }
   };
 
-  // 获取用户列表
-  const fetchUsers = async (page: number = 1, limit: number = 10, search?: string) => {
+  const fetchUsers = async (page = 1, limit = 10, search?: string) => {
     setLoading(true);
     try {
       const params: { page: number; limit: number; search?: string } = { page, limit };
-      if (search && search.trim()) {
-        params.search = search.trim();
-      }
-      
+      if (search?.trim()) params.search = search.trim();
       const response = await adminUsers.list(params);
       setUsers(response.data.list);
       setTotalUsers(response.data.pagination.total);
-    } catch (error) {
-      console.error('获取用户列表失败:', error);
+    } catch {
       message.error('获取用户列表失败');
     } finally {
       setLoading(false);
     }
   };
 
-  // 获取用户帖子和用户信息
   const fetchUserPosts = async (userId: number) => {
     setUserPostsLoading(true);
     try {
       const response = await adminPosts.getUserPosts(userId, { page: 1, limit: 100 });
-      // 更新用户信息（从API获取的最新信息）
       setSelectedUser(response.data.user);
       setUserPosts(response.data.posts.list);
-    } catch (error) {
-      console.error('获取用户帖子失败:', error);
+    } catch {
       message.error('获取用户帖子失败');
     } finally {
       setUserPostsLoading(false);
     }
   };
 
-  // 初始化数据
   useEffect(() => {
     fetchStats();
     fetchUsers(1, pageSize);
   }, [pageSize]);
 
-  // 格式化日期
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN');
-  };
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('zh-CN');
 
-  // 处理搜索
   const handleSearch = (value: string) => {
     setSearchQuery(value);
-    setCurrentPage(1); // 重置到第一页
+    setCurrentPage(1);
     fetchUsers(1, pageSize, value);
   };
 
-  // 处理搜索框清空
   const handleSearchClear = () => {
     setSearchQuery('');
     setCurrentPage(1);
     fetchUsers(1, pageSize);
   };
 
-  // 删除用户
   const handleDeleteUser = async (userId: number, userNickname: string) => {
     try {
       await adminUsers.delete(userId);
       message.success(`用户 ${userNickname} 删除成功`);
-      // 重新获取用户列表
       fetchUsers(currentPage, pageSize);
-    } catch (error) {
-      console.error('删除用户失败:', error);
+    } catch {
       message.error('删除用户失败');
     }
   };
 
-  // 查看用户详情
   const handleViewUser = async (user: User) => {
     setUserDetailVisible(true);
     await fetchUserPosts(user.id);
   };
 
-  // 删除用户帖子
   const handleDeletePost = async (postId: number, postContent: string) => {
     try {
       console.log('删除帖子:', postId, '内容:', postContent);
       await adminPosts.delete(postId);
       message.success('帖子删除成功');
-      // 重新获取用户帖子
-      if (selectedUser) {
-        await fetchUserPosts(selectedUser.id);
-      }
-    } catch (error) {
-      console.error('删除帖子失败:', error);
+      if (selectedUser) await fetchUserPosts(selectedUser.id);
+    } catch {
       message.error('删除帖子失败');
     }
   };
 
+  const genderLabel = (gender: string) =>
+    gender === 'male' ? '男' : gender === 'female' ? '女' : '其他';
+  const genderColor = (gender: string) =>
+    gender === 'male' ? '#60a5fa' : gender === 'female' ? '#f472b6' : TEXT_SUB;
 
-  // 表格列定义
   const columns: ColumnsType<User> = [
     {
       title: '用户',
       dataIndex: 'nickname',
       key: 'nickname',
       render: (text, record) => (
-        <div className="flex items-center space-x-3">
-          {/* <Avatar src={getUserAvatar(record)} size={40} /> */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, rgba(143,245,255,0.25), rgba(213,117,255,0.25))`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              color: PRIMARY,
+              flexShrink: 0,
+            }}
+          >
+            {text?.charAt(0)}
+          </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">{text}</span>
-              {record.role === 'admin' && (
-                <Tag color="blue">管理员</Tag>
-              )}
-            </div>
+            <span style={{ color: TEXT, fontWeight: 600, fontSize: '0.875rem' }}>{text}</span>
+            {record.role === 'admin' && (
+              <span
+                style={{
+                  marginLeft: 6,
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  color: SECONDARY,
+                  backgroundColor: `${SECONDARY}18`,
+                  border: `1px solid ${SECONDARY}30`,
+                  borderRadius: '999px',
+                  padding: '1px 7px',
+                }}
+              >
+                管理员
+              </span>
+            )}
           </div>
         </div>
       ),
@@ -154,15 +275,28 @@ const AdminPage = () => {
       title: '邮箱',
       dataIndex: 'email',
       key: 'email',
+      render: (email) => (
+        <span style={{ color: TEXT_SUB, fontSize: '0.85rem' }}>{email}</span>
+      ),
     },
     {
       title: '性别',
       dataIndex: 'gender',
       key: 'gender',
       render: (gender) => (
-        <Tag color={gender === 'male' ? 'blue' : gender === 'female' ? 'pink' : 'purple'}>
-          {gender === 'male' ? '男' : gender === 'female' ? '女' : '其他'}
-        </Tag>
+        <span
+          style={{
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            color: genderColor(gender),
+            backgroundColor: `${genderColor(gender)}18`,
+            border: `1px solid ${genderColor(gender)}28`,
+            borderRadius: '999px',
+            padding: '2px 10px',
+          }}
+        >
+          {genderLabel(gender)}
+        </span>
       ),
     },
     {
@@ -170,22 +304,28 @@ const AdminPage = () => {
       dataIndex: 'post_count',
       key: 'post_count',
       render: (count) => (
-        <Tag color="blue">{count}</Tag>
+        <span
+          style={{
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            color: TERTIARY,
+            backgroundColor: `${TERTIARY}14`,
+            border: `1px solid ${TERTIARY}22`,
+            borderRadius: '999px',
+            padding: '2px 10px',
+          }}
+        >
+          {count}
+        </span>
       ),
     },
-    // {
-    //   title: '评论数',
-    //   dataIndex: 'commentCount',
-    //   key: 'commentCount',
-    //   render: (count) => (
-    //     <Tag color="green">{count}</Tag>
-    //   ),
-    // },
     {
       title: '注册时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date) => formatDate(date),
+      render: (date) => (
+        <span style={{ color: TEXT_SUB, fontSize: '0.85rem' }}>{formatDate(date)}</span>
+      ),
     },
     {
       title: '操作',
@@ -194,18 +334,19 @@ const AdminPage = () => {
         <Space>
           <Button
             type="link"
-            icon={<EyeIcon className="w-4 h-4" />}
+            icon={<EyeIcon style={{ width: 14, height: 14 }} />}
             onClick={() => handleViewUser(record)}
+            style={{ color: PRIMARY, padding: '0 4px', fontSize: '0.85rem' }}
           >
-            查看详情
+            详情
           </Button>
           <Popconfirm
             title="确认删除用户"
             description={
-              <div>
-                <p>您确定要删除用户 <strong>{record.nickname}</strong> 吗？</p>
-                <p style={{ color: '#ff4d4f', marginTop: '8px' }}>
-                  ⚠️ 此操作将永久删除该用户及其所有数据，无法恢复！
+              <div style={{ color: TEXT_SUB, fontSize: '0.85rem', maxWidth: 240 }}>
+                <p>确定永久删除用户 <strong style={{ color: TEXT }}>{record.nickname}</strong> 吗？</p>
+                <p style={{ color: '#ff6478', marginTop: 6, fontSize: '0.8rem' }}>
+                  此操作无法恢复，包括该用户所有数据。
                 </p>
               </div>
             }
@@ -218,7 +359,8 @@ const AdminPage = () => {
             <Button
               type="link"
               danger
-              icon={<TrashIcon className="w-4 h-4" />}
+              icon={<TrashIcon style={{ width: 14, height: 14 }} />}
+              style={{ padding: '0 4px', fontSize: '0.85rem' }}
             >
               删除
             </Button>
@@ -229,205 +371,379 @@ const AdminPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 顶部导航栏 */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
-          </button>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-              <ChartBarIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-medium text-gray-900">管理后台</h1>
-              <p className="text-sm text-gray-500">用户管理</p>
-            </div>
-          </div>
-          <div className="w-6"></div>
-        </div>
-      </div>
+    <ConfigProvider theme={darkTheme}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#0e0e0f' }}>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {/* 总用户数 */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-blue-100 text-sm">总用户数</p>
-                <p className="text-3xl font-bold">{stats?.users.total_users || 0}</p>
-              </div>
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <UsersIcon className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="flex items-center text-sm">
-              <span className="text-blue-100">活跃用户: {stats?.users.active_users || 0}</span>
-            </div>
-          </div>
+        {/* 顶部导航 */}
+        <div
+          style={{
+            backgroundColor: 'rgba(14,14,15,0.85)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.25rem' }}>
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                borderRadius: '0.625rem',
+                color: TEXT_SUB,
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = TEXT)}
+              onMouseLeave={e => (e.currentTarget.style.color = TEXT_SUB)}
+            >
+              <ChevronLeftIcon style={{ width: 22, height: 22 }} />
+            </button>
 
-          {/* 总帖子数 */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between mb-4">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '0.75rem',
+                  background: `linear-gradient(135deg, ${PRIMARY}30, ${SECONDARY}30)`,
+                  border: `1px solid ${PRIMARY}25`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ChartBarIcon style={{ width: 20, height: 20, color: PRIMARY }} />
+              </div>
               <div>
-                <p className="text-green-100 text-sm">总帖子数</p>
-                <p className="text-3xl font-bold">{stats?.posts.total_posts || 0}</p>
-              </div>
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <ChartBarIcon className="w-6 h-6" />
+                <h1
+                  style={{
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    color: TEXT,
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    letterSpacing: '-0.02em',
+                    margin: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  管理后台
+                </h1>
+                <p style={{ fontSize: '0.75rem', color: TEXT_SUB, margin: 0 }}>用户管理</p>
               </div>
             </div>
-            <div className="flex items-center text-sm">
-              <span className="text-green-100">今日新增: {stats?.posts.today_posts || 0}</span>
-            </div>
-          </div>
 
-          {/* 总评论数 */}
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-6 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-purple-100 text-sm">总评论数</p>
-                <p className="text-3xl font-bold">{stats?.comments.total_comments || 0}</p>
-              </div>
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <FireIcon className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="flex items-center text-sm">
-              <span className="text-purple-100">今日新增: {stats?.comments.today_comments || 0}</span>
-            </div>
+            <div style={{ width: 30 }} />
           </div>
         </div>
 
-        {/* 用户管理表格 */}
-        <Card title="用户管理" className="shadow-sm">
-          <div className="mb-4">
-            <Input.Search
-              placeholder="搜索用户昵称或邮箱..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onSearch={handleSearch}
-              onClear={handleSearchClear}
-              allowClear
-              style={{ width: 300, caretColor: 'rgb(71, 85, 105)' }}
-              enterButton
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1.25rem' }}>
+
+          {/* 统计卡片 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            <StatCard
+              label="总用户数"
+              value={stats?.users.total_users ?? '—'}
+              sub="活跃用户"
+              subValue={stats?.users.active_users ?? 0}
+              accentColor={PRIMARY}
+              icon={UsersIcon}
+            />
+            <StatCard
+              label="总帖子数"
+              value={stats?.posts.total_posts ?? '—'}
+              sub="今日新增"
+              subValue={stats?.posts.today_posts ?? 0}
+              accentColor={TERTIARY}
+              icon={ChartBarIcon}
             />
           </div>
-          
-          <Table
-            columns={columns}
-            dataSource={users}
-            rowKey="id"
-            loading={loading}
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: totalUsers,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size || 10);
-                fetchUsers(page, size || 10, searchQuery);
-              },
-            }}
-          />
-        </Card>
-      </div>
 
-      {/* 用户详情模态框 */}
-      <Modal
-        title="用户详情"
-        open={userDetailVisible}
-        onCancel={() => setUserDetailVisible(false)}
-        footer={null}
-        width={800}
-      >
-        {selectedUser && (
-          <div className="space-y-6">
-            {/* 用户基本信息 */}
-            <Card title="基本信息" size="small">
-              <div className="flex items-start space-x-4">
-                {/* <Avatar src={getUserAvatar(selectedUser)} size={80} /> */}
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="text-lg font-medium">{selectedUser.nickname}</h3>
-                    {selectedUser.role === 'admin' && (
-                      <Tag color="blue">管理员</Tag>
+          {/* 用户管理表格 */}
+          <div
+            style={{
+              backgroundColor: SURFACE,
+              borderRadius: '1.25rem',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.3)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* 表格头部 */}
+            <div
+              style={{
+                padding: '1.25rem 1.5rem',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <UsersIcon style={{ width: 18, height: 18, color: TEXT_SUB }} />
+                <h2
+                  style={{
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    color: TEXT,
+                    margin: 0,
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  用户列表
+                </h2>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: PRIMARY,
+                    backgroundColor: `${PRIMARY}14`,
+                    border: `1px solid ${PRIMARY}22`,
+                    borderRadius: '999px',
+                    padding: '1px 8px',
+                  }}
+                >
+                  {totalUsers}
+                </span>
+              </div>
+              <Input.Search
+                placeholder="搜索用户昵称或邮箱..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={handleSearch}
+                onClear={handleSearchClear}
+                allowClear
+                style={{ width: 280 }}
+                enterButton
+              />
+            </div>
+
+            <div style={{ padding: '0 0.25rem' }}>
+              <Table
+                columns={columns}
+                dataSource={users}
+                rowKey="id"
+                loading={loading}
+                pagination={{
+                  current: currentPage,
+                  pageSize: pageSize,
+                  total: totalUsers,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条 / 共 ${total} 条`,
+                  onChange: (page, size) => {
+                    setCurrentPage(page);
+                    setPageSize(size || 10);
+                    fetchUsers(page, size || 10, searchQuery);
+                  },
+                  style: { padding: '0.75rem 1rem' },
+                }}
+                style={{ backgroundColor: 'transparent' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 用户详情 Modal */}
+        <Modal
+          title={
+            <span
+              style={{
+                color: TEXT,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontWeight: 700,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              用户详情
+            </span>
+          }
+          open={userDetailVisible}
+          onCancel={() => setUserDetailVisible(false)}
+          footer={null}
+          width={720}
+          styles={{
+            content: {
+              backgroundColor: SURFACE,
+              borderRadius: '1.25rem',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              padding: 0,
+            },
+            header: {
+              backgroundColor: SURFACE,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              padding: '1.25rem 1.5rem',
+              borderRadius: '1.25rem 1.25rem 0 0',
+              marginBottom: 0,
+            },
+            body: {
+              padding: '1.5rem',
+              maxHeight: '75vh',
+              overflowY: 'auto',
+            },
+          }}
+        >
+          {selectedUser && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+              {/* 用户基本信息 */}
+              <div
+                style={{
+                  backgroundColor: SURFACE_LOW,
+                  borderRadius: '1rem',
+                  padding: '1.25rem',
+                }}
+              >
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: TEXT_SUB, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>
+                  基本信息
+                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      background: `linear-gradient(135deg, rgba(143,245,255,0.3), rgba(213,117,255,0.3))`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '1.4rem',
+                      color: PRIMARY,
+                      flexShrink: 0,
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    }}
+                  >
+                    {selectedUser.nickname?.charAt(0)}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: TEXT, margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {selectedUser.nickname}
+                      </h3>
+                      {selectedUser.role === 'admin' && (
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: SECONDARY, backgroundColor: `${SECONDARY}18`, border: `1px solid ${SECONDARY}30`, borderRadius: 999, padding: '1px 7px' }}>
+                          管理员
+                        </span>
+                      )}
+                    </div>
+                    <p style={{ color: TEXT_SUB, fontSize: '0.875rem', margin: '0 0 4px' }}>{selectedUser.email}</p>
+                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: TEXT_SUB, marginTop: 4 }}>
+                      <span>
+                        性别：<span style={{ color: genderColor(selectedUser.gender || ''), fontWeight: 600 }}>{genderLabel(selectedUser.gender || '')}</span>
+                      </span>
+                      <span>注册：{selectedUser.created_at ? formatDate(selectedUser.created_at) : '未知'}</span>
+                    </div>
+                    {selectedUser.signature && (
+                      <p style={{ color: TEXT_SUB, fontStyle: 'italic', fontSize: '0.85rem', marginTop: 8 }}>
+                        "{selectedUser.signature}"
+                      </p>
                     )}
                   </div>
-                  <p className="text-gray-600 mb-2">{selectedUser.email}</p>
-                  <p className="text-gray-600 mb-2">
-                    性别: {selectedUser.gender === 'male' ? '男' : selectedUser.gender === 'female' ? '女' : '其他'}
-                  </p>
-                  <p className="text-gray-600 mb-2">
-                    注册时间: {selectedUser.created_at ? formatDate(selectedUser.created_at) : '未知'}
-                  </p>
-                  {selectedUser.signature && (
-                    <p className="text-gray-600 italic">"{selectedUser.signature}"</p>
-                  )}
                 </div>
               </div>
-            </Card>
 
-            {/* 用户统计 */}
-            <Card title="统计信息" size="small">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{userPosts.length}</div>
-                  <div className="text-gray-600">发布帖子</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {userPosts.reduce((sum, post) => sum + post.comment_count, 0)}
+              {/* 统计 */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                {[
+                  { label: '发布帖子', value: userPosts.length, color: PRIMARY },
+                  { label: '获得评论', value: userPosts.reduce((s, p) => s + p.comment_count, 0), color: TERTIARY },
+                ].map(({ label, value, color }) => (
+                  <div
+                    key={label}
+                    style={{
+                      backgroundColor: SURFACE_LOW,
+                      borderRadius: '0.875rem',
+                      padding: '1rem',
+                      textAlign: 'center',
+                      border: `1px solid ${color}18`,
+                    }}
+                  >
+                    <div style={{ fontSize: '1.75rem', fontWeight: 700, color, fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1 }}>
+                      {value}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: TEXT_SUB, marginTop: 4 }}>{label}</div>
                   </div>
-                  <div className="text-gray-600">总评论数</div>
-                </div>
+                ))}
               </div>
-            </Card>
 
-            {/* 用户发布的帖子 */}
-            <Card title="发布的帖子" size="small">
-              <Spin spinning={userPostsLoading}>
-                <div className="space-y-3">
-                  {userPosts.map((post) => (
-                    <div key={post.id} className="border rounded-lg p-3 hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <p className="text-gray-900 mb-1">{post.content}</p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <span>📍 {post.location || '未设置位置'}</span>
-                            <span>📅 {formatDate(post.created_at)}</span>
-                            <span>💬 {post.comment_count} 评论</span>
+              {/* 帖子列表 */}
+              <div
+                style={{
+                  backgroundColor: SURFACE_LOW,
+                  borderRadius: '1rem',
+                  padding: '1.25rem',
+                }}
+              >
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: TEXT_SUB, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>
+                  发布的帖子
+                </p>
+                <Spin spinning={userPostsLoading}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {userPosts.map((post) => (
+                      <div
+                        key={post.id}
+                        style={{
+                          backgroundColor: SURFACE_HIGH,
+                          borderRadius: '0.875rem',
+                          padding: '1rem',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ color: TEXT, fontSize: '0.875rem', margin: '0 0 8px', lineHeight: 1.6 }}>{post.content}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', fontSize: '0.78rem', color: TEXT_SUB, flexWrap: 'wrap' }}>
+                              <span>📍 {post.location || '未设置位置'}</span>
+                              <span>📅 {formatDate(post.created_at)}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                              {post.category_name && (
+                                <Tag
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    color: PRIMARY,
+                                    backgroundColor: `${PRIMARY}14`,
+                                    border: `1px solid ${PRIMARY}22`,
+                                    borderRadius: 999,
+                                    padding: '0 8px',
+                                  }}
+                                >
+                                  {post.category_name}
+                                </Tag>
+                              )}
+                              {post.subcategory_name && (
+                                <Tag
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    color: TERTIARY,
+                                    backgroundColor: `${TERTIARY}14`,
+                                    border: `1px solid ${TERTIARY}22`,
+                                    borderRadius: 999,
+                                    padding: '0 8px',
+                                  }}
+                                >
+                                  {post.subcategory_name}
+                                </Tag>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="ml-4">
                           <Popconfirm
                             title="确认删除帖子"
                             description={
-                              <div>
-                                <p>您确定要删除这个帖子吗？</p>
-                                <p style={{ color: '#ff4d4f', marginTop: '8px', fontSize: '12px' }}>
-                                  ⚠️ 此操作将永久删除该帖子及其所有评论，无法恢复！
-                                </p>
-                                <div style={{ 
-                                  marginTop: '8px', 
-                                  padding: '8px', 
-                                  backgroundColor: '#f5f5f5', 
-                                  borderRadius: '4px',
-                                  fontSize: '12px',
-                                  color: '#666',
-                                  maxWidth: '200px',
-                                  wordBreak: 'break-word'
-                                }}>
-                                  "{post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content}"
-                                </div>
+                              <div style={{ color: TEXT_SUB, fontSize: '0.85rem', maxWidth: 220 }}>
+                                <p>确定永久删除这条帖子吗？</p>
+                                <p style={{ color: '#ff6478', marginTop: 4, fontSize: '0.78rem' }}>此操作无法恢复。</p>
                               </div>
                             }
                             onConfirm={() => handleDeletePost(post.id, post.content)}
@@ -436,39 +752,48 @@ const AdminPage = () => {
                             okButtonProps={{ danger: true }}
                             placement="topRight"
                           >
-                            <Button
-                              type="text"
-                              danger
-                              size="small"
-                              icon={<TrashIcon className="w-4 h-4" />}
+                            <button
+                              style={{
+                                background: 'none',
+                                border: '1px solid rgba(255,100,120,0.25)',
+                                cursor: 'pointer',
+                                padding: '5px 8px',
+                                borderRadius: '0.5rem',
+                                color: '#ff6478',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                flexShrink: 0,
+                                transition: 'background 0.2s',
+                              }}
+                              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,100,120,0.1)')}
+                              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >
+                              <TrashIcon style={{ width: 13, height: 13 }} />
                               删除
-                            </Button>
+                            </button>
                           </Popconfirm>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Tag color="blue">{post.category_name}</Tag>
-                        <Tag color="green">{post.subcategory_name}</Tag>
-                        {post.comment_visibility === 'private' && (
-                          <Tag color="orange">私密评论</Tag>
-                        )}
+                    ))}
+                    {userPosts.length === 0 && !userPostsLoading && (
+                      <div style={{ textAlign: 'center', padding: '2rem 0', color: TEXT_SUB, fontSize: '0.875rem' }}>
+                        该用户还没有发布任何帖子
                       </div>
-                    </div>
-                  ))}
-                  {userPosts.length === 0 && !userPostsLoading && (
-                    <div className="text-center py-8 text-gray-500">
-                      该用户还没有发布任何帖子
-                    </div>
-                  )}
-                </div>
-              </Spin>
-            </Card>
-          </div>
-        )}
-      </Modal>
-    </div>
+                    )}
+                  </div>
+                </Spin>
+              </div>
+
+            </div>
+          )}
+        </Modal>
+
+      </div>
+    </ConfigProvider>
   );
 };
 
-export default AdminPage; 
+export default AdminPage;
