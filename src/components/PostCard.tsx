@@ -49,10 +49,6 @@ export default function PostCard({ post }: PostCardProps) {
     return '刚刚';
   };
 
-  const handleClick = () => {
-    navigate(`/post/${post.id}`);
-  };
-
   const handleAvatarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const currentUser = authUtils.getCurrentUser();
@@ -105,10 +101,7 @@ export default function PostCard({ post }: PostCardProps) {
 
   return (
     <div
-      className="group overflow-hidden cursor-pointer transition-all duration-200"
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      className="group overflow-hidden transition-all duration-200"
       style={{
         backgroundColor: '#1c1b1e',
         borderRadius: '1.25rem',

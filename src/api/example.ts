@@ -9,7 +9,6 @@ import type {
   RegisterRequest, 
   LoginRequest, 
   CreatePostRequest, 
-  CreateCommentRequest 
 } from './types';
 
 // ======================== 认证示例 ========================
@@ -85,31 +84,6 @@ export const handleGetPosts = async (page = 1, categoryId?: number) => {
   }
 };
 
-// ======================== 评论示例 ========================
-
-// 创建评论示例
-export const handleCreateComment = async (commentData: CreateCommentRequest) => {
-  try {
-    const response = await API.comments.createComment(commentData);
-    if (response.success) {
-      console.log('评论创建成功:', response.data);
-    }
-  } catch (error) {
-    console.error('创建评论失败:', error);
-  }
-};
-
-// 获取帖子评论示例
-export const handleGetComments = async (postId: number, page = 1) => {
-  try {
-    const response = await API.comments.getPostComments(postId, { page, limit: 10 });
-    if (response.success) {
-      console.log('评论列表:', response.data.list);
-    }
-  } catch (error) {
-    console.error('获取评论失败:', error);
-  }
-};
 
 // ======================== 通知示例 ========================
 

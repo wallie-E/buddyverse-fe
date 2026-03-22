@@ -71,7 +71,7 @@ export default function HomePage() {
         location: locationParam || undefined,
         gender: genderParam || undefined,
       });
-      console.log('response.data.list', posts);
+      
       if (response.success) {
         if (pageNum === 1) {
           setPosts(response.data.list);
