@@ -24,7 +24,6 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  // 监听滚动，控制回到顶部按钮显示
   useEffect(() => {
     const SCROLL_THRESHOLD = 400;
     const handleScrollVisibility = () => {
@@ -32,7 +31,7 @@ export default function HomePage() {
       setShowBackToTop(scrollTop > SCROLL_THRESHOLD);
     };
     window.addEventListener('scroll', handleScrollVisibility, { passive: true });
-    handleScrollVisibility(); // 初始检查
+    handleScrollVisibility();
     return () => window.removeEventListener('scroll', handleScrollVisibility);
   }, []);
 
@@ -40,7 +39,6 @@ export default function HomePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 获取分类列表
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -52,17 +50,14 @@ export default function HomePage() {
         console.error('获取分类失败:', error);
       }
     };
-
     fetchCategories();
   }, []);
 
-  // 获取帖子列表
   const fetchPosts = async (pageNum = 1, categoryId?: number, subCategoryId?: number, locationParam?: string, genderParam?: 'male' | 'female' | null) => {
     try {
-      // 第一页使用 loading，后续页面使用 loadingMore
       if (pageNum === 1) {
         setLoading(true);
-        setPosts([]); // 第一页时先清空旧数据
+        setPosts([]);
       } else {
         setLoadingMore(true);
       }
@@ -76,22 +71,18 @@ export default function HomePage() {
         location: locationParam || undefined,
         gender: genderParam || undefined,
       });
-      console.log('response.data.list',posts);
+      console.log('response.data.list', posts);
       if (response.success) {
         if (pageNum === 1) {
-          // 第一页直接替换结果
           setPosts(response.data.list);
         } else {
-          // 后续页面追加数据，去重处理
           setPosts(prev => {
             const existingIds = new Set(prev.map(p => p.id));
             const newPosts = response.data.list.filter(p => !existingIds.has(p.id));
             return [...prev, ...newPosts];
           });
         }
-
         setHasMore(response.data.pagination.page < response.data.pagination.pages);
-
       }
     } catch (error) {
       console.error('获取帖子列表失败:', error);
@@ -105,13 +96,11 @@ export default function HomePage() {
     }
   };
 
-  // 处理分类切换（即时生效）
   useEffect(() => {
     setPage(1);
     fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined);
   }, [selectedCategoryId, selectedSubCategoryId, selectedGender]);
 
-  // 加载更多
   const loadMore = useCallback(() => {
     if (!hasMore || loading || loadingMore) return;
     const nextPage = page + 1;
@@ -121,75 +110,65 @@ export default function HomePage() {
 
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
-    setSelectedSubCategoryId(null); // 重置子分类
+    setSelectedSubCategoryId(null);
   };
 
   const handleSubCategoryChange = (subCategoryId: number | null) => {
     setSelectedSubCategoryId(subCategoryId);
   };
 
-  // 处理位置搜索
   const handleLocationSearch = () => {
     setPage(1);
     fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined);
   };
 
-  // 处理回车键搜索
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleLocationSearch();
     }
   };
 
-  // 滚动监听，实现无限滚动
   useEffect(() => {
     const handleScroll = () => {
       if (!hasMore || loading || loadingMore) return;
-
-      // 检查是否滚动到页面底部附近
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-
-      // 当滚动到底部附近时（距离底部100px以内）触发加载
       if (scrollTop + windowHeight >= documentHeight - 100) {
         loadMore();
       }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loading, loadingMore, loadMore]);
 
-  // 处理发布第一个帖子点击事件
   const handleCreateFirstPost = () => {
-    // 检查用户是否已登录，如果未登录则跳转到登录页
-    if (redirectToLoginIfNeeded(navigate)) {
-      return;
-    }
-    // 用户已登录，跳转到发布帖子页面
+    if (redirectToLoginIfNeeded(navigate)) return;
     navigate('/create-post');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen" style={{ backgroundColor: '#0e0e0f' }}>
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Welcome Section */}
+
+        {/* Hero Section */}
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-medium text-slate-800 mb-4 tracking-tight font-sans">
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-4 text-white"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}
+          >
             今天想找什么搭子？
           </h2>
-          <p className="text-slate-500 font-normal text-lg leading-relaxed font-sans">
+          <p className="font-normal text-base leading-relaxed" style={{ color: '#8e8e93' }}>
             在这里发现有趣的人，开始美好的连接
           </p>
         </div>
 
-
         {/* Location Search */}
-        <div className="mb-6">
-          <div className="relative max-w-md mx-auto group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200">
-              <svg className="h-5 w-5 text-slate-400 group-focus-within:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-8">
+          <div className="relative max-w-2xl mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+              <svg className="h-5 w-5" style={{ color: '#6e6e73' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -199,31 +178,52 @@ export default function HomePage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="搜索位置如：北京、三里屯..."
-              className="block w-full pl-12 pr-28 py-4 rounded-full bg-white border-0 ring-1 ring-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:ring-1 focus:ring-slate-100 focus:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] focus:outline-none transition-all duration-200 placeholder:text-slate-400 text-slate-600 caret-slate-600"
+              placeholder="搜索位置，如：北京、三里屯..."
+              className="block w-full pl-14 pr-28 py-4 rounded-2xl focus:outline-none transition-all duration-200 text-sm"
+              style={{
+                backgroundColor: '#131314',
+                color: '#e0e0e3',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+              onFocus={e => {
+                e.currentTarget.style.backgroundColor = '#201f21';
+                e.currentTarget.style.border = '1px solid rgba(143,245,255,0.2)';
+              }}
+              onBlur={e => {
+                e.currentTarget.style.backgroundColor = '#131314';
+                e.currentTarget.style.border = '1px solid rgba(255,255,255,0.06)';
+              }}
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-0 gap-1">
+            {/* Placeholder color */}
+            <style>{`input::placeholder { color: #4e4e53; }`}</style>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 gap-1">
               {location && (
                 <button
                   onClick={() => setLocation('')}
-                  className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+                  className="p-2 rounded-full transition-colors"
+                  style={{ color: '#6e6e73' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#e0e0e3'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#6e6e73'}
                 >
-                  <svg className="h-5 w-5 text-slate-300 hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
               <button
                 onClick={handleLocationSearch}
-                className="px-6 py-3 bg-slate-800 text-white rounded-r-full hover:bg-slate-700 transition-colors duration-200 font-medium text-base shadow-sm h-full"
+                className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-95 m-1"
+                style={{
+                  background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)',
+                  color: '#0e0e0f',
+                  fontFamily: "'Inter', sans-serif",
+                }}
               >
                 搜索
               </button>
             </div>
           </div>
         </div>
-
-
 
         {/* Category Filter */}
         <CategoryFilter
@@ -236,83 +236,88 @@ export default function HomePage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-2xl mb-8 text-center">
+          <div
+            className="px-6 py-4 rounded-2xl mb-8 text-center text-sm"
+            style={{ backgroundColor: 'rgba(255,59,48,0.08)', color: '#ff6b6b', border: '1px solid rgba(255,59,48,0.15)' }}
+          >
             {error}
             <button
               onClick={() => fetchPosts(1, selectedCategoryId || undefined, selectedSubCategoryId || undefined, location || undefined, selectedGender || undefined)}
-              className="ml-2 font-medium underline decoration-red-300 underline-offset-2 hover:text-red-700 transition-colors"
+              className="ml-2 font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
             >
               重试
             </button>
           </div>
         )}
 
-
         {/* Posts Section */}
-        <div className="space-y-6">
-          {/* Section Header */}
-          {/* <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {selectedCategoryId
-                ? `${categories.find(c => c.id === selectedCategoryId)?.name || ''}帖子`
-                : '最新帖子'
-              }
-            </h3>
-          </div> */}
-
-          {/* Posts List */}
+        <div className="space-y-5">
           {loading && posts.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">加载中...</p>
+            <div className="text-center py-16">
+              <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-transparent animate-spin"
+                style={{ borderTopColor: '#8ff5ff', borderRightColor: 'rgba(143,245,255,0.2)', borderBottomColor: 'rgba(143,245,255,0.2)', borderLeftColor: 'rgba(143,245,255,0.2)' }}
+              />
+              <p className="text-sm" style={{ color: '#6e6e73' }}>加载中...</p>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 flex items-center justify-center mx-auto mb-6">
+            <div className="text-center py-20">
+              <div
+                className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
+                style={{ background: 'linear-gradient(135deg, rgba(143,245,255,0.1), rgba(213,117,255,0.1))' }}
+              >
                 <span className="text-4xl">🔍</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-3">暂无相关帖子</h3>
-              <p className="text-slate-600 mb-8 max-w-md mx-auto">
+              <h3 className="text-xl font-bold text-white mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                暂无相关帖子
+              </h3>
+              <p className="mb-8 max-w-md mx-auto text-sm leading-relaxed" style={{ color: '#6e6e73' }}>
                 {selectedCategoryId
                   ? `还没有人发布${categories.find(c => c.id === selectedCategoryId)?.name}相关的帖子，快来做第一个吧！`
-                  : "没有找到匹配的帖子，试试其他关键词吧～"}
+                  : '没有找到匹配的帖子，试试其他关键词吧～'}
               </p>
               <button
                 onClick={handleCreateFirstPost}
-                className="h-12 px-10 bg-white border border-slate-200 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 text-slate-700 font-medium flex items-center gap-2 mx-auto group font-sans"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-sm transition-all duration-300 hover:opacity-90 active:scale-95 group"
+                style={{ background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)', color: '#0e0e0f' }}
               >
                 <span>发布第一篇帖子</span>
                 <span className="group-hover:rotate-12 transition-transform">✨</span>
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-5">
               {posts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
           )}
 
-          {/* 滚动加载提示 */}
           {loadingMore && posts.length > 0 && (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-2 text-sm">加载更多...</p>
+            <div className="text-center py-6">
+              <div className="w-6 h-6 mx-auto mb-2 rounded-full border-2 border-transparent animate-spin"
+                style={{ borderTopColor: '#8ff5ff', borderRightColor: 'rgba(143,245,255,0.2)', borderBottomColor: 'rgba(143,245,255,0.2)', borderLeftColor: 'rgba(143,245,255,0.2)' }}
+              />
+              <p className="text-sm" style={{ color: '#6e6e73' }}>加载更多...</p>
             </div>
           )}
         </div>
-
       </div>
 
-      {/* 回到顶部悬浮按钮 */}
+      {/* Back to top */}
       {showBackToTop && (
         <button
           type="button"
           onClick={scrollToTop}
           aria-label="回到顶部"
-          className="fixed bottom-8 right-6 z-50 w-12 h-12 rounded-full bg-slate-800/55 backdrop-blur-sm text-white shadow-lg hover:bg-slate-700/85 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center ring-2 ring-white/10"
+          className="fixed bottom-8 right-6 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+          style={{
+            backgroundColor: 'rgba(143,245,255,0.12)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(143,245,255,0.2)',
+            color: '#8ff5ff',
+          }}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
           </svg>
         </button>

@@ -1,14 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MapPinIcon } from '@heroicons/react/24/outline';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, MessageCircle } from 'lucide-react';
 import { message, Modal } from 'antd';
 import { getUserProfile } from '../api/users';
 import { authUtils } from '../api';
 import { viewWechat } from '../api/wechatExchange';
-import { getSubCategoryIcon } from '../utils/categoryIcons';
 import { redirectToLoginIfNeeded } from '../utils/auth';
 import type { User, Post } from '../api/types';
+
+const card = {
+  backgroundColor: '#1c1b1e',
+  borderRadius: '1.25rem',
+  border: '1px solid rgba(255,255,255,0.05)',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(143,245,255,0.04)',
+} as const;
+
+const TAG_PALETTE = [
+  { bg: 'rgba(143,245,255,0.12)', color: '#8ff5ff' },
+  { bg: 'rgba(213,117,255,0.12)', color: '#d575ff' },
+  { bg: 'rgba(170,255,220,0.12)', color: '#aaffdc' },
+  { bg: 'rgba(255,143,171,0.12)', color: '#ff8fab' },
+  { bg: 'rgba(255,179,71,0.12)',  color: '#ffb347' },
+  { bg: 'rgba(135,206,235,0.12)', color: '#87ceeb' },
+];
+const hashColor = (name: string, offset = 0) => {
+  let h = offset;
+  for (let i = 0; i < name.length; i++) h += name.charCodeAt(i);
+  return TAG_PALETTE[h % TAG_PALETTE.length];
+};
 
 const UserProfilePage = () => {
   const navigate = useNavigate();
@@ -26,25 +46,13 @@ const UserProfilePage = () => {
   const [wechatIdInModal, setWechatIdInModal] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // 获取当前用户
   const currentUser = authUtils.getCurrentUser();
   const isCurrentUser = currentUser && id && currentUser.id?.toString() === id;
 
-  // 获取用户资料
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!id) {
-        setError('用户ID不存在');
-        setLoading(false);
-        return;
-      }
-
-      // 如果是当前用户，直接跳转到个人资料页面
-      if (isCurrentUser) {
-        navigate('/profile');
-        return;
-      }
-
+      if (!id) { setError('用户ID不存在'); setLoading(false); return; }
+      if (isCurrentUser) { navigate('/profile'); return; }
       try {
         setLoading(true);
         const response = await getUserProfile(parseInt(id), 1, 10);
@@ -57,25 +65,20 @@ const UserProfilePage = () => {
           setError(response.message || '获取用户资料失败');
         }
       } catch (err) {
-        console.error('获取用户资料失败:', err);
         setError(err instanceof Error ? err.message : '获取用户资料失败');
       } finally {
         setLoading(false);
       }
     };
-
     fetchUserProfile();
   }, [id, navigate, isCurrentUser]);
 
-  // 加载更多帖子
   const loadMorePosts = useCallback(async () => {
     if (!id || !hasMore || loading || loadingMore) return;
-
     try {
       setLoadingMore(true);
       const nextPage = currentPage + 1;
       const response = await getUserProfile(parseInt(id), nextPage, 10);
-      
       if (response.success) {
         setPosts(prev => [...prev, ...(response.data.posts?.list || [])]);
         setHasMore(response.data.posts?.pagination?.page < response.data.posts?.pagination?.pages);
@@ -89,49 +92,32 @@ const UserProfilePage = () => {
     }
   }, [id, hasMore, loading, loadingMore, currentPage, messageApi]);
 
-  // 滚动监听，实现无限滚动
   useEffect(() => {
     const handleScroll = () => {
       if (!hasMore || loading || loadingMore) return;
-
-      // 检查是否滚动到页面底部附近
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-
-      // 当滚动到底部附近时（距离底部100px以内）触发加载
-      if (scrollTop + windowHeight >= documentHeight - 100) {
-        loadMorePosts();
-      }
+      if (scrollTop + windowHeight >= documentHeight - 100) loadMorePosts();
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loading, loadingMore, loadMorePosts]);
 
-  // 格式化时间
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    
-    if (days > 0) {
-      return `${days}天前`;
-    } else if (hours > 0) {
-      return `${hours}小时前`;
-    } else if (minutes > 0) {
-      return `${minutes}分钟前`;
-    } else {
-      return '刚刚';
-    }
+    if (days > 0) return `${days}天前`;
+    if (hours > 0) return `${hours}小时前`;
+    if (minutes > 0) return `${minutes}分钟前`;
+    return '刚刚';
   };
 
-  // 查看微信
   const handleViewWechat = async () => {
     if (!user?.id) return;
     if (redirectToLoginIfNeeded(navigate)) return;
@@ -145,7 +131,7 @@ const UserProfilePage = () => {
       } else {
         messageApi.error('该用户账号异常，无法查看微信号');
       }
-    } catch (err) {
+    } catch {
       messageApi.error('该用户账号异常，无法查看微信号');
     } finally {
       setViewingWechat(false);
@@ -159,42 +145,42 @@ const UserProfilePage = () => {
       setCopied(true);
       messageApi.success('微信号已复制');
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       messageApi.error('复制失败');
     }
   };
 
-  // 加载状态
   if (loading) {
     return (
       <>
         {contextHolder}
-        <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0e0e0f' }}>
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-200 border-t-slate-600 mx-auto mb-6"></div>
-            <p className="text-slate-600 text-lg font-medium font-sans">加载中...</p>
+            <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-transparent animate-spin"
+              style={{ borderTopColor: '#8ff5ff', borderRightColor: 'rgba(143,245,255,0.15)', borderBottomColor: 'rgba(143,245,255,0.15)', borderLeftColor: 'rgba(143,245,255,0.15)' }}
+            />
+            <p className="text-sm" style={{ color: '#6e6e73' }}>加载中...</p>
           </div>
         </div>
       </>
     );
   }
 
-  // 错误状态
   if (error || !user) {
     return (
       <>
         {contextHolder}
-        <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0e0e0f' }}>
           <div className="text-center">
-            <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
+              style={{ background: 'linear-gradient(135deg, rgba(255,59,48,0.1), rgba(213,117,255,0.1))' }}>
               <span className="text-4xl">😞</span>
             </div>
-            <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">出错了</h3>
-            <p className="text-red-600 mb-8 text-lg font-normal font-sans leading-relaxed">{error || '用户不存在'}</p>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-slate-900 text-white px-8 py-3 rounded-full hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 font-medium font-sans"
-            >
+            <h3 className="text-xl font-bold mb-2" style={{ color: '#e0e0e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>出错了</h3>
+            <p className="mb-6 text-sm" style={{ color: '#ff6b6b' }}>{error || '用户不存在'}</p>
+            <button onClick={() => navigate('/')}
+              className="px-6 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)', color: '#0e0e0f' }}>
               返回首页
             </button>
           </div>
@@ -203,141 +189,136 @@ const UserProfilePage = () => {
     );
   }
 
+  const avatarColor = hashColor(user.nickname || '', 0);
+
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-slate-50/50">
+      <div className="min-h-screen" style={{ backgroundColor: '#0e0e0f' }}>
         <div className="max-w-4xl mx-auto px-4 py-12">
-          {/* 用户信息卡片 */}
-          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8 mb-8">
-            {/* 用户头像和基本信息 */}
-            <div className="text-center">
-              <div className="w-32 h-32 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.nickname}
-                    className="w-32 h-32 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white font-medium text-4xl font-sans">
-                    {user.nickname.charAt(0)}
-                  </span>
-                )}
-              </div>
-              
-              <h2 className="text-3xl font-medium text-slate-900 mb-3 font-sans tracking-tight">{user.nickname || '未知用户'}</h2>
-              
-              <p className="text-slate-500 mb-6 leading-loose text-lg max-w-2xl mx-auto font-normal font-sans">
-                {user.signature || '该用户暂无介绍'}
-              </p>
-              
-              <div className="flex items-center justify-center space-x-8 text-base text-slate-500">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">
-                    {user.gender === 'male' ? '👨' : user.gender === 'female' ? '👩' : '🤖'}
-                  </span>
-                  <span className="font-medium font-sans">
-                    {user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : '其他'}
-                  </span>
-                </div>
-              </div>
 
-              {/* 查看微信 */}
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={handleViewWechat}
-                  disabled={viewingWechat}
-                  className="inline-flex items-center gap-2 text-slate-600 text-sm font-sans px-4 py-2 rounded-full bg-slate-50 border border-slate-100 hover:bg-slate-100 disabled:opacity-60 transition-colors"
-                >
-                  {viewingWechat ? '查看中...' : '查看微信'}
-                </button>
-              </div>
+          {/* User info card */}
+          <div className="p-8 mb-6 text-center" style={card}>
+            {/* Avatar */}
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5 font-bold text-4xl"
+              style={{
+                background: `linear-gradient(135deg, ${avatarColor.bg.replace('0.12', '0.35')}, rgba(213,117,255,0.2))`,
+                color: avatarColor.color,
+                border: `2px solid ${avatarColor.bg}`,
+              }}>
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.nickname} className="w-24 h-24 rounded-full object-cover" />
+              ) : user.nickname.charAt(0)}
+            </div>
+
+            <h2 className="text-2xl font-bold mb-2" style={{ color: '#e0e0e3', fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>
+              {user.nickname || '未知用户'}
+            </h2>
+            <p className="text-sm leading-relaxed mb-5 max-w-sm mx-auto" style={{ color: '#8e8e93' }}>
+              {user.signature || '该用户暂无介绍'}
+            </p>
+
+            {/* Gender */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <span className="text-lg">
+                {user.gender === 'male' ? '👨' : user.gender === 'female' ? '👩' : '🤖'}
+              </span>
+              <span className="text-sm font-medium" style={{ color: '#8e8e93' }}>
+                {user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : '其他'}
+              </span>
+            </div>
+
+            {/* WeChat button */}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+              <button type="button" onClick={handleViewWechat} disabled={viewingWechat}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+                style={{ backgroundColor: 'rgba(143,245,255,0.08)', color: '#8ff5ff', border: '1px solid rgba(143,245,255,0.15)' }}>
+                <MessageCircle className="h-4 w-4" strokeWidth={2} />
+                {viewingWechat ? '查看中...' : '查看微信'}
+              </button>
             </div>
           </div>
 
-          {/* 用户帖子列表 */}
-          <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
+          {/* Posts section */}
+          <div className="p-6" style={card}>
+            <h3 className="text-base font-bold mb-5" style={{ color: '#e0e0e3', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Ta 的帖子
+            </h3>
 
             {posts.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-24 h-24 rounded-[2rem] bg-slate-100 flex items-center justify-center mx-auto mb-6">
-                  <span className="text-4xl">📝</span>
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ background: 'linear-gradient(135deg, rgba(143,245,255,0.08), rgba(213,117,255,0.08))' }}>
+                  <span className="text-3xl">📝</span>
                 </div>
-                <h3 className="text-2xl font-medium text-slate-800 mb-3 font-sans">还没有发布任何帖子</h3>
-                <p className="text-slate-500 text-lg font-normal font-sans leading-relaxed">这个用户还没有发布任何内容</p>
+                <h4 className="text-base font-semibold mb-2" style={{ color: '#c4c4c8' }}>还没有发布任何帖子</h4>
+                <p className="text-sm" style={{ color: '#6e6e73' }}>这个用户还没有发布任何内容</p>
               </div>
             ) : (
-              <div className="space-y-6">
-                {posts.map((post) => (
-                  <div 
-                    key={post.id} 
-                    className="bg-slate-50/50 border border-slate-100 rounded-[2rem] p-6"
-                    // onClick={() => navigate(`/post/${post.id}`)}
-                  >
-                    {/* 帖子头部信息 */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <span className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide ring-1 ring-slate-100 font-sans">
-                          <span>{getSubCategoryIcon(post.subcategory_name)}</span>
-                          <span>{post.subcategory_name}</span>
-                        </span>
+              <div className="space-y-4">
+                {posts.map((post) => {
+                  const catColor = hashColor(post.category_name || '', 0);
+                  const subColor = hashColor(post.subcategory_name || '', 3);
+                  return (
+                    <div key={post.id} className="p-5 rounded-xl"
+                      style={{ backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {post.category_name && (
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                              style={{ backgroundColor: catColor.bg, color: catColor.color }}>
+                              {post.category_name.replace('搭子', '')}
+                            </span>
+                          )}
+                          {post.subcategory_name && (
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                              style={{ backgroundColor: subColor.bg, color: subColor.color }}>
+                              {post.subcategory_name}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs flex-shrink-0" style={{ color: '#4e4e53' }}>{formatDate(post.created_at)}</span>
                       </div>
-                      <span className="text-sm text-slate-400 font-normal font-sans">{formatDate(post.created_at)}</span>
+                      <p className="text-sm leading-relaxed line-clamp-3 mb-3" style={{ color: '#c4c4c8' }}>
+                        {post.content}
+                      </p>
+                      {post.location && (
+                        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#6e6e73' }}>
+                          <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span className="truncate max-w-xs">{post.location}</span>
+                        </div>
+                      )}
                     </div>
-
-                    {/* 帖子内容 */}
-                    <div className="mb-4">
-                      <p className="text-slate-900 leading-loose text-lg line-clamp-2 font-normal font-sans">{post.content}</p>
-                    </div>
-
-                    {/* 位置信息 */}
-                    {post.location && (
-                      <div className="flex items-center space-x-2 mb-4 text-sm py-2 text-slate-500">
-                        <MapPinIcon className="h-4 w-4" />
-                        <span className="text-sm font-normal max-w-[90%] truncate font-sans">{post.location}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
-            {/* 滚动加载提示 */}
             {loadingMore && posts.length > 0 && (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-200 border-t-slate-600 mx-auto"></div>
-                <p className="text-slate-500 mt-2 text-sm font-normal font-sans">加载更多...</p>
+              <div className="text-center py-6">
+                <div className="w-6 h-6 mx-auto mb-2 rounded-full border-2 border-transparent animate-spin"
+                  style={{ borderTopColor: '#8ff5ff', borderRightColor: 'rgba(143,245,255,0.15)', borderBottomColor: 'rgba(143,245,255,0.15)', borderLeftColor: 'rgba(143,245,255,0.15)' }}
+                />
+                <p className="text-xs" style={{ color: '#6e6e73' }}>加载更多...</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 微信号弹窗 */}
-      <Modal
-        title="微信号"
-        open={wechatModalOpen}
-        onCancel={() => setWechatModalOpen(false)}
-        footer={null}
-        centered
-        destroyOnHidden
-      >
+      {/* WeChat modal */}
+      <Modal title="微信号" open={wechatModalOpen} onCancel={() => setWechatModalOpen(false)} footer={null} centered destroyOnHidden>
         {wechatIdInModal && (
-          <div className="flex items-center justify-between gap-4 py-2 px-4 mt-2 rounded-xl bg-green-50 border border-green-100">
-            <span className="text-green-700 font-medium text-lg font-sans truncate">{wechatIdInModal}</span>
-            <button
-              type="button"
-              onClick={handleCopyWechat}
-              className="flex-shrink-0 p-2 hover:bg-green-100 rounded-lg transition-colors"
-              title="复制微信号"
-            >
-              {copied ? (
-                <Check className="h-5 w-5 text-green-600" />
-              ) : (
-                <Copy className="h-5 w-5 text-green-600" />
-              )}
+          <div className="flex items-center justify-between gap-4 py-3 px-4 mt-2 rounded-xl"
+            style={{ backgroundColor: 'rgba(143,245,255,0.06)', border: '1px solid rgba(143,245,255,0.12)' }}>
+            <span className="font-semibold text-base truncate" style={{ color: '#8ff5ff' }}>{wechatIdInModal}</span>
+            <button type="button" onClick={handleCopyWechat}
+              className="flex-shrink-0 p-2 rounded-lg transition-colors"
+              style={{ color: '#8ff5ff' }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(143,245,255,0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+              title="复制微信号">
+              {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
             </button>
           </div>
         )}

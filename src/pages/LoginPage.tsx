@@ -4,15 +4,24 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { API, authUtils } from '../api';
 import type { LoginRequest, RegisterRequest } from '../api/types';
 
+const inputBase: React.CSSProperties = {
+  backgroundColor: '#131314',
+  color: '#e0e0e3',
+  border: '1px solid rgba(255,255,255,0.06)',
+  outline: 'none',
+  transition: 'all 0.2s',
+  width: '100%',
+  padding: '0.875rem 1.25rem',
+  borderRadius: '0.75rem',
+  fontSize: '0.9375rem',
+};
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isRegisterPage = location.pathname === '/register';
-  
-  const [formData, setFormData] = useState<LoginRequest>({
-    email: '',
-    password: ''
-  });
+
+  const [formData, setFormData] = useState<LoginRequest>({ email: '', password: '' });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
@@ -22,11 +31,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    // 清除错误信息
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     if (error) setError('');
   };
 
@@ -34,53 +39,38 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
       if (isRegisterPage) {
-        // 注册逻辑
         if (formData.password !== confirmPassword) {
           setError('密码和确认密码不一致');
           setIsLoading(false);
           return;
         }
-
         if (!nickname.trim()) {
           setError('请输入昵称');
           setIsLoading(false);
           return;
         }
-
         if (!gender || (gender !== 'male' && gender !== 'female')) {
           setError('请选择性别');
           setIsLoading(false);
           return;
         }
-        
         const registerData: RegisterRequest = {
           email: formData.email,
           password: formData.password,
           nickname: nickname.trim(),
-          gender: gender
+          gender,
         };
-
         const response = await API.auth.register(registerData);
-        
         if (response.success) {
-          // 注册成功，自动保存登录信息
           authUtils.saveAuth(response.data.token, response.data.user);
-          
-          // 跳转到首页
           navigate('/');
         }
       } else {
-        // 登录逻辑
         const response = await API.auth.login(formData);
-        
         if (response.success) {
-          // 保存登录信息
           authUtils.saveAuth(response.data.token, response.data.user);
-          
-          // 跳转到首页
           navigate('/');
         }
       }
@@ -92,36 +82,57 @@ const LoginPage = () => {
     }
   };
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.currentTarget.style, { backgroundColor: '#201f21', border: '1px solid rgba(143,245,255,0.2)' });
+  };
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    Object.assign(e.currentTarget.style, { backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.06)' });
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#0e0e0f' }}>
+      {/* Ambient glow behind card */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-[0.04]"
+          style={{ background: 'radial-gradient(ellipse, #8ff5ff 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      </div>
+
+      <div className="relative max-w-md w-full space-y-7">
+
         {/* Logo */}
         <div className="text-center">
-          <h1 className="text-4xl font-medium text-slate-900 mb-3 tracking-tight font-sans">轻搭</h1>
-          <p className="text-slate-500 text-lg font-normal font-sans leading-relaxed">
+         
+          <h1 className="text-3xl font-bold text-white mb-2"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>
+            轻搭
+          </h1>
+          <p className="text-sm" style={{ color: '#6e6e73' }}>
             {isRegisterPage ? '加入我们，寻找志同道合的搭子' : '欢迎回来，继续你的搭子之旅'}
           </p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white border border-slate-100 rounded-[2rem] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.04)] p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 错误提示 */}
+        {/* Form card */}
+        <div className="p-7" style={{
+          backgroundColor: '#1c1b1e',
+          borderRadius: '1.25rem',
+          border: '1px solid rgba(255,255,255,0.05)',
+          boxShadow: '0 4px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(143,245,255,0.04)',
+        }}>
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Error */}
             {error && (
-              <div className="bg-red-50/80 backdrop-blur-sm border-0 ring-1 ring-red-100 text-red-600/90 px-6 py-4 rounded-[2rem]">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-sans">!</span>
-                  </div>
-                  <span className="font-medium font-sans">{error}</span>
-                </div>
+              <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm"
+                style={{ backgroundColor: 'rgba(255,59,48,0.08)', border: '1px solid rgba(255,59,48,0.15)', color: '#ff6b6b' }}>
+                <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">!</span>
+                <span>{error}</span>
               </div>
             )}
 
-            {/* 注册时的昵称字段 */}
+            {/* Nickname (register only) */}
             {isRegisterPage && (
               <div>
-                <label htmlFor="nickname" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
+                <label htmlFor="nickname" className="block text-sm font-semibold mb-2" style={{ color: '#8e8e93' }}>
                   昵称
                 </label>
                 <input
@@ -129,63 +140,48 @@ const LoginPage = () => {
                   type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                   placeholder="请输入你的昵称"
                   required
                   maxLength={8}
+                  style={inputBase}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                 />
-                <p className="text-xs sm:text-sm text-slate-400 mt-1 sm:mt-2 text-end font-sans">最多8个字符</p>
+                <p className="text-xs mt-1.5 text-right" style={{ color: '#4e4e53' }}>最多8个字符</p>
               </div>
             )}
 
-            {/* 注册时的性别字段 */}
+            {/* Gender (register only) */}
             {isRegisterPage && (
               <div>
-                <label className="block text-lg font-medium text-slate-900 mb-3 font-sans">
-                  性别
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={gender === 'male'}
-                      onChange={(e) => setGender(e.target.value as 'male' | 'female')}
-                      className="sr-only"
-                    />
-                    <div className={`w-full px-6 py-4 rounded-full text-center font-medium text-lg transition-all duration-200 font-sans ${
-                      gender === 'male'
-                        ? 'bg-slate-900 text-white ring-1 ring-slate-900'
-                        : 'bg-slate-50/50 text-slate-600 ring-1 ring-slate-100 hover:bg-slate-100'
-                    }`}>
-                      男
-                    </div>
-                  </label>
-                  <label className="flex-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={gender === 'female'}
-                      onChange={(e) => setGender(e.target.value as 'male' | 'female')}
-                      className="sr-only"
-                    />
-                    <div className={`w-full px-6 py-4 rounded-full text-center font-medium text-lg transition-all duration-200 font-sans ${
-                      gender === 'female'
-                        ? 'bg-slate-900 text-white ring-1 ring-slate-900'
-                        : 'bg-slate-50/50 text-slate-600 ring-1 ring-slate-100 hover:bg-slate-100'
-                    }`}>
-                      女
-                    </div>
-                  </label>
+                <label className="block text-sm font-semibold mb-2" style={{ color: '#8e8e93' }}>性别</label>
+                <div className="flex gap-3">
+                  {(['male', 'female'] as const).map(g => (
+                    <label key={g} className="flex-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={g}
+                        checked={gender === g}
+                        onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+                        className="sr-only"
+                      />
+                      <div className="w-full py-3 rounded-xl text-center text-sm font-semibold transition-all duration-200"
+                        style={gender === g
+                          ? { background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)', color: '#0e0e0f' }
+                          : { backgroundColor: '#131314', color: '#8e8e93', border: '1px solid rgba(255,255,255,0.06)' }
+                        }>
+                        {g === 'male' ? '👨 男' : '👩 女'}
+                      </div>
+                    </label>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
+              <label htmlFor="email" className="block text-sm font-semibold mb-2" style={{ color: '#8e8e93' }}>
                 邮箱地址
               </label>
               <input
@@ -196,14 +192,16 @@ const LoginPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-6 py-4 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                 placeholder="请输入你的邮箱"
+                style={inputBase}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
+              <label htmlFor="password" className="block text-sm font-semibold mb-2" style={{ color: '#8e8e93' }}>
                 密码
               </label>
               <div className="relative">
@@ -215,29 +213,30 @@ const LoginPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                   placeholder={isRegisterPage ? '请设置密码（6-20位）' : '请输入密码'}
                   minLength={6}
                   maxLength={20}
+                  style={{ ...inputBase, paddingRight: '3rem' }}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute inset-y-0 right-0 px-4 flex items-center transition-colors"
+                  style={{ color: '#4e4e53' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#8e8e93')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#4e4e53')}
                 >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-6 w-6" />
-                  ) : (
-                    <EyeIcon className="h-6 w-6" />
-                  )}
+                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Confirm Password for Register */}
+            {/* Confirm Password (register only) */}
             {isRegisterPage && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-lg font-medium text-slate-900 mb-3 font-sans">
+                <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-2" style={{ color: '#8e8e93' }}>
                   确认密码
                 </label>
                 <div className="relative">
@@ -248,42 +247,51 @@ const LoginPage = () => {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-6 py-4 pr-14 border-0 ring-1 ring-slate-100 bg-slate-50/50 rounded-full focus:ring-1 focus:ring-slate-100 focus:bg-white focus:outline-none transition-all duration-200 text-lg caret-slate-600 font-sans"
                     placeholder="请再次输入密码"
+                    style={{ ...inputBase, paddingRight: '3rem' }}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 px-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute inset-y-0 right-0 px-4 flex items-center transition-colors"
+                    style={{ color: '#4e4e53' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#8e8e93')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#4e4e53')}
                   >
-                    {showConfirmPassword ? (
-                      <EyeSlashIcon className="h-6 w-6" />
-                    ) : (
-                      <EyeIcon className="h-6 w-6" />
-                    )}
+                    {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-slate-900 text-white py-4 px-6 rounded-full font-medium text-lg hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-sans"
+              className="w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              style={{
+                background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)',
+                color: '#0e0e0f',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
             >
               {isLoading ? '处理中...' : (isRegisterPage ? '立即注册' : '立即登录')}
             </button>
 
-            {/* Switch between login and register */}
-            <div className="text-center pt-4">
-              <span className="text-slate-500 text-base font-normal font-sans">
+            {/* Switch */}
+            <div className="text-center pt-1">
+              <span className="text-sm" style={{ color: '#6e6e73' }}>
                 {isRegisterPage ? '已有账号？' : '还没有账号？'}
               </span>
               <button
                 type="button"
                 onClick={() => navigate(isRegisterPage ? '/login' : '/register')}
-                className="text-slate-600 hover:text-slate-800 font-medium text-base ml-2 transition-colors font-sans"
+                className="text-sm font-semibold ml-1.5 transition-colors"
+                style={{ color: '#8ff5ff' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#aaffdc')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#8ff5ff')}
               >
                 {isRegisterPage ? '去登录' : '去注册'}
               </button>
@@ -291,11 +299,11 @@ const LoginPage = () => {
           </form>
         </div>
 
-        {/* Demo Account Info */}
-      
+        {/* Placeholder color fix */}
+        <style>{`input::placeholder { color: #4e4e53 !important; }`}</style>
       </div>
     </div>
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

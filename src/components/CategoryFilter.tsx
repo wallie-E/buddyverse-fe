@@ -11,12 +11,37 @@ interface CategoryFilterProps {
   onSubCategoryChange: (subCategoryId: number | null) => void;
 }
 
+const getCategoryIcon = (categoryName: string) => {
+  switch (categoryName) {
+    case '干饭搭子': return '🍽️';
+    case '运动搭子': return '⚽';
+    case '学习搭子': return '📚';
+    case '游戏搭子': return '🎮';
+    case '二次元搭子': return '🎭';
+    case '旅行搭子': return '✈️';
+    default: return '⭐';
+  }
+};
+
+// Short label for horizontal chips
+const getCategoryLabel = (categoryName: string) => {
+  switch (categoryName) {
+    case '干饭搭子': return '干饭';
+    case '运动搭子': return '运动';
+    case '学习搭子': return '学习';
+    case '游戏搭子': return '游戏';
+    case '二次元搭子': return '二次元';
+    case '旅行搭子': return '旅行';
+    default: return categoryName.replace('搭子', '');
+  }
+};
+
 export default function CategoryFilter({
   categories,
   selectedCategoryId,
   selectedSubCategoryId,
   onCategoryChange,
-  onSubCategoryChange
+  onSubCategoryChange,
 }: CategoryFilterProps) {
   const [isSubDropdownOpen, setIsSubDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,125 +49,141 @@ export default function CategoryFilter({
   const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
   const subCategories = selectedCategory?.subcategories || [];
 
-  // 点击外部关闭下拉菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsSubDropdownOpen(false);
       }
     };
-
     if (isSubDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isSubDropdownOpen]);
 
-  // 分类图标映射
-  const getCategoryIcon = (categoryName: string) => {
-    switch (categoryName) {
-      case '干饭搭子':
-        return '🍽️';
-      case '运动搭子':
-        return '⚽';
-      case '学习搭子':
-        return '📚';
-      case '游戏搭子':
-        return '🎮';
-      case '二次元搭子':
-        return '🎭';
-      case '旅行搭子':
-        return '✈️';
-      default:
-        return '⭐';
-    }
-  };
-
-
   return (
     <div className="mb-8">
-      <div className="bg-slate-100/50 rounded-[2rem] p-1.5">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide max-w-full">
-          {/* 全部分类 */}
-          <button
-            onClick={() => onCategoryChange(null)}
-            className={`flex flex-col items-center gap-2 py-4 px-4 sm:px-8 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
-              !selectedCategoryId ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <span className="text-xl">🌟</span>
-            <span className="text-sm font-medium font-sans whitespace-nowrap">全部</span>
-          </button>
+      {/* Horizontal pill chips */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {/* 全部 */}
+        <button
+          onClick={() => onCategoryChange(null)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full flex-shrink-0 transition-all duration-200 text-sm font-medium"
+          style={
+            !selectedCategoryId
+              ? {
+                  backgroundColor: '#201f21',
+                  color: '#8ff5ff',
+                  border: '1px solid rgba(143,245,255,0.25)',
+                  boxShadow: '0 0 12px rgba(143,245,255,0.08)',
+                }
+              : {
+                  backgroundColor: '#131314',
+                  color: '#8e8e93',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }
+          }
+        >
+          <span className="text-base leading-none">🌟</span>
+          <span>全部</span>
+        </button>
 
-          {/* 分类列表 */}
-          {categories.map((category) => (
+        {/* Category chips */}
+        {categories.map((category) => {
+          const isSelected = selectedCategoryId === category.id;
+          return (
             <button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
-              className={`flex flex-col items-center gap-2 py-4 px-4 sm:px-8 rounded-[1.5rem] transition-all duration-300 flex-shrink-0 min-w-[80px] ${
-                selectedCategoryId === category.id ? "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]" : "hover:bg-white/40 text-slate-500 hover:text-slate-700"
-              }`}
+              className="flex items-center gap-2 px-4 py-2 rounded-full flex-shrink-0 transition-all duration-200 text-sm font-medium"
+              style={
+                isSelected
+                  ? {
+                      backgroundColor: '#201f21',
+                      color: '#8ff5ff',
+                      border: '1px solid rgba(143,245,255,0.25)',
+                      boxShadow: '0 0 12px rgba(143,245,255,0.08)',
+                    }
+                  : {
+                      backgroundColor: '#131314',
+                      color: '#8e8e93',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                    }
+              }
             >
-              <span className="text-xl">{getCategoryIcon(category.name)}</span>
-              <span className="text-sm font-medium font-sans whitespace-nowrap">{category.name}</span>
+              <span className="text-base leading-none">{getCategoryIcon(category.name)}</span>
+              <span>{getCategoryLabel(category.name)}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* 细分类型下拉选择 */}
+      {/* Subcategory dropdown */}
       {selectedCategoryId && subCategories.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="flex items-center space-x-3">
-            <span className="text-sm text-slate-400 font-medium pl-2 font-sans">细分类型</span>
+            <span className="text-xs font-medium" style={{ color: '#6e6e73' }}>细分类型</span>
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSubDropdownOpen(!isSubDropdownOpen)}
-                className="flex items-center justify-between bg-white px-5 py-2.5 rounded-full hover:bg-slate-50 hover:shadow-sm transition-all min-w-[140px] ring-1 ring-slate-100 text-slate-600"
+                className="flex items-center justify-between px-4 py-2 rounded-full transition-all duration-200 min-w-[140px] text-sm font-medium"
+                style={{
+                  backgroundColor: '#131314',
+                  color: '#c4c4c8',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }}
               >
-                <span className="text-sm font-medium font-sans">
-                  {selectedSubCategoryId 
+                <span>
+                  {selectedSubCategoryId
                     ? subCategories.find(sub => sub.id === selectedSubCategoryId)?.name
-                    : `全部${selectedCategory?.name || '搭子'}`
-                  }
+                    : `全部${selectedCategory?.name || '搭子'}`}
                 </span>
-                <ChevronDownIcon className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${isSubDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDownIcon
+                  className={`h-4 w-4 ml-2 transition-transform duration-300 flex-shrink-0`}
+                  style={{ color: '#6e6e73', transform: isSubDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                />
               </button>
 
               {isSubDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white border-0 ring-1 ring-slate-100 rounded-[1.5rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] z-20 overflow-hidden p-1.5">
-                  <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-100">
+                <div
+                  className="absolute top-full left-0 mt-2 w-52 rounded-2xl overflow-hidden z-20 p-1.5"
+                  style={{
+                    backgroundColor: '#1c1b1e',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  <div className="max-h-64 overflow-y-auto scrollbar-thin">
                     <button
-                      onClick={() => {
-                        onSubCategoryChange(null);
-                        setIsSubDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 rounded-xl flex items-center justify-between transition-colors text-slate-600"
+                      onClick={() => { onSubCategoryChange(null); setIsSubDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-3 text-sm rounded-xl flex items-center justify-between transition-colors"
+                      style={{ color: '#c4c4c8' }}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
                       <span className="flex items-center gap-2">
                         <span>🌟</span>
                         <span>全部{selectedCategory?.name || '搭子'}</span>
                       </span>
-                      {!selectedSubCategoryId && <CheckIcon className="h-4 w-4 text-slate-800" />}
+                      {!selectedSubCategoryId && <CheckIcon className="h-4 w-4" style={{ color: '#8ff5ff' }} />}
                     </button>
                     {subCategories.map((subCategory) => (
                       <button
                         key={subCategory.id}
-                        onClick={() => {
-                          onSubCategoryChange(subCategory.id);
-                          setIsSubDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 rounded-xl flex items-center justify-between transition-colors text-slate-600"
+                        onClick={() => { onSubCategoryChange(subCategory.id); setIsSubDropdownOpen(false); }}
+                        className="w-full text-left px-4 py-3 text-sm rounded-xl flex items-center justify-between transition-colors"
+                        style={{ color: '#c4c4c8' }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                       >
                         <span className="flex items-center gap-2">
                           <span>{getSubCategoryIcon(subCategory.name)}</span>
                           <span>{subCategory.name}</span>
                         </span>
                         {selectedSubCategoryId === subCategory.id && (
-                          <CheckIcon className="h-4 w-4 text-slate-800" />
+                          <CheckIcon className="h-4 w-4" style={{ color: '#8ff5ff' }} />
                         )}
                       </button>
                     ))}
@@ -155,4 +196,4 @@ export default function CategoryFilter({
       )}
     </div>
   );
-} 
+}

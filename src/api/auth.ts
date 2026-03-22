@@ -6,10 +6,13 @@ import type {
   RegisterRequest, 
   LoginRequest 
 } from './types';
+import { getDeviceId } from '../utils/deviceId';
 
 // 用户注册
 export const register = async (data: RegisterRequest): Promise<ApiResponse<AuthResponse>> => {
-  return api.post('/api/auth/register', data);
+  return api.post('/api/auth/register', data, {
+    headers: { 'X-Device-ID': getDeviceId() },
+  });
 };
 
 // 用户登录
