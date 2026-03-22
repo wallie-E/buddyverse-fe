@@ -5,8 +5,6 @@ import './App.css';
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
 
-// Contexts
-import { NotificationProvider } from './contexts/NotificationProvider';
 import { GenderFilterProvider } from './contexts/GenderFilterContext';
 import '@ant-design/v5-patch-for-react-19';
 
@@ -52,9 +50,9 @@ function App() {
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/user/:id" element={<UserProfilePage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
+            {/* <Route path="/notifications" element={<NotificationsPage />} /> */}
             <Route path="/my-posts" element={<MyPostsPage />} />
-            <Route path="/post/:id" element={<PostDetailPage />} />
+            {/* <Route path="/post/:id" element={<PostDetailPage />} /> */}
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/api-test" element={<ApiTestPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

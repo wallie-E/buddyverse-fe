@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
-    allowedHosts: ['mkwxlsnrowlw.sealosbja.site','jplnacmzyuno.sealosbja.site'],
+    allowedHosts: ['mkwxlsnrowlw.sealosbja.site','jplnacmzyuno.sealosbja.site','www.buddyverse.cn'],
     proxy: {
       '/api': {
         target: 'http://dz-bg.ns-z580ek8h.svc.cluster.local:8080',
