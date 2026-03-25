@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { message } from 'antd';
+import { message, Modal, Popover } from 'antd';
+import { Trash2, Copy, Check } from 'lucide-react';
 import { API, authUtils } from '../api';
 import type { Post } from '../api/types';
 
@@ -35,6 +36,9 @@ export default function MyPostsPage() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [copiedLocationId, setCopiedLocationId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authUtils.isAuthenticated()) navigate('/login');
@@ -82,14 +86,34 @@ export default function MyPostsPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loading, loadingMore, loadMore]);
 
-  const handleDeletePost = async (postId: number) => {
-    if (!confirm('确定要删除这个帖子吗？删除后无法恢复。')) return;
+  const handleCopyLocation = async (e: React.MouseEvent, post: Post) => {
+    e.stopPropagation();
+    if (!post.location) return;
     try {
-      await API.posts.deletePost(postId);
-      setPosts(prev => prev.filter(post => post.id !== postId));
+      await navigator.clipboard.writeText(post.location);
+      setCopiedLocationId(post.id);
+      setTimeout(() => setCopiedLocationId(null), 2000);
+    } catch {
+      messageApi.error('复制失败');
+    }
+  };
+
+  const handleDeletePost = (postId: number) => {
+    setPendingDeleteId(postId);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (pendingDeleteId == null) return;
+    setDeleteModalOpen(false);
+    try {
+      await API.posts.deletePost(pendingDeleteId);
+      setPosts(prev => prev.filter(post => post.id !== pendingDeleteId));
     } catch (error) {
       console.error('删除帖子失败:', error);
       messageApi.error('删除失败，请重试');
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -155,7 +179,7 @@ export default function MyPostsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5">
               {posts.map((post) => {
                 const catColor = hashColor(post.category_name || '', 0);
                 const subColor = hashColor(post.subcategory_name || '', 3);
@@ -191,17 +215,62 @@ export default function MyPostsPage() {
                       </div>
 
                       {/* Content */}
-                      <p className="text-sm leading-relaxed line-clamp-5 mb-4" style={{ color: '#c4c4c8' }}>
+                      <p className="text-sm leading-relaxed mb-5 whitespace-pre-wrap break-words" style={{ color: '#c4c4c8' }}>
                         {post.content}
                       </p>
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-3"
                         style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#6e6e73' }}>
-                          <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span className="truncate max-w-[140px]">{post.location || '未设置位置'}</span>
-                        </div>
+                        <Popover
+                          trigger={post.location ? 'click' : []}
+                          placement="topLeft"
+                          arrow={false}
+                          overlayStyle={{ paddingBottom: 6 }}
+                          overlayInnerStyle={{
+                            backgroundColor: '#1c1b1e',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '0.875rem',
+                            padding: '0.875rem 1rem',
+                            boxShadow: '0 12px 40px rgba(0,0,0,0.55)',
+                          }}
+                          content={
+                            <div style={{ minWidth: 180, maxWidth: 260 }} onClick={e => e.stopPropagation()}>
+                              <div style={{ color: '#e0e0e3', fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.5, marginBottom: '0.75rem', wordBreak: 'break-all' }}>
+                                {post.location}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={e => handleCopyLocation(e, post)}
+                                style={{
+                                  width: '100%', padding: '0.5rem', borderRadius: '0.625rem', cursor: 'pointer',
+                                  background: copiedLocationId === post.id
+                                    ? 'linear-gradient(135deg, rgba(7,193,96,0.15), rgba(7,193,96,0.07))'
+                                    : 'linear-gradient(135deg, rgba(143,245,255,0.1), rgba(143,245,255,0.04))',
+                                  border: `1px solid ${copiedLocationId === post.id ? 'rgba(7,193,96,0.28)' : 'rgba(143,245,255,0.16)'}`,
+                                  color: copiedLocationId === post.id ? '#4ade80' : '#8ff5ff',
+                                  fontWeight: 600, fontSize: '0.8125rem',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
+                                  transition: 'all 0.2s',
+                                }}
+                              >
+                                {copiedLocationId === post.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                                {copiedLocationId === post.id ? '已复制' : '复制地址'}
+                              </button>
+                            </div>
+                          }
+                        >
+                          <div
+                            className="flex items-center gap-1.5 text-xs"
+                            style={{ color: '#6e6e73', cursor: post.location ? 'pointer' : 'default' }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="font-medium w-40 sm:w-100 truncate">
+                              {post.location || '未设置位置'}
+                            </span>
+                          </div>
+                        </Popover>
                         <span className="text-xs" style={{ color: '#4e4e53' }}>{formatDate(post.created_at)}</span>
                       </div>
                     </div>
@@ -222,6 +291,75 @@ export default function MyPostsPage() {
           )}
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      <Modal
+        open={deleteModalOpen}
+        onCancel={() => setDeleteModalOpen(false)}
+        footer={null}
+        centered
+        width={340}
+        closable={false}
+        styles={{
+          content: {
+            backgroundColor: '#1c1b1e',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '1.5rem',
+            padding: 0,
+            overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04)',
+          },
+          body: { padding: 0 },
+          mask: { backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' },
+        }}
+      >
+        <div style={{ padding: '1.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '1.25rem' }}>
+            <div style={{
+              width: '2.75rem', height: '2.75rem', borderRadius: '0.875rem', flexShrink: 0,
+              background: 'linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,59,48,0.06))',
+              border: '1px solid rgba(255,59,48,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Trash2 style={{ width: '1.125rem', height: '1.125rem', color: '#ff6b6b' }} strokeWidth={2} />
+            </div>
+            <div>
+              <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>删除帖子</div>
+              <div style={{ color: '#6e6e73', fontSize: '0.75rem', marginTop: '0.125rem' }}>删除后无法恢复，请确认</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <button
+              type="button"
+              onClick={() => setDeleteModalOpen(false)}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#c4c4c8', fontWeight: 600, fontSize: '0.9375rem', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={confirmDeletePost}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                background: 'linear-gradient(135deg, rgba(255,59,48,0.18), rgba(255,59,48,0.1))',
+                border: '1px solid rgba(255,59,48,0.28)',
+                color: '#ff6b6b', fontWeight: 600, fontSize: '0.9375rem', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.82'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+            >
+              删除
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }

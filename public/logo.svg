@@ -1,10 +1,30 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#9333ea;stop-opacity:1" />
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#cdfbff"/>
+      <stop offset="100%" stop-color="#9ee8f0"/>
     </linearGradient>
+    <filter id="inner-glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feFlood flood-color="#ffffff" flood-opacity="0.18" result="flood"/>
+      <feComposite in="flood" in2="SourceGraphic" operator="in" result="glow"/>
+      <feBlend in="SourceGraphic" in2="glow" mode="screen"/>
+    </filter>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
-  <text x="16" y="22" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">搭</text>
+  <!-- Background tile -->
+  <rect width="40" height="40" rx="10" fill="url(#grad)" filter="url(#inner-glow)"/>
+  <!-- Subtle top-edge highlight -->
+  <rect width="40" height="40" rx="10" fill="url(#highlight)" opacity="0.0"/>
+  <rect x="1" y="1" width="38" height="18" rx="9" fill="white" opacity="0.08"/>
+  <!-- Character -->
+  <text
+    x="20"
+    y="27"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    font-family="'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+    font-size="22"
+    font-weight="700"
+    fill="#0e0e0f"
+    letter-spacing="-0.5"
+  >搭</text>
 </svg>
