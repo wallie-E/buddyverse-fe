@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Bars2Icon, Cog6ToothIcon, PencilIcon, ChevronLeftIcon, ChevronRightIcon} from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
+import { LogOut } from 'lucide-react';
 import { getCurrentUser } from '../data/mockData';
 import { redirectToLoginIfNeeded } from '../utils/auth';
 import { authUtils } from '../api';
@@ -13,6 +15,7 @@ export default function Header() {
   const currentUser = getCurrentUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showGenderFilter, setShowGenderFilter] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -60,11 +63,14 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    if (confirm('确定要退出登录吗？')) {
-      authUtils.logout();
-      setIsMenuOpen(false);
-      navigate('/login');
-    }
+    setIsMenuOpen(false);
+    setLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    setLogoutModalOpen(false);
+    authUtils.logout();
+    navigate('/login');
   };
 
   const handleBackToMenu = () => {
@@ -246,6 +252,76 @@ export default function Header() {
           </div>
         </div>
       </div>
+      {/* Logout confirmation modal */}
+      <Modal
+        open={logoutModalOpen}
+        onCancel={() => setLogoutModalOpen(false)}
+        footer={null}
+        centered
+        width={340}
+        closable={false}
+        styles={{
+          content: {
+            backgroundColor: '#1c1b1e',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '1.5rem',
+            padding: 0,
+            overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04)',
+          },
+          body: { padding: 0 },
+          mask: { backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' },
+        }}
+      >
+        <div style={{ padding: '1.75rem' }}>
+          {/* Icon + title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '1.25rem' }}>
+            <div style={{
+              width: '2.75rem', height: '2.75rem', borderRadius: '0.875rem', flexShrink: 0,
+              background: 'linear-gradient(135deg, rgba(255,59,48,0.15), rgba(255,59,48,0.06))',
+              border: '1px solid rgba(255,59,48,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <LogOut style={{ width: '1.125rem', height: '1.125rem', color: '#ff6b6b' }} strokeWidth={2} />
+            </div>
+            <div>
+              <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>退出登录</div>
+              <div style={{ color: '#6e6e73', fontSize: '0.75rem', marginTop: '0.125rem' }}>确认后将退出当前账号</div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <button
+              type="button"
+              onClick={() => setLogoutModalOpen(false)}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#c4c4c8', fontWeight: 600, fontSize: '0.9375rem', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={confirmLogout}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                background: 'linear-gradient(135deg, rgba(255,59,48,0.18), rgba(255,59,48,0.1))',
+                border: '1px solid rgba(255,59,48,0.28)',
+                color: '#ff6b6b', fontWeight: 600, fontSize: '0.9375rem', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.82'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+            >
+              退出
+            </button>
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 }
