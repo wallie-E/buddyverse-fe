@@ -4,6 +4,7 @@ import { TrashIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { message, Modal, Popover } from 'antd';
 import { Trash2, Copy, Check } from 'lucide-react';
 import { API, authUtils } from '../api';
+import { postCheckCache } from '../utils/postCheckCache';
 import type { Post } from '../api/types';
 
 const card = {
@@ -108,7 +109,11 @@ export default function MyPostsPage() {
     setDeleteModalOpen(false);
     try {
       await API.posts.deletePost(pendingDeleteId);
-      setPosts(prev => prev.filter(post => post.id !== pendingDeleteId));
+      setPosts(prev => {
+        const next = prev.filter(post => post.id !== pendingDeleteId);
+        if (next.length === 0) postCheckCache.clear();
+        return next;
+      });
     } catch (error) {
       console.error('删除帖子失败:', error);
       messageApi.error('删除失败，请重试');

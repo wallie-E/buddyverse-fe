@@ -4,6 +4,7 @@ import { ChevronLeftIcon, MapPinIcon, PencilIcon, ChevronDownIcon, CheckIcon } f
 import { message, Modal } from 'antd';
 import { API, authUtils } from '../api';
 import type { Category, CreatePostRequest } from '../api/types';
+import { isValidWechatIdOrPhone, WECHAT_OR_PHONE_FORMAT_ERROR, isValidQqId, QQ_ID_FORMAT_ERROR } from '../utils/wechatIdValidation';
 
 const card = {
   backgroundColor: '#1c1b1e',
@@ -41,6 +42,10 @@ const CreatePostPage = () => {
   const [isSubCategoryDropdownOpen, setIsSubCategoryDropdownOpen] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
+  const [wechatModalOpen, setWechatModalOpen] = useState(false);
+  const [wechatInput, setWechatInput] = useState('');
+  const [qqInput, setQqInput] = useState('');
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
   const currentCategory = categories.find(cat => cat.id === selectedCategoryId);
   const currentSubCategories = currentCategory?.subcategories || [];
@@ -87,47 +92,7 @@ const CreatePostPage = () => {
     return () => { document.removeEventListener('mousedown', handleClickOutside); };
   }, [isCategoryDropdownOpen, isSubCategoryDropdownOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = authUtils.getCurrentUser();
-    const hasWechat = user && user.wechat_id && user.wechat_id.trim() !== '';
-
-    if (!hasWechat) {
-      Modal.confirm({
-        title: '请先设置微信号',
-        content: '发布帖子前需要先填写微信号，这样其他用户才能与您联系。是否现在前往个人资料页进行设置？',
-        okText: '去设置',
-        cancelText: '取消',
-        onOk: () => { navigate('/profile'); },
-        centered: true,
-        className: 'modern-confirm-modal',
-        styles: {
-          body: { padding: '32px 32px 24px' },
-          header: { padding: '0', marginBottom: '16px' },
-          content: { borderRadius: '24px', overflow: 'hidden' },
-          footer: { marginTop: '24px', padding: '0' },
-        },
-        okButtonProps: {
-          style: {
-            height: '44px', borderRadius: '22px',
-            background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)',
-            border: 'none', color: '#0e0e0f',
-            fontSize: '14px', fontWeight: 600,
-          },
-        },
-        cancelButtonProps: {
-          style: {
-            height: '44px', borderRadius: '22px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            fontSize: '14px', fontWeight: 500,
-            color: '#c4c4c8',
-            backgroundColor: '#131314',
-          },
-        },
-      });
-      return;
-    }
-
+  const submitPost = async () => {
     if (!formData.content.trim()) { messageApi.error('请输入帖子内容'); return; }
     if (formData.content.length > 150) { messageApi.error('帖子内容最多150字'); return; }
     if (!formData.location?.trim()) { messageApi.error('请输入发布位置'); return; }
@@ -149,6 +114,61 @@ const CreatePostPage = () => {
       messageApi.error(error instanceof Error ? error.message : '发布失败，请重试');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const user = authUtils.getCurrentUser();
+    const hasContact =
+      user &&
+      ((user.wechat_id && user.wechat_id.trim() !== '') || (user.qq_id && user.qq_id.trim() !== ''));
+
+    if (!hasContact) {
+      setWechatInput('');
+      setQqInput('');
+      setWechatModalOpen(true);
+      return;
+    }
+
+    await submitPost();
+  };
+
+  const handleContactSubmit = async () => {
+    const w = wechatInput.trim();
+    const q = qqInput.trim();
+    if (!w && !q) {
+      messageApi.error('请至少填写微信号或 QQ 号');
+      return;
+    }
+    if (w && !isValidWechatIdOrPhone(w)) {
+      messageApi.error(WECHAT_OR_PHONE_FORMAT_ERROR);
+      return;
+    }
+    if (q && !isValidQqId(q)) {
+      messageApi.error(QQ_ID_FORMAT_ERROR);
+      return;
+    }
+    setIsSavingContact(true);
+    try {
+      const profileRes = await API.users.updateProfile({
+        ...(w ? { wechat_id: w } : {}),
+        ...(q ? { qq_id: q } : {}),
+      });
+      if (!profileRes.success) {
+        messageApi.error(profileRes.message || '设置联系方式失败');
+        return;
+      }
+      const token = authUtils.getToken();
+      if (token && profileRes.data) {
+        authUtils.saveAuth(token, profileRes.data);
+      }
+      setWechatModalOpen(false);
+      await submitPost();
+    } catch {
+      messageApi.error('操作失败，请重试');
+    } finally {
+      setIsSavingContact(false);
     }
   };
 
@@ -346,6 +366,121 @@ const CreatePostPage = () => {
           </form>
         </div>
       </div>
+
+      {/* WeChat setup modal */}
+      <Modal
+        open={wechatModalOpen}
+        onCancel={() => setWechatModalOpen(false)}
+        footer={null}
+        centered
+        destroyOnHidden
+        width={380}
+        closable={false}
+        styles={{
+          content: {
+            backgroundColor: '#1c1b1e',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '1.5rem',
+            padding: 0,
+            overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04)',
+          },
+          body: { padding: 0 },
+          mask: { backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' },
+        }}
+      >
+        <div style={{ padding: '1.75rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', marginBottom: '0.375rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              设置联系方式后发布
+            </div>
+            <div style={{ color: '#6e6e73', fontSize: '0.8125rem', lineHeight: 1.5 }}>
+              至少填写微信号或 QQ 号，其他用户可通过它们与您联系
+            </div>
+          </div>
+
+          <input
+            type="text"
+            value={wechatInput}
+            onChange={e => setWechatInput(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+            onKeyDown={e => { if (e.key === 'Enter') handleContactSubmit(); }}
+            placeholder="微信号（可选）"
+            autoFocus
+            maxLength={20}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.75rem',
+              backgroundColor: '#131314',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e0e0e3',
+              fontSize: '0.9375rem',
+              outline: 'none',
+              marginBottom: '0.625rem',
+              boxSizing: 'border-box',
+            }}
+            onFocus={e => { e.currentTarget.style.border = '1px solid rgba(143,245,255,0.25)'; e.currentTarget.style.backgroundColor = '#201f21'; }}
+            onBlur={e => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; e.currentTarget.style.backgroundColor = '#131314'; }}
+          />
+
+          <input
+            type="text"
+            inputMode="numeric"
+            value={qqInput}
+            onChange={e => setQqInput(e.target.value.replace(/\D/g, ''))}
+            onKeyDown={e => { if (e.key === 'Enter') handleContactSubmit(); }}
+            placeholder="QQ 号（可选）"
+            maxLength={11}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              borderRadius: '0.75rem',
+              backgroundColor: '#131314',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e0e0e3',
+              fontSize: '0.9375rem',
+              outline: 'none',
+              marginBottom: '0.375rem',
+              boxSizing: 'border-box',
+            }}
+            onFocus={e => { e.currentTarget.style.border = '1px solid rgba(143,245,255,0.25)'; e.currentTarget.style.backgroundColor = '#201f21'; }}
+            onBlur={e => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; e.currentTarget.style.backgroundColor = '#131314'; }}
+          />
+
+          <div style={{ display: 'flex', gap: '0.625rem' }}>
+            <button
+              type="button"
+              onClick={() => setWechatModalOpen(false)}
+              disabled={isSavingContact}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#c4c4c8', fontWeight: 600, fontSize: '0.9375rem', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={handleContactSubmit}
+              disabled={isSavingContact}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)',
+                border: 'none', color: '#0e0e0f',
+                fontWeight: 700, fontSize: '0.9375rem', transition: 'all 0.15s',
+                opacity: isSavingContact ? 0.6 : 1,
+              }}
+              onMouseEnter={e => { if (!isSavingContact) e.currentTarget.style.opacity = '0.85'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = isSavingContact ? '0.6' : '1'; }}
+            >
+              {isSavingContact ? '发布中...' : '设置并发布'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
