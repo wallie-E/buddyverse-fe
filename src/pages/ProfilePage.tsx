@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { API, authUtils } from '../api';
 import type { User, UpdateProfileRequest } from '../api/types';
+import { isValidWechatIdOrPhone, WECHAT_OR_PHONE_FORMAT_ERROR, isValidQqId, QQ_ID_FORMAT_ERROR } from '../utils/wechatIdValidation';
 
 // Shared dark style tokens
 const card = {
@@ -41,7 +42,8 @@ export default function ProfilePage() {
     nickname: '',
     gender: 'male',
     signature: '',
-    wechat_id: ''
+    wechat_id: '',
+    qq_id: ''
   });
   const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
   const genderDropdownRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,8 @@ export default function ProfilePage() {
           nickname: response.data.nickname,
           gender: response.data.gender,
           signature: response.data.signature || '',
-          wechat_id: response.data.wechat_id || ''
+          wechat_id: response.data.wechat_id || '',
+          qq_id: response.data.qq_id || ''
         });
       }
     } catch (error) {
@@ -92,7 +95,8 @@ export default function ProfilePage() {
         nickname: user.nickname,
         gender: user.gender,
         signature: user.signature || '',
-        wechat_id: user.wechat_id || ''
+        wechat_id: user.wechat_id || '',
+        qq_id: user.qq_id || ''
       });
       setIsEditing(true);
     }
@@ -106,6 +110,16 @@ export default function ProfilePage() {
       setError('昵称长度应在2-8字符之间');
       return;
     }
+    const wechatTrimmed = editForm.wechat_id?.trim() ?? '';
+    if (wechatTrimmed && !isValidWechatIdOrPhone(wechatTrimmed)) {
+      setError(WECHAT_OR_PHONE_FORMAT_ERROR);
+      return;
+    }
+    const qqTrimmed = editForm.qq_id?.trim() ?? '';
+    if (qqTrimmed && !isValidQqId(qqTrimmed)) {
+      setError(QQ_ID_FORMAT_ERROR);
+      return;
+    }
     try {
       setIsUpdating(true);
       setError('');
@@ -113,7 +127,8 @@ export default function ProfilePage() {
         nickname: editForm.nickname?.trim(),
         gender: editForm.gender,
         signature: editForm.signature?.trim() || undefined,
-        wechat_id: editForm.wechat_id?.trim() || undefined
+        wechat_id: editForm.wechat_id?.trim() || undefined,
+        qq_id: editForm.qq_id?.trim() || undefined
       };
       const response = await API.users.updateProfile(updateData);
       if (response.success) {
@@ -289,12 +304,30 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* WeChat */}
+                {/* WeChat / phone */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: '#8e8e93' }}>微信号</label>
-                  <input type="text" value={editForm.wechat_id}
-                    onChange={e => setEditForm(p => ({ ...p, wechat_id: e.target.value }))}
-                    placeholder="请输入微信号"
+                  <input
+                    type="text"
+                    value={editForm.wechat_id}
+                    maxLength={20}
+                    onChange={e => setEditForm(p => ({ ...p, wechat_id: e.target.value.replace(/[^a-zA-Z0-9_-]/g, '') }))}
+                    placeholder="微信号"
+                    style={inputStyle()}
+                    onFocus={e => Object.assign(e.currentTarget.style, inputFocused)}
+                    onBlur={e => Object.assign(e.currentTarget.style, { backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.06)' })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#8e8e93' }}>QQ 号</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editForm.qq_id}
+                    maxLength={11}
+                    onChange={e => setEditForm(p => ({ ...p, qq_id: e.target.value.replace(/\D/g, '') }))}
+                    placeholder="QQ 号"
                     style={inputStyle()}
                     onFocus={e => Object.assign(e.currentTarget.style, inputFocused)}
                     onBlur={e => Object.assign(e.currentTarget.style, { backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.06)' })}
@@ -329,6 +362,12 @@ export default function ProfilePage() {
                   <label className="block text-xs font-medium mb-2" style={{ color: '#6e6e73' }}>微信号</label>
                   <p className="text-base font-semibold truncate" style={{ color: user.wechat_id ? '#8ff5ff' : '#4e4e53' }}>
                     {user.wechat_id || '未设置'}
+                  </p>
+                </div>
+                <div className="p-5 rounded-xl" style={{ backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.04)' }}>
+                  <label className="block text-xs font-medium mb-2" style={{ color: '#6e6e73' }}>QQ 号</label>
+                  <p className="text-base font-semibold truncate" style={{ color: user.qq_id ? '#8ff5ff' : '#4e4e53' }}>
+                    {user.qq_id || '未设置'}
                   </p>
                 </div>
                 <div className="p-5 rounded-xl sm:col-span-2" style={{ backgroundColor: '#131314', border: '1px solid rgba(255,255,255,0.04)' }}>

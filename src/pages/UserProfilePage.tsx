@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MapPinIcon } from '@heroicons/react/24/outline';
-import { Copy, Check, MessageCircle, X } from 'lucide-react';
+import { Copy, Check, MessageCircle, X, FilePlus } from 'lucide-react';
 import { message, Modal, Popover } from 'antd';
-import { getUserProfile } from '../api/users';
+import { getUserProfile, getUserPosts } from '../api/users';
 import { authUtils } from '../api';
-import { viewWechat } from '../api/wechatExchange';
+import { viewWechat, extractViewContact } from '../api/wechatExchange';
 import { redirectToLoginIfNeeded } from '../utils/auth';
+import { postCheckCache } from '../utils/postCheckCache';
 import type { User, Post } from '../api/types';
 
 const card = {
@@ -44,8 +45,10 @@ const UserProfilePage = () => {
   const [viewingWechat, setViewingWechat] = useState(false);
   const [wechatModalOpen, setWechatModalOpen] = useState(false);
   const [wechatIdInModal, setWechatIdInModal] = useState<string | null>(null);
+  const [qqIdInModal, setQqIdInModal] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedLocationId, setCopiedLocationId] = useState<number | null>(null);
+  const [needPostModalOpen, setNeedPostModalOpen] = useState(false);
 
   const currentUser = authUtils.getCurrentUser();
   const isCurrentUser = currentUser && id && currentUser.id?.toString() === id;
@@ -122,18 +125,35 @@ const UserProfilePage = () => {
   const handleViewWechat = async () => {
     if (!user?.id) return;
     if (redirectToLoginIfNeeded(navigate)) return;
+    if (!postCheckCache.get()) {
+      try {
+        const postsRes = await getUserPosts({ page: 1, limit: 1 });
+        if (postsRes.success) {
+          if (postsRes.data.pagination.total === 0) {
+            setNeedPostModalOpen(true);
+            return;
+          } else {
+            postCheckCache.setTrue();
+          }
+        }
+      } catch {
+        // fail open
+      }
+    }
     setViewingWechat(true);
     try {
       const res = await viewWechat(Number(user.id));
-      if (res.success && res.data?.wechatId) {
-        setWechatIdInModal(res.data.wechatId);
+      const { wechat, qq } = extractViewContact(res.data);
+      if (res.success && (wechat || qq)) {
+        setWechatIdInModal(wechat || null);
+        setQqIdInModal(qq || null);
         setWechatModalOpen(true);
         setCopied(false);
       } else {
-        messageApi.error('该用户账号异常，无法查看微信号');
+        messageApi.error('暂无联系方式');
       }
     } catch {
-      messageApi.error('该用户账号异常，无法查看微信号');
+      messageApi.error('暂无联系方式');
     } finally {
       setViewingWechat(false);
     }
@@ -152,11 +172,14 @@ const UserProfilePage = () => {
   };
 
   const handleCopyWechat = async () => {
-    if (!wechatIdInModal) return;
+    const lines: string[] = [];
+    if (wechatIdInModal) lines.push(`微信号：${wechatIdInModal}`);
+    if (qqIdInModal) lines.push(`QQ：${qqIdInModal}`);
+    if (!lines.length) return;
     try {
-      await navigator.clipboard.writeText(wechatIdInModal);
+      await navigator.clipboard.writeText(lines.join('\n'));
       setCopied(true);
-      messageApi.success('微信号已复制');
+      messageApi.success('联系方式已复制');
       setTimeout(() => setCopied(false), 2000);
     } catch {
       messageApi.error('复制失败');
@@ -247,7 +270,7 @@ const UserProfilePage = () => {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
                 style={{ backgroundColor: 'rgba(143,245,255,0.08)', color: '#8ff5ff', border: '1px solid rgba(143,245,255,0.15)' }}>
                 <MessageCircle className="h-4 w-4" strokeWidth={2} />
-                {viewingWechat ? '查看中...' : '查看微信'}
+                {viewingWechat ? '查看中...' : '查看联系方式'}
               </button>
             </div>
           </div>
@@ -399,8 +422,8 @@ const UserProfilePage = () => {
                 <MessageCircle style={{ width: '1.25rem', height: '1.25rem', color: '#07C160' }} strokeWidth={2} />
               </div>
               <div>
-                <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>微信联系方式</div>
-                <div style={{ color: '#6e6e73', fontSize: '0.75rem', marginTop: '0.125rem' }}>搜索以下微信号添加好友</div>
+                <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>联系方式</div>
+                <div style={{ color: '#6e6e73', fontSize: '0.75rem', marginTop: '0.125rem' }}>微信号与 QQ（如有）</div>
               </div>
             </div>
             <button
@@ -418,23 +441,40 @@ const UserProfilePage = () => {
             </button>
           </div>
 
-          {/* WeChat ID */}
-          {wechatIdInModal && (
+          {(wechatIdInModal || qqIdInModal) && (
             <>
-              <div style={{
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: '0.875rem',
-                padding: '0.875rem 1.125rem',
-                marginBottom: '0.875rem',
-              }}>
-                <div style={{ color: '#4e4e53', fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.375rem' }}>
-                  微信号
+              {wechatIdInModal && (
+                <div style={{
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '0.875rem',
+                  padding: '0.875rem 1.125rem',
+                  marginBottom: '0.625rem',
+                }}>
+                  <div style={{ color: '#4e4e53', fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.375rem' }}>
+                    微信号
+                  </div>
+                  <div style={{ color: '#e0e0e3', fontWeight: 600, fontSize: '1.0625rem', letterSpacing: '0.03em', fontFamily: 'ui-monospace, "SF Mono", monospace' }}>
+                    {wechatIdInModal}
+                  </div>
                 </div>
-                <div style={{ color: '#e0e0e3', fontWeight: 600, fontSize: '1.0625rem', letterSpacing: '0.03em', fontFamily: 'ui-monospace, "SF Mono", monospace' }}>
-                  {wechatIdInModal}
+              )}
+              {qqIdInModal && (
+                <div style={{
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '0.875rem',
+                  padding: '0.875rem 1.125rem',
+                  marginBottom: '0.875rem',
+                }}>
+                  <div style={{ color: '#4e4e53', fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.375rem' }}>
+                    QQ 号
+                  </div>
+                  <div style={{ color: '#e0e0e3', fontWeight: 600, fontSize: '1.0625rem', letterSpacing: '0.03em', fontFamily: 'ui-monospace, "SF Mono", monospace' }}>
+                    {qqIdInModal}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button
                 type="button"
@@ -454,10 +494,93 @@ const UserProfilePage = () => {
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? '已复制' : '复制微信号'}
+                {copied ? '已复制' : '复制联系方式'}
               </button>
             </>
           )}
+        </div>
+      </Modal>
+
+      {/* 需先发帖提示 — 与帖子卡片同一套深色样式 */}
+      <Modal
+        open={needPostModalOpen}
+        onCancel={() => setNeedPostModalOpen(false)}
+        footer={null}
+        centered
+        destroyOnHidden
+        width={360}
+        closable={false}
+        styles={{
+          content: {
+            backgroundColor: '#1c1b1e',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '1.5rem',
+            padding: 0,
+            overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04)',
+          },
+          body: { padding: 0 },
+          mask: { backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.65)' },
+        }}
+      >
+        <div style={{ padding: '1.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+              <div style={{
+                width: '2.75rem', height: '2.75rem', borderRadius: '0.875rem',
+                background: 'linear-gradient(135deg, rgba(143,245,255,0.18), rgba(143,245,255,0.06))',
+                border: '1px solid rgba(143,245,255,0.22)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <FilePlus style={{ width: '1.25rem', height: '1.25rem', color: '#8ff5ff' }} strokeWidth={2} />
+              </div>
+              <div>
+                <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>请先发布帖子</div>
+                <div style={{ color: '#6e6e73', fontSize: '0.8125rem', marginTop: '0.375rem', lineHeight: 1.5 }}>
+                  查看他人联系方式前，需要先发布至少一个帖子。
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNeedPostModalOpen(false)}
+              style={{
+                width: '2rem', height: '2rem', borderRadius: '0.5rem', flexShrink: 0,
+                backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+                color: '#6e6e73', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#a0a0a8'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#6e6e73'; }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              type="button"
+              onClick={() => setNeedPostModalOpen(false)}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem',
+                backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#a0a0a8',
+              }}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setNeedPostModalOpen(false);
+                navigate('/create-post');
+              }}
+              style={{
+                flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem',
+                background: 'linear-gradient(135deg, rgba(143,245,255,0.14), rgba(143,245,255,0.06))',
+                border: '1px solid rgba(143,245,255,0.22)', color: '#8ff5ff',
+              }}
+            >
+              去发布
+            </button>
+          </div>
         </div>
       </Modal>
     </>

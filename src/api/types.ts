@@ -30,6 +30,7 @@ export interface User {
   avatar?: string;
   signature?: string;
   wechat_id?: string;
+  qq_id?: string;
   role: 'user' | 'admin';
   status?: 'active' | 'inactive' | 'banned';
   created_at?: string;
@@ -57,6 +58,7 @@ export interface UpdateProfileRequest {
   gender?: 'male' | 'female' | 'other';
   signature?: string;
   wechat_id?: string;
+  qq_id?: string;
 }
 
 // 帖子相关类型
