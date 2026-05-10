@@ -22,7 +22,7 @@ const inputBase: React.CSSProperties = {
   width: '100%',
   padding: '0.75rem 1.25rem',
   borderRadius: '0.75rem',
-  fontSize: '0.9375rem',
+  fontSize: '1rem',
 };
 
 const CreatePostPage = () => {
@@ -414,7 +414,7 @@ const CreatePostPage = () => {
               backgroundColor: '#131314',
               border: '1px solid rgba(255,255,255,0.08)',
               color: '#e0e0e3',
-              fontSize: '0.9375rem',
+              fontSize: '1rem',
               outline: 'none',
               marginBottom: '0.625rem',
               boxSizing: 'border-box',
@@ -438,7 +438,7 @@ const CreatePostPage = () => {
               backgroundColor: '#131314',
               border: '1px solid rgba(255,255,255,0.08)',
               color: '#e0e0e3',
-              fontSize: '0.9375rem',
+              fontSize: '1rem',
               outline: 'none',
               marginBottom: '0.375rem',
               boxSizing: 'border-box',

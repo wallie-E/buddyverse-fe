@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, TrashIcon, ChartBarIcon, UsersIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Button, Modal, Input, Space, message, Popconfirm, Spin, ConfigProvider, theme, Tag } from 'antd';
+import { Table, Button, Modal, Input, Space, message, Popconfirm, Spin, ConfigProvider, theme, Tag, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { getStats, adminUsers, adminPosts } from '../api/admin';
-import type { User, Post, AdminStats } from '../api/types';
+import { adminGetFeedbacks, adminUpdateFeedback, adminDeleteFeedback } from '../api/feedback';
+import type { User, Post, AdminStats, AdminFeedback, FeedbackType, FeedbackStatus } from '../api/types';
 
 const SURFACE = '#1c1b1e';
 const SURFACE_LOW = '#131314';
@@ -122,20 +124,104 @@ const StatCard = ({
   </div>
 );
 
+const FEEDBACK_TYPE_LABELS: Record<FeedbackType, string> = {
+  feature: '功能建议',
+  bug: '问题反馈',
+  report: '内容举报',
+  other: '其他',
+};
+
+const FEEDBACK_STATUS_LABELS: Record<FeedbackStatus, string> = {
+  pending: '待处理',
+  reviewed: '已查看',
+  resolved: '已解决',
+};
+
+const FEEDBACK_STATUS_COLORS: Record<FeedbackStatus, string> = {
+  pending: '#ffb347',
+  reviewed: '#8ff5ff',
+  resolved: '#aaffdc',
+};
+
 const AdminPage = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'users' | 'feedbacks'>('users');
+
+  // 用户管理状态
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDetailVisible, setUserDetailVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
-
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [userPostsLoading, setUserPostsLoading] = useState(false);
+
+  // 反馈管理状态
+  const [feedbacks, setFeedbacks] = useState<AdminFeedback[]>([]);
+  const [totalFeedbacks, setTotalFeedbacks] = useState(0);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackPage, setFeedbackPage] = useState(1);
+  const [feedbackPageSize] = useState(20);
+  const [feedbackTypeFilter, setFeedbackTypeFilter] = useState<FeedbackType | undefined>();
+  const [feedbackStatusFilter, setFeedbackStatusFilter] = useState<FeedbackStatus | undefined>();
+  const [replyModalVisible, setReplyModalVisible] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<AdminFeedback | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replyStatus, setReplyStatus] = useState<FeedbackStatus>('reviewed');
+  const [replySubmitting, setReplySubmitting] = useState(false);
+
+  const fetchFeedbacks = async (
+    page = feedbackPage,
+    type = feedbackTypeFilter,
+    status = feedbackStatusFilter,
+  ) => {
+    setFeedbackLoading(true);
+    try {
+      const res = await adminGetFeedbacks({ page, limit: feedbackPageSize, type, status });
+      setFeedbacks(res.data.list);
+      setTotalFeedbacks(res.data.pagination.total);
+    } catch {
+      message.error('获取反馈列表失败');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const handleOpenReply = (record: AdminFeedback) => {
+    setSelectedFeedback(record);
+    setReplyText(record.admin_reply ?? '');
+    setReplyStatus(record.status);
+    setReplyModalVisible(true);
+  };
+
+  const handleReplySubmit = async () => {
+    if (!selectedFeedback) return;
+    setReplySubmitting(true);
+    try {
+      await adminUpdateFeedback(selectedFeedback.id, { status: replyStatus, admin_reply: replyText || undefined });
+      message.success('反馈已更新');
+      setReplyModalVisible(false);
+      fetchFeedbacks(feedbackPage, feedbackTypeFilter, feedbackStatusFilter);
+    } catch {
+      message.error('更新失败，请重试');
+    } finally {
+      setReplySubmitting(false);
+    }
+  };
+
+  const handleDeleteFeedback = async (id: number) => {
+    try {
+      await adminDeleteFeedback(id);
+      message.success('反馈已删除');
+      fetchFeedbacks(feedbackPage, feedbackTypeFilter, feedbackStatusFilter);
+    } catch {
+      message.error('删除失败');
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -177,6 +263,7 @@ const AdminPage = () => {
   useEffect(() => {
     fetchStats();
     fetchUsers(1, pageSize);
+    fetchFeedbacks(1);
   }, [pageSize]);
 
   const formatDate = (dateString: string) =>
@@ -224,6 +311,103 @@ const AdminPage = () => {
     gender === 'male' ? '男' : gender === 'female' ? '女' : '其他';
   const genderColor = (gender: string) =>
     gender === 'male' ? '#60a5fa' : gender === 'female' ? '#f472b6' : TEXT_SUB;
+
+  const feedbackColumns: ColumnsType<AdminFeedback> = [
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      render: (type: FeedbackType) => (
+        <span style={{
+          display: 'inline-block',
+          fontSize: '0.78rem', fontWeight: 600, padding: '2px 10px',
+          borderRadius: 999, color: PRIMARY,
+          backgroundColor: `${PRIMARY}14`, border: `1px solid ${PRIMARY}22`,
+          whiteSpace: 'nowrap',
+        }}>
+          {FEEDBACK_TYPE_LABELS[type]}
+        </span>
+      ),
+    },
+    {
+      title: '内容',
+      dataIndex: 'description',
+      key: 'description',
+      render: (text: string) => (
+        <span style={{ color: TEXT, fontSize: '0.875rem', lineHeight: 1.5 }}>{text}</span>
+      ),
+    },
+    {
+      title: '用户',
+      key: 'user',
+      width: 120,
+      render: (_, record) => (
+        <span style={{ color: TEXT_SUB, fontSize: '0.82rem' }}>
+          {record.user_nickname ?? '匿名'}
+        </span>
+      ),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: (status: FeedbackStatus) => (
+        <span style={{
+          fontSize: '0.78rem', fontWeight: 600, padding: '2px 10px',
+          borderRadius: 999, color: FEEDBACK_STATUS_COLORS[status],
+          backgroundColor: `${FEEDBACK_STATUS_COLORS[status]}14`,
+          border: `1px solid ${FEEDBACK_STATUS_COLORS[status]}28`,
+        }}>
+          {FEEDBACK_STATUS_LABELS[status]}
+        </span>
+      ),
+    },
+    {
+      title: '提交时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 110,
+      render: (date: string) => (
+        <span style={{ color: TEXT_SUB, fontSize: '0.82rem' }}>{formatDate(date)}</span>
+      ),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 130,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="link"
+            onClick={() => handleOpenReply(record)}
+            style={{ color: PRIMARY, padding: '0 4px', fontSize: '0.85rem' }}
+          >
+            回复
+          </Button>
+          <Popconfirm
+            title="确认删除反馈"
+            description={<div style={{ color: TEXT_SUB, fontSize: '0.85rem', maxWidth: 200 }}>此操作无法恢复。</div>}
+            onConfirm={() => handleDeleteFeedback(record.id)}
+            okText="确认删除"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+            placement="topRight"
+          >
+            <Button
+              type="link"
+              danger
+              icon={<TrashIcon style={{ width: 14, height: 14 }} />}
+              style={{ padding: '0 4px', fontSize: '0.85rem' }}
+            >
+              删除
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   const columns: ColumnsType<User> = [
     {
@@ -383,7 +567,7 @@ const AdminPage = () => {
             borderBottom: '1px solid rgba(255,255,255,0.06)',
             position: 'sticky',
             top: 0,
-            zIndex: 50,
+            zIndex: 40,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.25rem' }}>
@@ -435,7 +619,9 @@ const AdminPage = () => {
                 >
                   管理后台
                 </h1>
-                <p style={{ fontSize: '0.75rem', color: TEXT_SUB, margin: 0 }}>用户管理</p>
+                <p style={{ fontSize: '0.75rem', color: TEXT_SUB, margin: 0 }}>
+                  {activeTab === 'users' ? '用户管理' : '反馈管理'}
+                </p>
               </div>
             </div>
 
@@ -444,6 +630,26 @@ const AdminPage = () => {
         </div>
 
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1.25rem' }}>
+
+          {/* Tab 切换 */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem' }}>
+            {([['users', <UsersIcon key="u" style={{ width: 15, height: 15 }} />, '用户管理'], ['feedbacks', <MessageSquare key="f" style={{ width: 15, height: 15 }} />, '反馈管理']] as const).map(([key, icon, label]) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  padding: '0.5rem 1rem', borderRadius: '0.75rem', cursor: 'pointer',
+                  fontSize: '0.875rem', fontWeight: 600, transition: 'all 0.15s',
+                  ...(activeTab === key
+                    ? { background: `${PRIMARY}14`, border: `1px solid ${PRIMARY}30`, color: PRIMARY }
+                    : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: TEXT_SUB }),
+                }}
+              >
+                {icon}{label}
+              </button>
+            ))}
+          </div>
 
           {/* 统计卡片 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
@@ -466,7 +672,7 @@ const AdminPage = () => {
           </div>
 
           {/* 用户管理表格 */}
-          <div
+          {activeTab === 'users' && <div
             style={{
               backgroundColor: SURFACE,
               borderRadius: '1.25rem',
@@ -550,7 +756,101 @@ const AdminPage = () => {
                 style={{ backgroundColor: 'transparent' }}
               />
             </div>
-          </div>
+          </div>}
+
+          {/* 反馈管理区块 */}
+          {activeTab === 'feedbacks' && (
+            <div
+              style={{
+                backgroundColor: SURFACE,
+                borderRadius: '1.25rem',
+                border: '1px solid rgba(255,255,255,0.06)',
+                boxShadow: '0 4px 32px rgba(0,0,0,0.3)',
+                overflow: 'hidden',
+              }}
+            >
+              {/* 表格头部 */}
+              <div
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <MessageSquare style={{ width: 18, height: 18, color: TEXT_SUB }} />
+                  <h2 style={{ fontSize: '1rem', fontWeight: 600, color: TEXT, margin: 0 }}>
+                    用户反馈
+                  </h2>
+                  <span style={{
+                    fontSize: '0.75rem', fontWeight: 600, padding: '1px 8px', borderRadius: 999,
+                    color: PRIMARY, backgroundColor: `${PRIMARY}14`, border: `1px solid ${PRIMARY}22`,
+                  }}>
+                    {totalFeedbacks}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Select
+                    allowClear
+                    placeholder="类型"
+                    style={{ width: 120 }}
+                    value={feedbackTypeFilter}
+                    onChange={(val) => {
+                      setFeedbackTypeFilter(val);
+                      setFeedbackPage(1);
+                      fetchFeedbacks(1, val, feedbackStatusFilter);
+                    }}
+                    options={[
+                      { value: 'feature', label: '功能建议' },
+                      { value: 'bug', label: '问题反馈' },
+                      { value: 'report', label: '内容举报' },
+                      { value: 'other', label: '其他' },
+                    ]}
+                  />
+                  <Select
+                    allowClear
+                    placeholder="状态"
+                    style={{ width: 110 }}
+                    value={feedbackStatusFilter}
+                    onChange={(val) => {
+                      setFeedbackStatusFilter(val);
+                      setFeedbackPage(1);
+                      fetchFeedbacks(1, feedbackTypeFilter, val);
+                    }}
+                    options={[
+                      { value: 'pending', label: '待处理' },
+                      { value: 'reviewed', label: '已查看' },
+                      { value: 'resolved', label: '已解决' },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <Table<AdminFeedback>
+                dataSource={feedbacks}
+                columns={feedbackColumns}
+                rowKey="id"
+                loading={feedbackLoading}
+                pagination={{
+                  current: feedbackPage,
+                  pageSize: feedbackPageSize,
+                  total: totalFeedbacks,
+                  showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条 / 共 ${total} 条`,
+                  onChange: (page) => {
+                    setFeedbackPage(page);
+                    fetchFeedbacks(page, feedbackTypeFilter, feedbackStatusFilter);
+                  },
+                  style: { padding: '0.75rem 1rem' },
+                }}
+                style={{ backgroundColor: 'transparent' }}
+              />
+            </div>
+          )}
+
         </div>
 
         {/* 用户详情 Modal */}
@@ -787,6 +1087,120 @@ const AdminPage = () => {
                 </Spin>
               </div>
 
+            </div>
+          )}
+        </Modal>
+
+        {/* 反馈回复 Modal */}
+        <Modal
+          title={<span style={{ color: TEXT, fontWeight: 700 }}>处理反馈</span>}
+          open={replyModalVisible}
+          onCancel={() => setReplyModalVisible(false)}
+          footer={null}
+          width={520}
+          styles={{
+            content: {
+              backgroundColor: SURFACE,
+              borderRadius: '1.25rem',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              padding: 0,
+            },
+            header: {
+              backgroundColor: SURFACE,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              padding: '1.25rem 1.5rem',
+              borderRadius: '1.25rem 1.25rem 0 0',
+              marginBottom: 0,
+            },
+            body: { padding: '1.5rem' },
+          }}
+        >
+          {selectedFeedback && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* 原始内容 */}
+              <div style={{
+                backgroundColor: SURFACE_LOW, borderRadius: '0.875rem',
+                padding: '1rem', border: '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: '0.75rem', fontWeight: 600, padding: '1px 8px', borderRadius: 999,
+                    color: PRIMARY, backgroundColor: `${PRIMARY}14`, border: `1px solid ${PRIMARY}22`,
+                  }}>
+                    {FEEDBACK_TYPE_LABELS[selectedFeedback.type]}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: TEXT_SUB }}>{formatDate(selectedFeedback.created_at)}</span>
+                </div>
+                <p style={{ color: TEXT, fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+                  {selectedFeedback.description}
+                </p>
+              </div>
+
+              {/* 状态选择 */}
+              <div>
+                <p style={{ color: TEXT_SUB, fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
+                  处理状态
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {(['pending', 'reviewed', 'resolved'] as FeedbackStatus[]).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setReplyStatus(s)}
+                      style={{
+                        padding: '0.375rem 0.875rem', borderRadius: '0.625rem', cursor: 'pointer',
+                        fontSize: '0.825rem', fontWeight: 600, transition: 'all 0.15s',
+                        ...(replyStatus === s
+                          ? { background: `${FEEDBACK_STATUS_COLORS[s]}14`, border: `1px solid ${FEEDBACK_STATUS_COLORS[s]}40`, color: FEEDBACK_STATUS_COLORS[s] }
+                          : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: TEXT_SUB }),
+                      }}
+                    >
+                      {FEEDBACK_STATUS_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 回复内容 */}
+              <div>
+                <p style={{ color: TEXT_SUB, fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
+                  管理员回复（可选）
+                </p>
+                <Input.TextArea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value.slice(0, 500))}
+                  placeholder="输入回复内容…"
+                  rows={4}
+                  maxLength={500}
+                  showCount
+                />
+              </div>
+
+              {/* 操作按钮 */}
+              <div style={{ display: 'flex', gap: '0.625rem' }}>
+                <button
+                  onClick={() => setReplyModalVisible(false)}
+                  style={{
+                    flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: 'pointer',
+                    backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                    color: TEXT_SUB, fontWeight: 600, fontSize: '0.9375rem',
+                  }}
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleReplySubmit}
+                  disabled={replySubmitting}
+                  style={{
+                    flex: 1, padding: '0.75rem', borderRadius: '0.875rem', cursor: replySubmitting ? 'not-allowed' : 'pointer',
+                    background: 'linear-gradient(135deg, #8ff5ff, #5bc8d4)',
+                    border: 'none', color: '#0e0e0f', fontWeight: 700, fontSize: '0.9375rem',
+                    opacity: replySubmitting ? 0.7 : 1,
+                  }}
+                >
+                  {replySubmitting ? '提交中…' : '确认提交'}
+                </button>
+              </div>
             </div>
           )}
         </Modal>
