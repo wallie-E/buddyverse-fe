@@ -215,4 +215,39 @@ export interface AdminUserPostsResponse {
 export interface AdminCommentListParams extends PaginationParams {
   status?: 'active' | 'deleted';
   post_id?: number;
+}
+
+// 反馈相关类型
+export type FeedbackType = 'feature' | 'bug' | 'report' | 'other';
+export type FeedbackStatus = 'pending' | 'reviewed' | 'resolved';
+
+export interface Feedback {
+  id: number;
+  type: FeedbackType;
+  description: string;
+  status: FeedbackStatus;
+  admin_reply: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminFeedback extends Feedback {
+  user_id: number | null;
+  user_nickname: string | null;
+  user_email: string | null;
+}
+
+export interface SubmitFeedbackRequest {
+  type: FeedbackType;
+  description: string;
+}
+
+export interface UpdateFeedbackRequest {
+  status: FeedbackStatus;
+  admin_reply?: string;
+}
+
+export interface AdminFeedbackListParams extends PaginationParams {
+  type?: FeedbackType;
+  status?: FeedbackStatus;
 } 

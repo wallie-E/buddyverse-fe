@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bars2Icon, Cog6ToothIcon, PencilIcon, ChevronLeftIcon, ChevronRightIcon} from '@heroicons/react/24/outline';
+import { Bars2Icon, Cog6ToothIcon, PencilIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'antd';
@@ -62,6 +62,11 @@ export default function Header() {
     setIsMenuOpen(false);
   };
 
+  const handleFeedback = () => {
+    setIsMenuOpen(false);
+    navigate('/feedback');
+  };
+
   const handleLogout = () => {
     setIsMenuOpen(false);
     setLogoutModalOpen(true);
@@ -77,7 +82,7 @@ export default function Header() {
     setShowGenderFilter(false);
   };
 
-  const dropdownClass = "absolute right-0 top-full mt-2 w-56 bg-[#1c1b1e]/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/5 overflow-hidden z-50";
+  const dropdownClass = "absolute right-0 top-full mt-2 w-56 bg-[#1c1b1e]/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/5 overflow-hidden z-[110]";
   const dropdownItemClass = "w-full px-4 py-3 text-left text-[#c4c4c8] hover:bg-white/5 hover:text-[#e0e0e3] transition-colors font-sans text-sm font-medium";
   const dividerClass = "h-px bg-white/5";
 
@@ -85,15 +90,19 @@ export default function Header() {
     <>
       {!showGenderFilter ? (
         <>
-          <button onClick={handleProfileClick} className={dropdownItemClass}>
-            个人资料
-          </button>
           <button
             onClick={handleFilterClick}
             className={`${dropdownItemClass} flex items-center justify-between`}
           >
-            <span>筛选</span>
+            <span>性别筛选</span>
             <ChevronRightIcon className="h-4 w-4 text-[#6e6e73]" />
+          </button>
+          <button onClick={handleProfileClick} className={dropdownItemClass}>
+            个人资料
+          </button>
+
+          <button onClick={handleFeedback} className={dropdownItemClass}>
+            反馈
           </button>
           <div className={dividerClass} />
           <button
@@ -120,11 +129,10 @@ export default function Header() {
                 <button
                   key={g ?? 'all'}
                   onClick={() => handleGenderSelect(g)}
-                  className={`w-full px-3 py-2 text-left rounded-lg transition-colors font-sans text-sm ${
-                    selectedGender === g
+                  className={`w-full px-3 py-2 text-left rounded-lg transition-colors font-sans text-sm ${selectedGender === g
                       ? 'bg-[#8ff5ff]/10 text-[#8ff5ff] font-medium'
                       : 'text-[#c4c4c8] hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   {g === null ? '全部' : g === 'male' ? '男' : '女'}
                 </button>
@@ -137,7 +145,7 @@ export default function Header() {
   );
 
   return (
-    <header className="bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-50 transition-all duration-300">
+    <header className="bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-[100] transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 

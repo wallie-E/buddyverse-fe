@@ -17,6 +17,7 @@ import UserProfilePage from './pages/UserProfilePage';
 import MyPostsPage from './pages/MyPostsPage';
 import AdminPage from './pages/AdminPage';
 import ApiTestPage from './pages/ApiTestPage';
+import FeedbackPage from './pages/FeedbackPage';
 
 function App() {
   const isLoggedIn = true; // 模拟登录状态
@@ -52,6 +53,7 @@ function App() {
             {/* <Route path="/post/:id" element={<PostDetailPage />} /> */}
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/api-test" element={<ApiTestPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

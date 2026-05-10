@@ -13,7 +13,7 @@ const inputBase: React.CSSProperties = {
   width: '100%',
   padding: '0.875rem 1.25rem',
   borderRadius: '0.75rem',
-  fontSize: '0.9375rem',
+  fontSize: '1rem',
 };
 
 const LoginPage = () => {

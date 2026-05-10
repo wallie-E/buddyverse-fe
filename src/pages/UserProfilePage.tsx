@@ -46,7 +46,8 @@ const UserProfilePage = () => {
   const [wechatModalOpen, setWechatModalOpen] = useState(false);
   const [wechatIdInModal, setWechatIdInModal] = useState<string | null>(null);
   const [qqIdInModal, setQqIdInModal] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedWechat, setCopiedWechat] = useState(false);
+  const [copiedQq, setCopiedQq] = useState(false);
   const [copiedLocationId, setCopiedLocationId] = useState<number | null>(null);
   const [needPostModalOpen, setNeedPostModalOpen] = useState(false);
 
@@ -148,7 +149,8 @@ const UserProfilePage = () => {
         setWechatIdInModal(wechat || null);
         setQqIdInModal(qq || null);
         setWechatModalOpen(true);
-        setCopied(false);
+        setCopiedWechat(false);
+        setCopiedQq(false);
       } else {
         messageApi.error('暂无联系方式');
       }
@@ -172,15 +174,24 @@ const UserProfilePage = () => {
   };
 
   const handleCopyWechat = async () => {
-    const lines: string[] = [];
-    if (wechatIdInModal) lines.push(`微信号：${wechatIdInModal}`);
-    if (qqIdInModal) lines.push(`QQ：${qqIdInModal}`);
-    if (!lines.length) return;
+    if (!wechatIdInModal) return;
     try {
-      await navigator.clipboard.writeText(lines.join('\n'));
-      setCopied(true);
-      messageApi.success('联系方式已复制');
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(wechatIdInModal);
+      setCopiedWechat(true);
+      messageApi.success('微信号已复制');
+      setTimeout(() => setCopiedWechat(false), 2000);
+    } catch {
+      messageApi.error('复制失败');
+    }
+  };
+
+  const handleCopyQq = async () => {
+    if (!qqIdInModal) return;
+    try {
+      await navigator.clipboard.writeText(qqIdInModal);
+      setCopiedQq(true);
+      messageApi.success('QQ 号已复制');
+      setTimeout(() => setCopiedQq(false), 2000);
     } catch {
       messageApi.error('复制失败');
     }
@@ -423,7 +434,6 @@ const UserProfilePage = () => {
               </div>
               <div>
                 <div style={{ color: '#e0e0e3', fontWeight: 700, fontSize: '1rem', lineHeight: 1.3 }}>联系方式</div>
-                <div style={{ color: '#6e6e73', fontSize: '0.75rem', marginTop: '0.125rem' }}>微信号与 QQ（如有）</div>
               </div>
             </div>
             <button
@@ -476,26 +486,52 @@ const UserProfilePage = () => {
                 </div>
               )}
 
-              <button
-                type="button"
-                onClick={handleCopyWechat}
-                style={{
-                  width: '100%', padding: '0.8125rem', borderRadius: '0.875rem', cursor: 'pointer',
-                  background: copied
-                    ? 'linear-gradient(135deg, rgba(7,193,96,0.15), rgba(7,193,96,0.07))'
-                    : 'linear-gradient(135deg, rgba(143,245,255,0.1), rgba(143,245,255,0.04))',
-                  border: `1px solid ${copied ? 'rgba(7,193,96,0.28)' : 'rgba(143,245,255,0.16)'}`,
-                  color: copied ? '#4ade80' : '#8ff5ff',
-                  fontWeight: 600, fontSize: '0.9375rem',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? '已复制' : '复制联系方式'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.625rem' }}>
+                {wechatIdInModal && (
+                  <button
+                    type="button"
+                    onClick={handleCopyWechat}
+                    style={{
+                      flex: 1, padding: '0.8125rem', borderRadius: '0.875rem', cursor: 'pointer',
+                      background: copiedWechat
+                        ? 'linear-gradient(135deg, rgba(7,193,96,0.15), rgba(7,193,96,0.07))'
+                        : 'linear-gradient(135deg, rgba(143,245,255,0.1), rgba(143,245,255,0.04))',
+                      border: `1px solid ${copiedWechat ? 'rgba(7,193,96,0.28)' : 'rgba(143,245,255,0.16)'}`,
+                      color: copiedWechat ? '#4ade80' : '#8ff5ff',
+                      fontWeight: 600, fontSize: '0.9375rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                  >
+                    {copiedWechat ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copiedWechat ? '已复制' : '复制微信号'}
+                  </button>
+                )}
+                {qqIdInModal && (
+                  <button
+                    type="button"
+                    onClick={handleCopyQq}
+                    style={{
+                      flex: 1, padding: '0.8125rem', borderRadius: '0.875rem', cursor: 'pointer',
+                      background: copiedQq
+                        ? 'linear-gradient(135deg, rgba(7,193,96,0.15), rgba(7,193,96,0.07))'
+                        : 'linear-gradient(135deg, rgba(143,245,255,0.1), rgba(143,245,255,0.04))',
+                      border: `1px solid ${copiedQq ? 'rgba(7,193,96,0.28)' : 'rgba(143,245,255,0.16)'}`,
+                      color: copiedQq ? '#4ade80' : '#8ff5ff',
+                      fontWeight: 600, fontSize: '0.9375rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                  >
+                    {copiedQq ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copiedQq ? '已复制' : '复制 QQ 号'}
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

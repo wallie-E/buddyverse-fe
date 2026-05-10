@@ -126,9 +126,9 @@ export default function ProfilePage() {
       const updateData: UpdateProfileRequest = {
         nickname: editForm.nickname?.trim(),
         gender: editForm.gender,
-        signature: editForm.signature?.trim() || undefined,
-        wechat_id: editForm.wechat_id?.trim() || undefined,
-        qq_id: editForm.qq_id?.trim() || undefined
+        signature: editForm.signature?.trim() || '',
+        wechat_id: editForm.wechat_id?.trim() || '',
+        qq_id: editForm.qq_id?.trim() || ''
       };
       const response = await API.users.updateProfile(updateData);
       if (response.success) {
@@ -182,7 +182,7 @@ export default function ProfilePage() {
     width: '100%',
     padding: '0.75rem 1.25rem',
     borderRadius: '0.75rem',
-    fontSize: '0.9375rem',
+    fontSize: '1rem',
   });
 
   return (

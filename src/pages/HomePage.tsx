@@ -179,7 +179,7 @@ export default function HomePage() {
               onChange={(e) => setLocation(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="搜索位置，如：北京、三里屯..."
-              className="block w-full pl-14 pr-28 py-4 rounded-2xl focus:outline-none transition-all duration-200 text-sm"
+              className="block w-full pl-14 pr-28 py-4 rounded-2xl focus:outline-none transition-all duration-200 text-base"
               style={{
                 backgroundColor: '#131314',
                 color: '#e0e0e3',
