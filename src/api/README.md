@@ -23,7 +23,7 @@ src/api/
 ## 基础配置
 
 ### 服务器地址
-- **Base URL**: `http://localhost:8080`
+- **Base URL**: 由环境变量 `VITE_API_URL` 提供（见仓库根目录 `.env.example`）
 - **认证方式**: Bearer Token (JWT)
 - **数据格式**: JSON
 
