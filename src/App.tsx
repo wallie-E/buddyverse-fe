@@ -20,7 +20,7 @@ import ApiTestPage from './pages/ApiTestPage';
 import FeedbackPage from './pages/FeedbackPage';
 
 function App() {
-  const isLoggedIn = true; // 模拟登录状态
+  const isLoggedIn = true; 
 
   if (!isLoggedIn) {
     return (

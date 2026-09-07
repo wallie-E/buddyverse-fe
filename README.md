@@ -1,63 +1,63 @@
-# 搭子社区应用
+# Buddyverse
 
-一个基于 React + TypeScript 的搭子社区前端项目，面向「找搭子」场景，支持发帖、筛选、个人资料管理、联系方式查看与基础后台管理。
+A React + TypeScript frontend for a buddy-matching community. Users can post, filter, manage profiles, view contact details, and use a basic admin console.
 
-## 项目功能总览
+## Features
 
-### 1) 用户与认证
-- 邮箱 + 密码注册/登录
-- 注册时填写昵称与性别
-- 本地保存登录态（token + 用户信息）
-- 未登录访问受限功能时自动跳转登录页
+### 1) Auth
+- Email + password sign up and sign in
+- Nickname and gender collected at registration
+- Login state stored locally (token + user profile)
+- Unauthenticated access to protected actions redirects to the login page
 
-### 2) 首页广场
-- 帖子流展示（卡片式）
-- 按主分类与子分类筛选
-- 支持按位置关键词搜索
-- 支持按性别筛选（全部/男/女）
-- 无限滚动加载（分页请求）
-- 空状态、错误重试、回到顶部交互
+### 2) Feed (`/`)
+- Card-based post feed
+- Filter by primary and secondary category
+- Search by location keyword
+- Filter by gender (all / male / female)
+- Infinite scroll (paginated requests)
+- Empty state, error retry, and back-to-top
 
-### 3) 发帖能力
-- 发布 150 字以内内容
-- 可填写位置（最多 200 字）
-- 必选主分类与子分类
-- 发帖前校验：内容、位置、分类完整性
-- 若当前用户未设置联系方式，会先弹窗要求至少填写微信或 QQ 后再发布
+### 3) Create post
+- Posts up to 150 characters
+- Optional location (up to 200 characters)
+- Primary and secondary category required
+- Validates content, location, and categories before submit
+- If the current user has no contact info, a modal asks them to add WeChat or QQ first
 
-### 4) 个人中心
-- 查看个人资料（昵称、邮箱、性别、签名、微信、QQ）
-- 在线编辑并保存资料
-- 字段校验（昵称长度、微信格式、QQ 格式）
-- 快捷入口进入「我的帖子」
-- 管理员账号可从此处进入后台
+### 4) Profile
+- View profile (nickname, email, gender, bio, WeChat, QQ)
+- Inline edit and save
+- Field validation (nickname length, WeChat format, QQ format)
+- Shortcut to My Posts
+- Admins can enter the admin console from here
 
-### 5) 我的帖子
-- 查看自己发布的帖子列表
-- 无限滚动加载
-- 删除帖子（二次确认）
-- 位置支持展开并复制到剪贴板
+### 5) My posts
+- List of posts created by the current user
+- Infinite scroll
+- Delete with confirmation
+- Expand location and copy it to the clipboard
 
-### 6) 用户主页（`/user/:id`）
-- 查看他人资料与其发布内容
-- 支持分页加载对方帖子
-- 可申请查看对方联系方式（微信/QQ）
-- 联系方式查看门槛：自己需至少发布过一条帖子
-- 支持一键复制联系方式
+### 6) User profile (`/user/:id`)
+- View another user’s profile and posts
+- Paginated post loading
+- Request to view WeChat / QQ
+- Contact unlock requires the viewer to have published at least one post
+- One-click copy for contact details
 
-### 7) 管理后台（`/admin`）
-- 查看用户与帖子基础统计
-- 用户列表分页 + 搜索（昵称/邮箱）
-- 查看用户详情及其发帖记录
-- 删除用户
-- 删除指定用户的帖子
+### 7) Admin (`/admin`)
+- Basic user and post stats
+- Paginated user list with search (nickname / email)
+- User detail and their posts
+- Delete a user
+- Delete a user’s posts
 
-### 8) API 调试页（`/api-test`）
-- 内置常见接口快速测试按钮
-- 可单项测试或一键执行全部测试
-- 展示请求成功/失败结果
+### 8) API debug page (`/api-test`)
+- Quick-test buttons for common endpoints
+- Run a single test or all tests
+- Shows success / failure for each request
 
-## 技术栈
+## Tech stack
 
 - `React 19` + `TypeScript`
 - `React Router`
@@ -67,64 +67,67 @@
 - `Vite 7`
 - `ESLint`
 
-## 页面与路由
+## Routes
 
-- `/`：首页
-- `/login`：登录
-- `/register`：注册
-- `/create-post`：发布帖子
-- `/profile`：个人资料
-- `/my-posts`：我的帖子
-- `/user/:id`：用户主页
-- `/admin`：管理后台
-- `/api-test`：API 测试页
+- `/`: Home feed
+- `/login`: Sign in
+- `/register`: Sign up
+- `/create-post`: Create post
+- `/profile`: Profile
+- `/my-posts`: My posts
+- `/user/:id`: User profile
+- `/admin`: Admin console
+- `/api-test`: API debug page
 
-## 目录结构
+## Project structure
 
 ```txt
 src/
-├── api/                 # API 封装（auth/users/posts/categories/admin 等）
-├── components/          # 通用组件（Header、PostCard、CategoryFilter）
-├── contexts/            # 全局状态（如性别筛选）
-├── pages/               # 页面组件
-├── utils/               # 工具函数（鉴权、格式校验、缓存）
-├── data/                # 本地 mock/辅助数据
-├── types/               # 类型定义
-└── App.tsx              # 路由入口
+├── api/                 # API clients (auth/users/posts/categories/admin, etc.)
+├── components/          # Shared UI (Header, PostCard, CategoryFilter)
+├── contexts/            # Global state (e.g. gender filter)
+├── pages/               # Page components
+├── utils/               # Helpers (auth, validation, cache)
+├── data/                # Local mock / helper data
+├── types/               # TypeScript types
+└── App.tsx              # Router entry
 ```
 
-## 快速开始
+## Getting started
 
-### 环境要求
+### Requirements
 - Node.js >= 20.19.0
 - npm
 
-### 安装依赖
+### Install
 ```bash
 npm install
 ```
 
-### 本地开发
+### Environment
+Copy `.env.example` to `.env` (and `.env.production` if needed) and fill in local values. Do not commit those files.
+
+### Dev server
 ```bash
 npm run dev
 ```
 
-### 构建
+### Production build
 ```bash
 npm run build
 ```
 
-### 代码检查
+### Lint
 ```bash
 npm run lint
 ```
 
-## 当前状态说明
+## Current status
 
-- 当前仓库已实现核心社区流程（注册登录 -> 发帖 -> 浏览筛选 -> 查看用户 -> 联系方式交换）
-- `App.tsx` 中登录态目前写有模拟值，实际接入可根据 `authUtils` 的 token 状态切换
-- 项目包含 API 调试页，便于联调后端接口
+- Core community flow is in place: register / login → create post → browse and filter → view users → exchange contacts
+- `App.tsx` currently uses mock login state; wire it to `authUtils` token state for a real session
+- An API debug page is included for backend integration
 
-## 许可证
+## License
 
 MIT
